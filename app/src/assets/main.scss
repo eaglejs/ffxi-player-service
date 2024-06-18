@@ -1,0 +1,33 @@
+@import './base.css';
+
+$gray-dark: var(--bs-gray-dark);
+$gray-light: var(--bs-gray-light);
+$blue: var(--bs-blue);
+$blue-600: var(--bs-blue-600);
+
+body {
+  font-family: 'Roboto', sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  margin: 0;
+  padding: 0;
+  color: #fff;
+}
+
+[data-bs-theme="gray-dark"] {
+  --bs-body-color: var(--bs-white);
+  --bs-body-color-rgb: #{to-rgb($gray-dark)};
+  --bs-body-bg: var(--bs-gray-dark);
+  --bs-body-bg-rgb: #{to-rgb($blue)};
+  --bs-tertiary-bg: #{$blue-600};
+  --bs-progress-bg: var(--bs-gray-600);
+}
+
+[data-bs-theme="gray-light"] {
+  --bs-body-color: var(--bs-black);
+  --bs-body-color-rgb: #{to-rgb($gray-light)};
+  --bs-body-bg: var(--bs-gray-light);
+  --bs-body-bg-rgb: #{to-rgb($blue)};
+  --bs-tertiary-bg: #{$blue-600};
+  --bs-progress-bg: var(--bs-gray-400);
+}

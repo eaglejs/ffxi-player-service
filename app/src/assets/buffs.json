@@ -1,0 +1,2482 @@
+[
+	{
+		"id": 0,
+		"en": "ko"
+	},
+	{
+		"id": 1,
+		"en": "weakness"
+	},
+	{
+		"id": 2,
+		"en": "sleep"
+	},
+	{
+		"id": 3,
+		"en": "poison"
+	},
+	{
+		"id": 4,
+		"en": "paralysis"
+	},
+	{
+		"id": 5,
+		"en": "blindness"
+	},
+	{
+		"id": 6,
+		"en": "silence"
+	},
+	{
+		"id": 7,
+		"en": "petrification"
+	},
+	{
+		"id": 8,
+		"en": "disease"
+	},
+	{
+		"id": 9,
+		"en": "curse"
+	},
+	{
+		"id": 10,
+		"en": "stun"
+	},
+	{
+		"id": 11,
+		"en": "bind"
+	},
+	{
+		"id": 12,
+		"en": "weight"
+	},
+	{
+		"id": 13,
+		"en": "slow"
+	},
+	{
+		"id": 14,
+		"en": "charm"
+	},
+	{
+		"id": 15,
+		"en": "doom"
+	},
+	{
+		"id": 16,
+		"en": "amnesia"
+	},
+	{
+		"id": 17,
+		"en": "charm"
+	},
+	{
+		"id": 18,
+		"en": "gradual petrification"
+	},
+	{
+		"id": 19,
+		"en": "sleep"
+	},
+	{
+		"id": 20,
+		"en": "curse"
+	},
+	{
+		"id": 21,
+		"en": "addle"
+	},
+	{
+		"id": 22,
+		"en": "intimidate"
+	},
+	{
+		"id": 23,
+		"en": "kaustra"
+	},
+	{
+		"id": 24,
+		"en": "st24"
+	},
+	{
+		"id": 25,
+		"en": "st25"
+	},
+	{
+		"id": 26,
+		"en": "st26"
+	},
+	{
+		"id": 27,
+		"en": "st27"
+	},
+	{
+		"id": 28,
+		"en": "terror"
+	},
+	{
+		"id": 29,
+		"en": "mute"
+	},
+	{
+		"id": 30,
+		"en": "bane"
+	},
+	{
+		"id": 31,
+		"en": "plague"
+	},
+	{
+		"id": 32,
+		"en": "flee"
+	},
+	{
+		"id": 33,
+		"en": "haste"
+	},
+	{
+		"id": 34,
+		"en": "blaze spikes"
+	},
+	{
+		"id": 35,
+		"en": "ice spikes"
+	},
+	{
+		"id": 36,
+		"en": "blink"
+	},
+	{
+		"id": 37,
+		"en": "stoneskin"
+	},
+	{
+		"id": 38,
+		"en": "shock spikes"
+	},
+	{
+		"id": 39,
+		"en": "aquaveil"
+	},
+	{
+		"id": 40,
+		"en": "protect"
+	},
+	{
+		"id": 41,
+		"en": "shell"
+	},
+	{
+		"id": 42,
+		"en": "regen"
+	},
+	{
+		"id": 43,
+		"en": "refresh"
+	},
+	{
+		"id": 44,
+		"en": "mighty strikes"
+	},
+	{
+		"id": 45,
+		"en": "boost"
+	},
+	{
+		"id": 46,
+		"en": "hundred fists"
+	},
+	{
+		"id": 47,
+		"en": "manafont"
+	},
+	{
+		"id": 48,
+		"en": "chainspell"
+	},
+	{
+		"id": 49,
+		"en": "perfect dodge"
+	},
+	{
+		"id": 50,
+		"en": "invincible"
+	},
+	{
+		"id": 51,
+		"en": "blood weapon"
+	},
+	{
+		"id": 52,
+		"en": "soul voice"
+	},
+	{
+		"id": 53,
+		"en": "eagle eye shot"
+	},
+	{
+		"id": 54,
+		"en": "meikyo shisui"
+	},
+	{
+		"id": 55,
+		"en": "astral flow"
+	},
+	{
+		"id": 56,
+		"en": "berserk"
+	},
+	{
+		"id": 57,
+		"en": "defender"
+	},
+	{
+		"id": 58,
+		"en": "aggressor"
+	},
+	{
+		"id": 59,
+		"en": "focus"
+	},
+	{
+		"id": 60,
+		"en": "dodge"
+	},
+	{
+		"id": 61,
+		"en": "counterstance"
+	},
+	{
+		"id": 62,
+		"en": "sentinel"
+	},
+	{
+		"id": 63,
+		"en": "souleater"
+	},
+	{
+		"id": 64,
+		"en": "last resort"
+	},
+	{
+		"id": 65,
+		"en": "sneak attack"
+	},
+	{
+		"id": 66,
+		"en": "copy image"
+	},
+	{
+		"id": 67,
+		"en": "third eye"
+	},
+	{
+		"id": 68,
+		"en": "warcry"
+	},
+	{
+		"id": 69,
+		"en": "invisible"
+	},
+	{
+		"id": 70,
+		"en": "deodorize"
+	},
+	{
+		"id": 71,
+		"en": "sneak"
+	},
+	{
+		"id": 72,
+		"en": "sharpshot"
+	},
+	{
+		"id": 73,
+		"en": "barrage"
+	},
+	{
+		"id": 74,
+		"en": "holy circle"
+	},
+	{
+		"id": 75,
+		"en": "arcane circle"
+	},
+	{
+		"id": 76,
+		"en": "hide"
+	},
+	{
+		"id": 77,
+		"en": "camouflage"
+	},
+	{
+		"id": 78,
+		"en": "divine seal"
+	},
+	{
+		"id": 79,
+		"en": "elemental seal"
+	},
+	{
+		"id": 80,
+		"en": "str boost"
+	},
+	{
+		"id": 81,
+		"en": "dex boost"
+	},
+	{
+		"id": 82,
+		"en": "vit boost"
+	},
+	{
+		"id": 83,
+		"en": "agi boost"
+	},
+	{
+		"id": 84,
+		"en": "int boost"
+	},
+	{
+		"id": 85,
+		"en": "mnd boost"
+	},
+	{
+		"id": 86,
+		"en": "chr boost"
+	},
+	{
+		"id": 87,
+		"en": "trick attack"
+	},
+	{
+		"id": 88,
+		"en": "max hp boost"
+	},
+	{
+		"id": 89,
+		"en": "max mp boost"
+	},
+	{
+		"id": 90,
+		"en": "accuracy boost"
+	},
+	{
+		"id": 91,
+		"en": "attack boost"
+	},
+	{
+		"id": 92,
+		"en": "evasion boost"
+	},
+	{
+		"id": 93,
+		"en": "defense boost"
+	},
+	{
+		"id": 94,
+		"en": "enfire"
+	},
+	{
+		"id": 95,
+		"en": "enblizzard"
+	},
+	{
+		"id": 96,
+		"en": "enaero"
+	},
+	{
+		"id": 97,
+		"en": "enstone"
+	},
+	{
+		"id": 98,
+		"en": "enthunder"
+	},
+	{
+		"id": 99,
+		"en": "enwater"
+	},
+	{
+		"id": 100,
+		"en": "barfire"
+	},
+	{
+		"id": 101,
+		"en": "barblizzard"
+	},
+	{
+		"id": 102,
+		"en": "baraero"
+	},
+	{
+		"id": 103,
+		"en": "barstone"
+	},
+	{
+		"id": 104,
+		"en": "barthunder"
+	},
+	{
+		"id": 105,
+		"en": "barwater"
+	},
+	{
+		"id": 106,
+		"en": "barsleep"
+	},
+	{
+		"id": 107,
+		"en": "barpoison"
+	},
+	{
+		"id": 108,
+		"en": "barparalyze"
+	},
+	{
+		"id": 109,
+		"en": "barblind"
+	},
+	{
+		"id": 110,
+		"en": "barsilence"
+	},
+	{
+		"id": 111,
+		"en": "barpetrify"
+	},
+	{
+		"id": 112,
+		"en": "barvirus"
+	},
+	{
+		"id": 113,
+		"en": "reraise"
+	},
+	{
+		"id": 114,
+		"en": "cover"
+	},
+	{
+		"id": 115,
+		"en": "unlimited shot"
+	},
+	{
+		"id": 116,
+		"en": "phalanx"
+	},
+	{
+		"id": 117,
+		"en": "warding circle"
+	},
+	{
+		"id": 118,
+		"en": "ancient circle"
+	},
+	{
+		"id": 119,
+		"en": "str boost"
+	},
+	{
+		"id": 120,
+		"en": "dex boost"
+	},
+	{
+		"id": 121,
+		"en": "vit boost"
+	},
+	{
+		"id": 122,
+		"en": "agi boost"
+	},
+	{
+		"id": 123,
+		"en": "int boost"
+	},
+	{
+		"id": 124,
+		"en": "mnd boost"
+	},
+	{
+		"id": 125,
+		"en": "chr boost"
+	},
+	{
+		"id": 126,
+		"en": "spirit surge"
+	},
+	{
+		"id": 127,
+		"en": "costume"
+	},
+	{
+		"id": 128,
+		"en": "burn"
+	},
+	{
+		"id": 129,
+		"en": "frost"
+	},
+	{
+		"id": 130,
+		"en": "choke"
+	},
+	{
+		"id": 131,
+		"en": "rasp"
+	},
+	{
+		"id": 132,
+		"en": "shock"
+	},
+	{
+		"id": 133,
+		"en": "drown"
+	},
+	{
+		"id": 134,
+		"en": "dia"
+	},
+	{
+		"id": 135,
+		"en": "bio"
+	},
+	{
+		"id": 136,
+		"en": "str down"
+	},
+	{
+		"id": 137,
+		"en": "dex down"
+	},
+	{
+		"id": 138,
+		"en": "vit down"
+	},
+	{
+		"id": 139,
+		"en": "agi down"
+	},
+	{
+		"id": 140,
+		"en": "int down"
+	},
+	{
+		"id": 141,
+		"en": "mnd down"
+	},
+	{
+		"id": 142,
+		"en": "chr down"
+	},
+	{
+		"id": 143,
+		"en": "level restriction"
+	},
+	{
+		"id": 144,
+		"en": "max hp down"
+	},
+	{
+		"id": 145,
+		"en": "max mp down"
+	},
+	{
+		"id": 146,
+		"en": "accuracy down"
+	},
+	{
+		"id": 147,
+		"en": "attack down"
+	},
+	{
+		"id": 148,
+		"en": "evasion down"
+	},
+	{
+		"id": 149,
+		"en": "defense down"
+	},
+	{
+		"id": 150,
+		"en": "physical shield"
+	},
+	{
+		"id": 151,
+		"en": "arrow shield"
+	},
+	{
+		"id": 152,
+		"en": "magic shield"
+	},
+	{
+		"id": 153,
+		"en": "damage spikes"
+	},
+	{
+		"id": 154,
+		"en": "shining ruby"
+	},
+	{
+		"id": 155,
+		"en": "medicine"
+	},
+	{
+		"id": 156,
+		"en": "flash"
+	},
+	{
+		"id": 157,
+		"en": "sj restriction"
+	},
+	{
+		"id": 158,
+		"en": "provoke"
+	},
+	{
+		"id": 159,
+		"en": "penalty"
+	},
+	{
+		"id": 160,
+		"en": "preparations"
+	},
+	{
+		"id": 161,
+		"en": "sprint"
+	},
+	{
+		"id": 162,
+		"en": "enchantment"
+	},
+	{
+		"id": 163,
+		"en": "azure lore"
+	},
+	{
+		"id": 164,
+		"en": "chain affinity"
+	},
+	{
+		"id": 165,
+		"en": "burst affinity"
+	},
+	{
+		"id": 166,
+		"en": "overdrive"
+	},
+	{
+		"id": 167,
+		"en": "magic def. down"
+	},
+	{
+		"id": 168,
+		"en": "inhibit tp"
+	},
+	{
+		"id": 169,
+		"en": "potency"
+	},
+	{
+		"id": 170,
+		"en": "regain"
+	},
+	{
+		"id": 171,
+		"en": "pax"
+	},
+	{
+		"id": 172,
+		"en": "intension"
+	},
+	{
+		"id": 173,
+		"en": "dread spikes"
+	},
+	{
+		"id": 174,
+		"en": "magic acc. down"
+	},
+	{
+		"id": 175,
+		"en": "magic atk. down"
+	},
+	{
+		"id": 176,
+		"en": "quickening"
+	},
+	{
+		"id": 177,
+		"en": "encumbrance"
+	},
+	{
+		"id": 178,
+		"en": "firestorm"
+	},
+	{
+		"id": 179,
+		"en": "hailstorm"
+	},
+	{
+		"id": 180,
+		"en": "windstorm"
+	},
+	{
+		"id": 181,
+		"en": "sandstorm"
+	},
+	{
+		"id": 182,
+		"en": "thunderstorm"
+	},
+	{
+		"id": 183,
+		"en": "rainstorm"
+	},
+	{
+		"id": 184,
+		"en": "aurorastorm"
+	},
+	{
+		"id": 185,
+		"en": "voidstorm"
+	},
+	{
+		"id": 186,
+		"en": "helix"
+	},
+	{
+		"id": 187,
+		"en": "sublimation: activated"
+	},
+	{
+		"id": 188,
+		"en": "sublimation: complete"
+	},
+	{
+		"id": 189,
+		"en": "max tp down"
+	},
+	{
+		"id": 190,
+		"en": "magic atk. boost"
+	},
+	{
+		"id": 191,
+		"en": "magic def. boost"
+	},
+	{
+		"id": 192,
+		"en": "requiem"
+	},
+	{
+		"id": 193,
+		"en": "lullaby"
+	},
+	{
+		"id": 194,
+		"en": "elegy"
+	},
+	{
+		"id": 195,
+		"en": "paeon"
+	},
+	{
+		"id": 196,
+		"en": "ballad"
+	},
+	{
+		"id": 197,
+		"en": "minne"
+	},
+	{
+		"id": 198,
+		"en": "minuet"
+	},
+	{
+		"id": 199,
+		"en": "madrigal"
+	},
+	{
+		"id": 200,
+		"en": "prelude"
+	},
+	{
+		"id": 201,
+		"en": "mambo"
+	},
+	{
+		"id": 202,
+		"en": "aubade"
+	},
+	{
+		"id": 203,
+		"en": "pastoral"
+	},
+	{
+		"id": 204,
+		"en": "hum"
+	},
+	{
+		"id": 205,
+		"en": "fantasia"
+	},
+	{
+		"id": 206,
+		"en": "operetta"
+	},
+	{
+		"id": 207,
+		"en": "capriccio"
+	},
+	{
+		"id": 208,
+		"en": "serenade"
+	},
+	{
+		"id": 209,
+		"en": "round"
+	},
+	{
+		"id": 210,
+		"en": "gavotte"
+	},
+	{
+		"id": 211,
+		"en": "fugue"
+	},
+	{
+		"id": 212,
+		"en": "rhapsody"
+	},
+	{
+		"id": 213,
+		"en": "aria"
+	},
+	{
+		"id": 214,
+		"en": "march"
+	},
+	{
+		"id": 215,
+		"en": "etude"
+	},
+	{
+		"id": 216,
+		"en": "carol"
+	},
+	{
+		"id": 217,
+		"en": "threnody"
+	},
+	{
+		"id": 218,
+		"en": "hymnus"
+	},
+	{
+		"id": 219,
+		"en": "mazurka"
+	},
+	{
+		"id": 220,
+		"en": "sirvente"
+	},
+	{
+		"id": 221,
+		"en": "dirge"
+	},
+	{
+		"id": 222,
+		"en": "scherzo"
+	},
+	{
+		"id": 223,
+		"en": "nocturne"
+	},
+	{
+		"id": 224,
+		"en": "st224"
+	},
+	{
+		"id": 225,
+		"en": "st225"
+	},
+	{
+		"id": 226,
+		"en": "st226"
+	},
+	{
+		"id": 227,
+		"en": "store tp"
+	},
+	{
+		"id": 228,
+		"en": "embrava"
+	},
+	{
+		"id": 229,
+		"en": "manawell"
+	},
+	{
+		"id": 230,
+		"en": "spontaneity"
+	},
+	{
+		"id": 231,
+		"en": "marcato"
+	},
+	{
+		"id": 232,
+		"en": "(n/a)"
+	},
+	{
+		"id": 233,
+		"en": "auto-regen"
+	},
+	{
+		"id": 234,
+		"en": "auto-refresh"
+	},
+	{
+		"id": 235,
+		"en": "fishing imagery"
+	},
+	{
+		"id": 236,
+		"en": "woodworking imagery"
+	},
+	{
+		"id": 237,
+		"en": "smithing imagery"
+	},
+	{
+		"id": 238,
+		"en": "goldsmithing imagery"
+	},
+	{
+		"id": 239,
+		"en": "clothcraft imagery"
+	},
+	{
+		"id": 240,
+		"en": "leathercraft imagery"
+	},
+	{
+		"id": 241,
+		"en": "bonecraft imagery"
+	},
+	{
+		"id": 242,
+		"en": "alchemy imagery"
+	},
+	{
+		"id": 243,
+		"en": "cooking imagery"
+	},
+	{
+		"id": 249,
+		"en": "dedication"
+	},
+	{
+		"id": 250,
+		"en": "ef badge"
+	},
+	{
+		"id": 251,
+		"en": "food"
+	},
+	{
+		"id": 252,
+		"en": "mounted"
+	},
+	{
+		"id": 253,
+		"en": "signet"
+	},
+	{
+		"id": 254,
+		"en": "battlefield"
+	},
+	{
+		"id": 256,
+		"en": "sanction"
+	},
+	{
+		"id": 257,
+		"en": "besieged"
+	},
+	{
+		"id": 258,
+		"en": "illusion"
+	},
+	{
+		"id": 259,
+		"en": "encumbrance"
+	},
+	{
+		"id": 260,
+		"en": "obliviscence"
+	},
+	{
+		"id": 261,
+		"en": "impairment"
+	},
+	{
+		"id": 262,
+		"en": "omerta"
+	},
+	{
+		"id": 263,
+		"en": "debilitation"
+	},
+	{
+		"id": 264,
+		"en": "pathos"
+	},
+	{
+		"id": 265,
+		"en": "flurry"
+	},
+	{
+		"id": 266,
+		"en": "concentration"
+	},
+	{
+		"id": 267,
+		"en": "allied tags"
+	},
+	{
+		"id": 268,
+		"en": "sigil"
+	},
+	{
+		"id": 269,
+		"en": "level sync"
+	},
+	{
+		"id": 270,
+		"en": "aftermath: lv.1"
+	},
+	{
+		"id": 271,
+		"en": "aftermath: lv.2"
+	},
+	{
+		"id": 272,
+		"en": "aftermath: lv.3"
+	},
+	{
+		"id": 273,
+		"en": "aftermath"
+	},
+	{
+		"id": 274,
+		"en": "enlight"
+	},
+	{
+		"id": 275,
+		"en": "auspice"
+	},
+	{
+		"id": 276,
+		"en": "confrontation"
+	},
+	{
+		"id": 277,
+		"en": "enfire ii"
+	},
+	{
+		"id": 278,
+		"en": "enblizzard ii"
+	},
+	{
+		"id": 279,
+		"en": "enaero ii"
+	},
+	{
+		"id": 280,
+		"en": "enstone ii"
+	},
+	{
+		"id": 281,
+		"en": "enthunder ii"
+	},
+	{
+		"id": 282,
+		"en": "enwater ii"
+	},
+	{
+		"id": 283,
+		"en": "perfect defense"
+	},
+	{
+		"id": 284,
+		"en": "egg"
+	},
+	{
+		"id": 285,
+		"en": "visitant"
+	},
+	{
+		"id": 286,
+		"en": "baramnesia"
+	},
+	{
+		"id": 287,
+		"en": "atma"
+	},
+	{
+		"id": 288,
+		"en": "endark"
+	},
+	{
+		"id": 289,
+		"en": "enmity boost"
+	},
+	{
+		"id": 290,
+		"en": "subtle blow plus"
+	},
+	{
+		"id": 291,
+		"en": "enmity down"
+	},
+	{
+		"id": 292,
+		"en": "pennant"
+	},
+	{
+		"id": 293,
+		"en": "negate petrify"
+	},
+	{
+		"id": 294,
+		"en": "negate terror"
+	},
+	{
+		"id": 295,
+		"en": "negate amnesia"
+	},
+	{
+		"id": 296,
+		"en": "negate doom"
+	},
+	{
+		"id": 297,
+		"en": "negate poison"
+	},
+	{
+		"id": 298,
+		"en": "critical hit evasion down"
+	},
+	{
+		"id": 299,
+		"en": "overload"
+	},
+	{
+		"id": 300,
+		"en": "fire maneuver"
+	},
+	{
+		"id": 301,
+		"en": "ice maneuver"
+	},
+	{
+		"id": 302,
+		"en": "wind maneuver"
+	},
+	{
+		"id": 303,
+		"en": "earth maneuver"
+	},
+	{
+		"id": 304,
+		"en": "thunder maneuver"
+	},
+	{
+		"id": 305,
+		"en": "water maneuver"
+	},
+	{
+		"id": 306,
+		"en": "light maneuver"
+	},
+	{
+		"id": 307,
+		"en": "dark maneuver"
+	},
+	{
+		"id": 308,
+		"en": "double-up chance"
+	},
+	{
+		"id": 309,
+		"en": "bust"
+	},
+	{
+		"id": 310,
+		"en": "fighter's roll"
+	},
+	{
+		"id": 311,
+		"en": "monk's roll"
+	},
+	{
+		"id": 312,
+		"en": "healer's roll"
+	},
+	{
+		"id": 313,
+		"en": "wizard's roll"
+	},
+	{
+		"id": 314,
+		"en": "warlock's roll"
+	},
+	{
+		"id": 315,
+		"en": "rogue's roll"
+	},
+	{
+		"id": 316,
+		"en": "gallant's roll"
+	},
+	{
+		"id": 317,
+		"en": "chaos roll"
+	},
+	{
+		"id": 318,
+		"en": "beast roll"
+	},
+	{
+		"id": 319,
+		"en": "choral roll"
+	},
+	{
+		"id": 320,
+		"en": "hunter's roll"
+	},
+	{
+		"id": 321,
+		"en": "samurai roll"
+	},
+	{
+		"id": 322,
+		"en": "ninja roll"
+	},
+	{
+		"id": 323,
+		"en": "drachen roll"
+	},
+	{
+		"id": 324,
+		"en": "evoker's roll"
+	},
+	{
+		"id": 325,
+		"en": "magus's roll"
+	},
+	{
+		"id": 326,
+		"en": "corsair's roll"
+	},
+	{
+		"id": 327,
+		"en": "puppet roll"
+	},
+	{
+		"id": 328,
+		"en": "dancer's roll"
+	},
+	{
+		"id": 329,
+		"en": "scholar's roll"
+	},
+	{
+		"id": 330,
+		"en": "bolter's roll"
+	},
+	{
+		"id": 331,
+		"en": "caster's roll"
+	},
+	{
+		"id": 332,
+		"en": "courser's roll"
+	},
+	{
+		"id": 333,
+		"en": "blitzer's roll"
+	},
+	{
+		"id": 334,
+		"en": "tactician's roll"
+	},
+	{
+		"id": 335,
+		"en": "allies' roll"
+	},
+	{
+		"id": 336,
+		"en": "miser's roll"
+	},
+	{
+		"id": 337,
+		"en": "companion's roll"
+	},
+	{
+		"id": 338,
+		"en": "avenger's roll"
+	},
+	{
+		"id": 339,
+		"en": "naturalist's roll"
+	},
+	{
+		"id": 340,
+		"en": "warrior's charge"
+	},
+	{
+		"id": 341,
+		"en": "formless strikes"
+	},
+	{
+		"id": 342,
+		"en": "assassin's charge"
+	},
+	{
+		"id": 343,
+		"en": "feint"
+	},
+	{
+		"id": 344,
+		"en": "fealty"
+	},
+	{
+		"id": 345,
+		"en": "dark seal"
+	},
+	{
+		"id": 346,
+		"en": "diabolic eye"
+	},
+	{
+		"id": 347,
+		"en": "nightingale"
+	},
+	{
+		"id": 348,
+		"en": "troubadour"
+	},
+	{
+		"id": 349,
+		"en": "killer instinct"
+	},
+	{
+		"id": 350,
+		"en": "stealth shot"
+	},
+	{
+		"id": 351,
+		"en": "flashy shot"
+	},
+	{
+		"id": 352,
+		"en": "sange"
+	},
+	{
+		"id": 353,
+		"en": "hasso"
+	},
+	{
+		"id": 354,
+		"en": "seigan"
+	},
+	{
+		"id": 355,
+		"en": "convergence"
+	},
+	{
+		"id": 356,
+		"en": "diffusion"
+	},
+	{
+		"id": 357,
+		"en": "snake eye"
+	},
+	{
+		"id": 358,
+		"en": "light arts"
+	},
+	{
+		"id": 359,
+		"en": "dark arts"
+	},
+	{
+		"id": 360,
+		"en": "penury"
+	},
+	{
+		"id": 361,
+		"en": "parsimony"
+	},
+	{
+		"id": 362,
+		"en": "celerity"
+	},
+	{
+		"id": 363,
+		"en": "alacrity"
+	},
+	{
+		"id": 364,
+		"en": "rapture"
+	},
+	{
+		"id": 365,
+		"en": "ebullience"
+	},
+	{
+		"id": 366,
+		"en": "accession"
+	},
+	{
+		"id": 367,
+		"en": "manifestation"
+	},
+	{
+		"id": 368,
+		"en": "drain samba"
+	},
+	{
+		"id": 369,
+		"en": "aspir samba"
+	},
+	{
+		"id": 370,
+		"en": "haste samba"
+	},
+	{
+		"id": 371,
+		"en": "velocity shot"
+	},
+	{
+		"id": 375,
+		"en": "building flourish"
+	},
+	{
+		"id": 376,
+		"en": "trance"
+	},
+	{
+		"id": 377,
+		"en": "tabula rasa"
+	},
+	{
+		"id": 378,
+		"en": "drain daze"
+	},
+	{
+		"id": 379,
+		"en": "aspir daze"
+	},
+	{
+		"id": 380,
+		"en": "haste daze"
+	},
+	{
+		"id": 381,
+		"en": "finishing move 1"
+	},
+	{
+		"id": 382,
+		"en": "finishing move 2"
+	},
+	{
+		"id": 383,
+		"en": "finishing move 3"
+	},
+	{
+		"id": 384,
+		"en": "finishing move 4"
+	},
+	{
+		"id": 385,
+		"en": "finishing move 5"
+	},
+	{
+		"id": 386,
+		"en": "lethargic daze 1"
+	},
+	{
+		"id": 387,
+		"en": "lethargic daze 2"
+	},
+	{
+		"id": 388,
+		"en": "lethargic daze 3"
+	},
+	{
+		"id": 389,
+		"en": "lethargic daze 4"
+	},
+	{
+		"id": 390,
+		"en": "lethargic daze 5"
+	},
+	{
+		"id": 391,
+		"en": "sluggish daze 1"
+	},
+	{
+		"id": 392,
+		"en": "sluggish daze 2"
+	},
+	{
+		"id": 393,
+		"en": "sluggish daze 3"
+	},
+	{
+		"id": 394,
+		"en": "sluggish daze 4"
+	},
+	{
+		"id": 395,
+		"en": "sluggish daze 5"
+	},
+	{
+		"id": 396,
+		"en": "weakened daze 1"
+	},
+	{
+		"id": 397,
+		"en": "weakened daze 2"
+	},
+	{
+		"id": 398,
+		"en": "weakened daze 3"
+	},
+	{
+		"id": 399,
+		"en": "weakened daze 4"
+	},
+	{
+		"id": 400,
+		"en": "weakened daze 5"
+	},
+	{
+		"id": 401,
+		"en": "addendum: white"
+	},
+	{
+		"id": 402,
+		"en": "addendum: black"
+	},
+	{
+		"id": 403,
+		"en": "reprisal"
+	},
+	{
+		"id": 404,
+		"en": "magic evasion down"
+	},
+	{
+		"id": 405,
+		"en": "retaliation"
+	},
+	{
+		"id": 406,
+		"en": "footwork"
+	},
+	{
+		"id": 407,
+		"en": "klimaform"
+	},
+	{
+		"id": 408,
+		"en": "sekkanoki"
+	},
+	{
+		"id": 409,
+		"en": "pianissimo"
+	},
+	{
+		"id": 410,
+		"en": "saber dance"
+	},
+	{
+		"id": 411,
+		"en": "fan dance"
+	},
+	{
+		"id": 412,
+		"en": "altruism"
+	},
+	{
+		"id": 413,
+		"en": "focalization"
+	},
+	{
+		"id": 414,
+		"en": "tranquility"
+	},
+	{
+		"id": 415,
+		"en": "equanimity"
+	},
+	{
+		"id": 416,
+		"en": "enlightenment"
+	},
+	{
+		"id": 417,
+		"en": "afflatus solace"
+	},
+	{
+		"id": 418,
+		"en": "afflatus misery"
+	},
+	{
+		"id": 419,
+		"en": "composure"
+	},
+	{
+		"id": 420,
+		"en": "yonin"
+	},
+	{
+		"id": 421,
+		"en": "innin"
+	},
+	{
+		"id": 422,
+		"en": "carbuncle's favor"
+	},
+	{
+		"id": 423,
+		"en": "ifrit's favor"
+	},
+	{
+		"id": 424,
+		"en": "shiva's favor"
+	},
+	{
+		"id": 425,
+		"en": "garuda's favor"
+	},
+	{
+		"id": 426,
+		"en": "titan's favor"
+	},
+	{
+		"id": 427,
+		"en": "ramuh's favor"
+	},
+	{
+		"id": 428,
+		"en": "leviathan's favor"
+	},
+	{
+		"id": 429,
+		"en": "fenrir's favor"
+	},
+	{
+		"id": 430,
+		"en": "diabolos's favor"
+	},
+	{
+		"id": 431,
+		"en": "avatar's favor"
+	},
+	{
+		"id": 432,
+		"en": "multi strikes"
+	},
+	{
+		"id": 433,
+		"en": "double shot"
+	},
+	{
+		"id": 434,
+		"en": "transcendency"
+	},
+	{
+		"id": 435,
+		"en": "restraint"
+	},
+	{
+		"id": 436,
+		"en": "perfect counter"
+	},
+	{
+		"id": 437,
+		"en": "mana wall"
+	},
+	{
+		"id": 438,
+		"en": "divine emblem"
+	},
+	{
+		"id": 439,
+		"en": "nether void"
+	},
+	{
+		"id": 440,
+		"en": "sengikori"
+	},
+	{
+		"id": 441,
+		"en": "futae"
+	},
+	{
+		"id": 442,
+		"en": "presto"
+	},
+	{
+		"id": 443,
+		"en": "climactic flourish"
+	},
+	{
+		"id": 444,
+		"en": "copy image (2)"
+	},
+	{
+		"id": 445,
+		"en": "copy image (3)"
+	},
+	{
+		"id": 446,
+		"en": "copy image (4+)"
+	},
+	{
+		"id": 447,
+		"en": "multi shots"
+	},
+	{
+		"id": 448,
+		"en": "bewildered daze 1"
+	},
+	{
+		"id": 449,
+		"en": "bewildered daze 2"
+	},
+	{
+		"id": 450,
+		"en": "bewildered daze 3"
+	},
+	{
+		"id": 451,
+		"en": "bewildered daze 4"
+	},
+	{
+		"id": 452,
+		"en": "bewildered daze 5"
+	},
+	{
+		"id": 453,
+		"en": "divine caress"
+	},
+	{
+		"id": 454,
+		"en": "saboteur"
+	},
+	{
+		"id": 455,
+		"en": "tenuto"
+	},
+	{
+		"id": 456,
+		"en": "spur"
+	},
+	{
+		"id": 457,
+		"en": "efflux"
+	},
+	{
+		"id": 458,
+		"en": "earthen armor"
+	},
+	{
+		"id": 459,
+		"en": "divine caress"
+	},
+	{
+		"id": 460,
+		"en": "blood rage"
+	},
+	{
+		"id": 461,
+		"en": "impetus"
+	},
+	{
+		"id": 462,
+		"en": "conspirator"
+	},
+	{
+		"id": 463,
+		"en": "sepulcher"
+	},
+	{
+		"id": 464,
+		"en": "arcane crest"
+	},
+	{
+		"id": 465,
+		"en": "hamanoha"
+	},
+	{
+		"id": 466,
+		"en": "dragon breaker"
+	},
+	{
+		"id": 467,
+		"en": "triple shot"
+	},
+	{
+		"id": 468,
+		"en": "striking flourish"
+	},
+	{
+		"id": 469,
+		"en": "perpetuance"
+	},
+	{
+		"id": 470,
+		"en": "immanence"
+	},
+	{
+		"id": 471,
+		"en": "migawari"
+	},
+	{
+		"id": 472,
+		"en": "ternary flourish"
+	},
+	{
+		"id": 473,
+		"en": "muddle"
+	},
+	{
+		"id": 474,
+		"en": "prowess"
+	},
+	{
+		"id": 475,
+		"en": "voidwatcher"
+	},
+	{
+		"id": 476,
+		"en": "ensphere"
+	},
+	{
+		"id": 477,
+		"en": "sacrosanctity"
+	},
+	{
+		"id": 478,
+		"en": "palisade"
+	},
+	{
+		"id": 479,
+		"en": "scarlet delirium"
+	},
+	{
+		"id": 480,
+		"en": "scarlet delirium"
+	},
+	{
+		"id": 481,
+		"en": "abdhaljs seal"
+	},
+	{
+		"id": 482,
+		"en": "decoy shot"
+	},
+	{
+		"id": 483,
+		"en": "hagakure"
+	},
+	{
+		"id": 484,
+		"en": "issekigan"
+	},
+	{
+		"id": 485,
+		"en": "unbridled learning"
+	},
+	{
+		"id": 486,
+		"en": "counter boost"
+	},
+	{
+		"id": 487,
+		"en": "endrain"
+	},
+	{
+		"id": 488,
+		"en": "enaspir"
+	},
+	{
+		"id": 489,
+		"en": "afterglow"
+	},
+	{
+		"id": 490,
+		"en": "brazen rush"
+	},
+	{
+		"id": 491,
+		"en": "inner strength"
+	},
+	{
+		"id": 492,
+		"en": "asylum"
+	},
+	{
+		"id": 493,
+		"en": "subtle sorcery"
+	},
+	{
+		"id": 494,
+		"en": "stymie"
+	},
+	{
+		"id": 496,
+		"en": "intervene"
+	},
+	{
+		"id": 497,
+		"en": "soul enslavement"
+	},
+	{
+		"id": 498,
+		"en": "unleash"
+	},
+	{
+		"id": 499,
+		"en": "clarion call"
+	},
+	{
+		"id": 500,
+		"en": "overkill"
+	},
+	{
+		"id": 501,
+		"en": "yaegasumi"
+	},
+	{
+		"id": 502,
+		"en": "mikage"
+	},
+	{
+		"id": 503,
+		"en": "fly high"
+	},
+	{
+		"id": 504,
+		"en": "astral conduit"
+	},
+	{
+		"id": 505,
+		"en": "unbridled wisdom"
+	},
+	{
+		"id": 507,
+		"en": "grand pas"
+	},
+	{
+		"id": 508,
+		"en": "widened compass"
+	},
+	{
+		"id": 509,
+		"en": "odyllic subterfuge"
+	},
+	{
+		"id": 510,
+		"en": "ergon might"
+	},
+	{
+		"id": 511,
+		"en": "reive mark"
+	},
+	{
+		"id": 512,
+		"en": "ionis"
+	},
+	{
+		"id": 513,
+		"en": "bolster"
+	},
+	{
+		"id": 515,
+		"en": "lasting emanation"
+	},
+	{
+		"id": 516,
+		"en": "ecliptic attrition"
+	},
+	{
+		"id": 517,
+		"en": "collimated fervor"
+	},
+	{
+		"id": 518,
+		"en": "dematerialize"
+	},
+	{
+		"id": 519,
+		"en": "theurgic focus"
+	},
+	{
+		"id": 522,
+		"en": "elemental sforzo"
+	},
+	{
+		"id": 523,
+		"en": "ignis"
+	},
+	{
+		"id": 524,
+		"en": "gelus"
+	},
+	{
+		"id": 525,
+		"en": "flabra"
+	},
+	{
+		"id": 526,
+		"en": "tellus"
+	},
+	{
+		"id": 527,
+		"en": "sulpor"
+	},
+	{
+		"id": 528,
+		"en": "unda"
+	},
+	{
+		"id": 529,
+		"en": "lux"
+	},
+	{
+		"id": 530,
+		"en": "tenebrae"
+	},
+	{
+		"id": 531,
+		"en": "vallation"
+	},
+	{
+		"id": 532,
+		"en": "swordplay"
+	},
+	{
+		"id": 533,
+		"en": "pflug"
+	},
+	{
+		"id": 534,
+		"en": "embolden"
+	},
+	{
+		"id": 535,
+		"en": "valiance"
+	},
+	{
+		"id": 536,
+		"en": "gambit"
+	},
+	{
+		"id": 537,
+		"en": "liement"
+	},
+	{
+		"id": 538,
+		"en": "one for all"
+	},
+	{
+		"id": 539,
+		"en": "regen"
+	},
+	{
+		"id": 540,
+		"en": "poison"
+	},
+	{
+		"id": 541,
+		"en": "refresh"
+	},
+	{
+		"id": 542,
+		"en": "str boost"
+	},
+	{
+		"id": 543,
+		"en": "dex boost"
+	},
+	{
+		"id": 544,
+		"en": "vit boost"
+	},
+	{
+		"id": 545,
+		"en": "agi boost"
+	},
+	{
+		"id": 546,
+		"en": "int boost"
+	},
+	{
+		"id": 547,
+		"en": "mnd boost"
+	},
+	{
+		"id": 548,
+		"en": "chr boost"
+	},
+	{
+		"id": 549,
+		"en": "attack boost"
+	},
+	{
+		"id": 550,
+		"en": "defense boost"
+	},
+	{
+		"id": 551,
+		"en": "magic atk. boost"
+	},
+	{
+		"id": 552,
+		"en": "magic def. boost"
+	},
+	{
+		"id": 553,
+		"en": "accuracy boost"
+	},
+	{
+		"id": 554,
+		"en": "evasion boost"
+	},
+	{
+		"id": 555,
+		"en": "magic acc. boost"
+	},
+	{
+		"id": 556,
+		"en": "magic evasion boost"
+	},
+	{
+		"id": 557,
+		"en": "attack down"
+	},
+	{
+		"id": 558,
+		"en": "defense down"
+	},
+	{
+		"id": 559,
+		"en": "magic atk. down"
+	},
+	{
+		"id": 560,
+		"en": "magic def. down"
+	},
+	{
+		"id": 561,
+		"en": "accuracy down"
+	},
+	{
+		"id": 562,
+		"en": "evasion down"
+	},
+	{
+		"id": 563,
+		"en": "magic acc. down"
+	},
+	{
+		"id": 564,
+		"en": "magic evasion down"
+	},
+	{
+		"id": 565,
+		"en": "slow"
+	},
+	{
+		"id": 566,
+		"en": "paralysis"
+	},
+	{
+		"id": 567,
+		"en": "weight"
+	},
+	{
+		"id": 568,
+		"en": "foil"
+	},
+	{
+		"id": 569,
+		"en": "blaze of glory"
+	},
+	{
+		"id": 570,
+		"en": "battuta"
+	},
+	{
+		"id": 571,
+		"en": "rayke"
+	},
+	{
+		"id": 572,
+		"en": "avoidance down"
+	},
+	{
+		"id": 573,
+		"en": "deluge spikes"
+	},
+	{
+		"id": 574,
+		"en": "fast cast"
+	},
+	{
+		"id": 575,
+		"en": "gestation"
+	},
+	{
+		"id": 576,
+		"en": "doubt"
+	},
+	{
+		"id": 577,
+		"en": "cait sith's favor"
+	},
+	{
+		"id": 578,
+		"en": "fishy intuition"
+	},
+	{
+		"id": 579,
+		"en": "commitment"
+	},
+	{
+		"id": 580,
+		"en": "haste"
+	},
+	{
+		"id": 581,
+		"en": "flurry"
+	},
+	{
+		"id": 582,
+		"en": "contradance"
+	},
+	{
+		"id": 583,
+		"en": "apogee"
+	},
+	{
+		"id": 584,
+		"en": "entrust"
+	},
+	{
+		"id": 585,
+		"en": "costume"
+	},
+	{
+		"id": 586,
+		"en": "curing conduit"
+	},
+	{
+		"id": 587,
+		"en": "tp bonus"
+	},
+	{
+		"id": 588,
+		"en": "finishing move (6+)"
+	},
+	{
+		"id": 589,
+		"en": "firestorm"
+	},
+	{
+		"id": 590,
+		"en": "hailstorm"
+	},
+	{
+		"id": 591,
+		"en": "windstorm"
+	},
+	{
+		"id": 592,
+		"en": "sandstorm"
+	},
+	{
+		"id": 593,
+		"en": "thunderstorm"
+	},
+	{
+		"id": 594,
+		"en": "rainstorm"
+	},
+	{
+		"id": 595,
+		"en": "aurorastorm"
+	},
+	{
+		"id": 596,
+		"en": "voidstorm"
+	},
+	{
+		"id": 597,
+		"en": "inundation"
+	},
+	{
+		"id": 598,
+		"en": "cascade"
+	},
+	{
+		"id": 599,
+		"en": "consume mana"
+	},
+	{
+		"id": 600,
+		"en": "runeist's roll"
+	},
+	{
+		"id": 601,
+		"en": "crooked cards"
+	},
+	{
+		"id": 602,
+		"en": "vorseal"
+	},
+	{
+		"id": 603,
+		"en": "elvorseal"
+	},
+	{
+		"id": 604,
+		"en": "mighty guard"
+	},
+	{
+		"id": 605,
+		"en": "gale spikes"
+	},
+	{
+		"id": 606,
+		"en": "clod spikes"
+	},
+	{
+		"id": 607,
+		"en": "glint spikes"
+	},
+	{
+		"id": 608,
+		"en": "negate virus"
+	},
+	{
+		"id": 609,
+		"en": "negate curse"
+	},
+	{
+		"id": 610,
+		"en": "negate charm"
+	},
+	{
+		"id": 611,
+		"en": "magic evasion boost"
+	},
+	{
+		"id": 612,
+		"en": "colure active"
+	},
+	{
+		"id": 613,
+		"en": "mumor's radiance"
+	},
+	{
+		"id": 614,
+		"en": "ullegore's gloom"
+	},
+	{
+		"id": 615,
+		"en": "boost"
+	},
+	{
+		"id": 616,
+		"en": "artisanal knowledge"
+	},
+	{
+		"id": 617,
+		"en": "sacrifice"
+	},
+	{
+		"id": 618,
+		"en": "emporox's gift"
+	},
+	{
+		"id": 619,
+		"en": "spirit bond"
+	},
+	{
+		"id": 620,
+		"en": "awaken"
+	},
+	{
+		"id": 621,
+		"en": "majesty"
+	},
+	{
+		"id": 622,
+		"en": "guarding rate boost"
+	},
+	{
+		"id": 623,
+		"en": "rampart"
+	},
+	{
+		"id": 624,
+		"en": "wind's blessing"
+	},
+	{
+		"id": 625,
+		"en": "siren's favor"
+	},
+	{
+		"id": 626,
+		"en": "negate sleep"
+	},
+	{
+		"id": 627,
+		"en": "mobilization"
+	},
+	{
+		"id": 628,
+		"en": "hover shot"
+	},
+	{
+		"id": 629,
+		"en": "moogle amplifier"
+	},
+	{
+		"id": 630,
+		"en": "taint"
+	},
+	{
+		"id": 631,
+		"en": "haunt"
+	},
+	{
+		"id": 632,
+		"en": "black sanctus"
+	},
+	{
+		"id": 633,
+		"en": "animated"
+	}
+]
