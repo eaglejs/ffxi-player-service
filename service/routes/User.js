@@ -123,6 +123,7 @@ router.post('/set_hpp', async(req, res) => {
 	const data = req.body;
 	const playerName = data.playerName.toLowerCase();
 	const hpp = data.hpp;
+  const debug = false;
 
 	try {
 		await users.findOneAndUpdate(
@@ -133,10 +134,18 @@ router.post('/set_hpp', async(req, res) => {
 		
 		wss.clients.forEach(client => {
 			if (client.readyState === WebSocket.OPEN) {
-				client.send(JSON.stringify({
-					playerName: playerName,
-					hpp: hpp
-				}));
+        if (playerName == "piplup" && debug) {
+          client.send(JSON.stringify({
+            playerName: playerName,
+            hpp: 0
+          }));
+        } else {
+          client.send(JSON.stringify({
+            playerName: playerName,
+            hpp: hpp
+          }));
+        }
+				
 			}
 		});
 
