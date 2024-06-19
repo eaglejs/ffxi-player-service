@@ -5,7 +5,7 @@
     </svg>
     <div class="card-body" :class="{ 'dead-mask': dead }">
       <h2 class="card-title">
-        <span ref="titleElement" :class="onlineStatusDot" :title="online" data-bs-toggle="tooltip"
+        <span ref="titleElement" :class="onlineStatusDot" :title="onlineTitleText" data-bs-toggle="tooltip"
           data-bs-placement="top"></span>{{ playerName }}
         M. lvl: {{ user?.masterLevel }}
         ({{ user?.mainJob }}{{ user?.mainJobLevel }}/{{ user?.subJob }}{{ user?.subJobLevel }})
@@ -70,15 +70,11 @@ const currentExemplar = computed(() => props?.user?.currentExemplar.toLocaleStri
 const dead = computed(() => props?.user?.hpp === 0)
 const exemplarProgress = computed(() => (props?.user?.currentExemplar / props?.user?.requiredExemplar) * 100)
 const exemplarProgressRounded = computed(() => Math.round(exemplarProgress.value))
-const isOnline = computed(() => moment().diff(moment.unix(props?.user?.lastOnline), 'minutes') < 1)
-const online = computed(() => isOnline.value ? 'Online' : 'Offline')
-const onlineStatusDot = computed(() => isOnline.value ? 'online-dot' : 'offline-dot')
 const playerBuffs = computed(() => props?.user?.buffs)
 const playerName = computed(() => props?.user?.playerName.charAt(0).toUpperCase() + props?.user?.playerName.slice(1))
 const requiredExemplar = computed(() => props?.user?.requiredExemplar.toLocaleString())
 const theme: any = computed(() => themeStore.theme === 'dark' ? 'gray-dark' : 'gray-light')
 const themeColor = computed(() => themeStore.theme === 'dark' ? '#fff' : '#000')
-const skullColor = computed(() => themeStore.theme === 'dark' ? '#fff' : 'red')
 const themeStore = useThemeStore()
 
 const props = defineProps({
@@ -88,8 +84,15 @@ const props = defineProps({
 let tooltip: any = null
 const titleElement = ref()
 const deadElement = ref()
+const isOnline = ref(moment().diff(moment.unix(props?.user?.lastOnline), 'minutes') < 1)
+const onlineTitleText = ref('Offline')
+const onlineStatusDot = ref('offline-dot')
 
-
+const checkOnlineState = () => {
+  isOnline.value = moment().diff(moment.unix(props?.user?.lastOnline), 'minutes') < 1
+  onlineTitleText.value = isOnline.value ? 'Online' : 'Offline'
+  onlineStatusDot.value = isOnline.value ? 'online-dot' : 'offline-dot'
+}
 
 onUpdated(() => {
   tooltip = new bootstrap.Tooltip(titleElement.value)
@@ -97,6 +100,8 @@ onUpdated(() => {
 
 onMounted(() => {
   tooltip = new bootstrap.Tooltip(titleElement.value)
+  checkOnlineState()
+  setInterval(checkOnlineState, 5000)
 })
 
 onBeforeUpdate(() => {
