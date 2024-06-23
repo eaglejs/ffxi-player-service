@@ -1,9 +1,7 @@
 <template>
-  <div class="mt-1">
+  <div class="buffs-wrapper mt-1">
     <span v-for="(buffId, index) in buffIds" :key="index">
       <Buff :buff-id="buffId" :buff-name="formattedBuffNames[buffId].en" :url-path="urlPath" />
-      <!-- <img :src="`${urlPath}${buffId}.png`" :alt="formattedBuffNames[buffId].en" data-bs-toggle="tooltip"
-        data-bs-placement="bottom" :title="formattedBuffNames[buffId].en" /> -->
     </span>
   </div>
 </template>
@@ -22,10 +20,16 @@ const props = defineProps({
 })
 
 const buffNames: any = computed(() => {
+  if (!props?.buffData) {
+    return []
+  }
   return props?.buffData?.split(',').map(buff => buff.trim()) || []
 })
 
 const buffIds: any = computed(() => {
+  if (!buffNames.value) {
+    return []
+  }
   return buffNames.value.map((name: string) => {
     const buff: any = Object.values(BUFFS).find((b: any) => b.en === name)
     return buff ? buff.id : 'Not found'
@@ -47,4 +51,10 @@ const formattedBuffNames: any = computed(() => {
 
 </script>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+@media screen and (max-width: 431px){
+  .buffs-wrapper {
+    min-height: 64px;
+  }
+}
+</style>

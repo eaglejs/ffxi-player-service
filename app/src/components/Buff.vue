@@ -17,7 +17,7 @@ const props = defineProps({
 })
 
 const buffIcon: any = computed(() => {
-  return `${props.urlPath}${props.buffId}.png`
+  return `${props.urlPath}${props.buffId}.webp`
 })
 
 onUpdated(() => {

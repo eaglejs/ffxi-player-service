@@ -14,21 +14,24 @@ const wsPath = ref(import.meta.env.MODE === 'staging' || import.meta.env.PROD
   ? `/ws`
   : `:${port + 1}`);
 
+const fullUrl = `${protocol}//${host}${apiPath.value}`
+const fullWsUrl = `ws://${host}${wsPath.value}`
+
 export const useUserStore = defineStore('user', () => {
   let ws: WebSocket | null = null;
   const players = ref([] as any)
 
   const fetchUsers = async () => {
-    const response = await axios.get(`${protocol}//${host}${apiPath.value}/get_users`)
+    const response = await axios.get(`${fullUrl}/get_users`)
     players.value = response.data
   }
 
   const connectWebSocket = () => {
-    ws = new WebSocket(`ws://${host}${wsPath.value}`)
+    ws = new WebSocket(`${fullWsUrl}/ws`)
 
     ws.onopen = () => {
       setInterval(() => {
-        if (ws) {
+        if (ws && ws.readyState === ws.OPEN) {
           ws.send('ping');
         }
       }, 5000); // Send ping every 5 seconds
@@ -60,6 +63,12 @@ export const useUserStore = defineStore('user', () => {
   onMounted(() => {
     fetchUsers();
     connectWebSocket();
+    window.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        fetchUsers()
+      } 
+    })
+    window.addEventListener('online', fetchUsers)
   })
 
   onUnmounted(() => {

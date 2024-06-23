@@ -47,11 +47,16 @@
           </p>
         </section>
       </div>
-      <div class="row mt-4">
+      <div class="row mt-1" v-if="playerBuffs.length">
         <section class="col-12">
           <Buffs :buff-data="playerBuffs" />
         </section>
       </div>
+      <!-- <div class="row mt-4" v-if="playerAbilities.length">
+        <section class="col-12">
+          <Abilities :abilities="playerAbilities" />
+        </section>
+      </div>  -->
     </div>
   </div>
 </template>
@@ -61,13 +66,20 @@ import "bootstrap/dist/css/bootstrap.min.css"
 import "bootstrap"
 import { computed, defineProps, onMounted, onUpdated, onUnmounted, onBeforeUpdate, ref, watch } from 'vue'
 import { useThemeStore } from '@/stores/theme'
+import { useUserStore } from '@/stores/user'
 import { mdiSkullCrossbones } from "@mdi/js"
 import * as bootstrap from 'bootstrap'
 import moment from 'moment'
+import Abilities from '@/components/Abilities.vue'
 import Buffs from '@/components/Buffs.vue'
+import type { Ability } from "@/types/Ability"
+
+const userStore = useUserStore()
+const props = defineProps({
+  user: Object,
+})
 
 const currentExemplar = computed(() => props?.user?.currentExemplar.toLocaleString())
-const dead = computed(() => props?.user?.hpp === 0)
 const exemplarProgress = computed(() => (props?.user?.currentExemplar / props?.user?.requiredExemplar) * 100)
 const exemplarProgressRounded = computed(() => Math.round(exemplarProgress.value))
 const playerBuffs = computed(() => props?.user?.buffs)
@@ -76,10 +88,40 @@ const requiredExemplar = computed(() => props?.user?.requiredExemplar.toLocaleSt
 const theme: any = computed(() => themeStore.theme === 'dark' ? 'gray-dark' : 'gray-light')
 const themeColor = computed(() => themeStore.theme === 'dark' ? '#fff' : '#000')
 const themeStore = useThemeStore()
+const playerAbilities = ref([])
 
-const props = defineProps({
-  user: Object,
+const filterAbilties = () => {
+  let abilities = typeof props?.user?.abilities === 'string' ? JSON.parse(props?.user?.abilities) : props?.user?.abilities
+  let filteredAbilities: any = []
+
+  for (const ability of abilities) {
+    if (moment().diff(moment.unix(ability?.recast), 'seconds') <= 0){
+      filteredAbilities.push(ability)
+    }
+  }
+
+  return filteredAbilities
+}
+
+const dead = computed(() => {
+  if (props?.user?.status == 2 && deadElement.value) {
+    deadElement.value.classList.add('transition')
+    setTimeout(() => {
+      deadElement.value.classList.add('fade-in')
+    }, 50)
+    return true
+  } else {
+    if (!deadElement.value) {
+      return false
+    }
+    setTimeout(() => {
+      deadElement.value.classList.remove('transition')
+    }, 350)
+    deadElement.value.classList.remove('fade-in')
+  }
+  return false
 })
+
 
 let tooltip: any = null
 const titleElement = ref()
@@ -117,16 +159,8 @@ onUnmounted(() => {
   }
 })
 
-watch(dead, (newDead) => {
-  if (newDead) {
-    deadElement.value.classList.add('transition')
-    setTimeout(() => {
-      deadElement.value.classList.add('fade-in')
-    }, 100)
-  } else {
-    deadElement.value.classList.remove('transition')
-    deadElement.value.classList.remove('fade-in')
-  }
+watch( userStore?.players, () => {
+  playerAbilities.value = filterAbilties()
 })
 
 </script>
