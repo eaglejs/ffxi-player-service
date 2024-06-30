@@ -21,15 +21,42 @@ const userSchema = new mongoose.Schema({
   lastOnline: Number,
   mainJobLevel: Number,
   masterLevel: Number,
+  nationRank: Number,
   requiredExemplar: Number,
   status: Number,
+  stats: {
+    baseSTR: Number,
+    baseDEX: Number,
+    baseVIT: Number,
+    baseAGI: Number,
+    baseINT: Number,
+    baseMND: Number,
+    baseCHR: Number,
+    addedSTR: Number,
+    addedDEX: Number,
+    addedVIT: Number,
+    addedAGI: Number,
+    addedINT: Number,
+    addedMND: Number,
+    addedCHR: Number,
+    fireResistance: Number,
+    iceResistance: Number,
+    windResistance: Number,
+    earthResistance: Number,
+    lightningResistance: Number,
+    waterResistance: Number,
+    lightResistance: Number,
+    darkResistance: Number,
+  },
+  hpp: Number,
+  mainJob: String,
+  mpp: Number,
+  playerName: String,
   subJob: String,
   subJobLevel: Number,
+  title: String,
+  tp: Number,
   zone: String,
-  mainJob: String,
-  playerName: String,
-  hpp: Number,
-  mpp: Number,
 });
 
 const users = mongoose.model('users', userSchema);
@@ -212,16 +239,47 @@ router.post('/set_mpp', async (req, res) => {
   }
 });
 
+router.post('/set_tp', async (req, res) => {
+  const data = req.body;
+  const playerName = data.playerName.toLowerCase();
+  const tp = data.tp;
+
+  try {
+    await users.findOneAndUpdate
+      (
+        { playerName: playerName },
+        { $set: { tp: tp } },
+        { upsert: true, new: true }
+      );
+      
+    wss.clients.forEach(client => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(JSON.stringify({
+          playerName: playerName,
+          tp: tp
+        }));
+      }
+    });
+
+    res.send(`TP: OK`);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('An error occurred while updating the TP.');
+  }
+});
+
 router.post('/set_stats', async (req, res) => {
   const data = req.body;
   const playerName = data.playerName.toLowerCase();
-  const masterLevel = data.masterLevel;
-  const mainJobLevel = data.mainJobLevel;
-  const subJobLevel = data.subJobLevel;
-  const attack = data.attack;
-  const defense = data.defense;
-  const currentExemplar = data.currentExemplar;
-  const requiredExemplar = data.requiredExemplar;
+  const { masterLevel, mainJobLevel, subJobLevel, attack, defense, currentExemplar, requiredExemplar,
+    title, nationRank, fireResistance, iceResistance, windResistance, earthResistance, lightningResistance, 
+     waterResistance, lightResistance, darkResistance, 
+     baseSTR, baseAGI, baseDEX, baseVIT, baseINT, baseMND, baseCHR, addedSTR, addedAGI, addedDEX, addedVIT, addedINT, addedMND, addedCHR
+     } = data;
+  const stats = {
+    baseSTR, baseAGI, baseDEX, baseVIT, baseINT, baseMND, baseCHR, addedSTR, addedAGI, addedDEX, addedVIT, addedINT, addedMND, addedCHR,
+    fireResistance, iceResistance, windResistance, earthResistance, lightningResistance, waterResistance, lightResistance, darkResistance
+  }
 
   try {
     await users.findOneAndUpdate(
@@ -233,6 +291,9 @@ router.post('/set_stats', async (req, res) => {
           subJobLevel: subJobLevel,
           attack: attack,
           defense: defense,
+          stats: stats,
+          title: title,
+          nationRank: nationRank,
           currentExemplar: currentExemplar,
           requiredExemplar: requiredExemplar,
         }
@@ -249,6 +310,9 @@ router.post('/set_stats', async (req, res) => {
           subJobLevel: subJobLevel,
           attack: attack,
           defense: defense,
+          stats: stats,
+          title: title,
+          nationRank: nationRank,
           currentExemplar: currentExemplar,
           requiredExemplar: requiredExemplar,
         }));
