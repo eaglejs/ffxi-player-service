@@ -6,7 +6,7 @@
           <User class="ms-1 me-1" :user="user" />
         </div>
         <div v-if="players.length === 0" class="text-center">
-          <h1>No players online</h1>
+          <h2>No players online</h2>
         </div>
       </div>
     </div>
@@ -23,3 +23,11 @@ const userStore = useUserStore()
 const players = computed(() => userStore.players.filter((user: any) => moment().diff(moment.unix(user?.lastOnline), 'minutes') < 5))
 
 </script>
+
+<style scoped lang="scss">
+[data-bs-theme="light"] {
+  h2 {
+    color: var(--bs-dark);
+  }
+}
+</style>
