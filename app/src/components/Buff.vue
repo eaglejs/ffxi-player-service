@@ -4,8 +4,9 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, computed, onMounted, ref, onBeforeUpdate, watch, onUpdated, onUnmounted } from 'vue'
+import { computed, onMounted, ref, onBeforeUpdate, watch, onUpdated, onUnmounted } from 'vue'
 import * as bootstrap from 'bootstrap'
+import { iconsPath } from '@/helpers/config'
 
 let tooltip: any = null
 const buffElement = ref()
@@ -13,11 +14,10 @@ const buffElement = ref()
 const props = defineProps({
   buffId: Number,
   buffName: String,
-  urlPath: String,
 })
 
 const buffIcon: any = computed(() => {
-  return `${props.urlPath}${props.buffId}.webp`
+  return `${iconsPath}${props.buffId}.webp`
 })
 
 onUpdated(() => {
