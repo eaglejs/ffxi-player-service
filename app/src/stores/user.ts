@@ -2,20 +2,7 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import { defineStore } from 'pinia'
 import axios from 'axios'
 
-const host = window.location.hostname
-const port = 8080
-const protocol = window.location.protocol
-
-const apiPath = ref(import.meta.env.MODE === 'staging' || import.meta.env.PROD
-  ? `/api`
-  : `:${port}`);
-
-const wsPath = ref(import.meta.env.MODE === 'staging' || import.meta.env.PROD
-  ? `/ws`
-  : `:${port + 1}`);
-
-const fullUrl = `${protocol}//${host}${apiPath.value}`
-const fullWsUrl = `ws://${host}${wsPath.value}`
+import { fullUrl, websocket, connectWebSocket } from '@/helpers/config'
 
 export const useUserStore = defineStore('user', () => {
   let ws: WebSocket | null = null;
@@ -24,28 +11,39 @@ export const useUserStore = defineStore('user', () => {
   const fetchUsers = async () => {
     const response = await axios.get(`${fullUrl}/get_users`)
     players.value = response.data
+    return Promise.resolve(players.value)
   }
 
-  const connectWebSocket = () => {
-    ws = new WebSocket(`${fullWsUrl}/ws`)
-
-    ws.onopen = () => {
-      setInterval(() => {
-        if (ws && ws.readyState === ws.OPEN) {
-          ws.send('ping');
+  const fetchUser = async (playerName: string) => {
+    const response = await axios.get(`${fullUrl}/get_user?playerName=${playerName}`)
+    // find player in players and update
+    const index = players.value.findIndex((p: any) => p.playerName === playerName)
+    if (index !== -1) {
+      for (const key in response.data) {
+        if (response.data.hasOwnProperty(key)) {
+          players.value[index][key] = response.data[key]
         }
-      }, 5000); // Send ping every 5 seconds
-    };
-
-    ws.onmessage = (event) => {
-      if (event.data !== 'pong') {
-        updatePlayer(event.data)
       }
-    };
+    }
+    return Promise.resolve(response.data)
+  }
 
-    ws.onclose = () => {
-      setTimeout(connectWebSocket, 5000); // Try to reconnect every 5 seconds
-    };
+  websocket.onopen = () => {
+    setInterval(() => {
+      if (ws && websocket.readyState === websocket.OPEN) {
+        websocket.send('ping');
+      }
+    }, 5000); // Send ping every 5 seconds
+  };
+
+  websocket.onmessage = (event) => {
+    if (event.data !== 'pong') {
+      updatePlayer(event.data)
+    }
+  };
+
+  websocket.onclose = () => {
+    setInterval(connectWebSocket, 5000); // Try to reconnect every 5 seconds
   };
 
   const updatePlayer = (data: any) => {
@@ -66,16 +64,17 @@ export const useUserStore = defineStore('user', () => {
     window.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') {
         fetchUsers()
-      } 
+        connectWebSocket()
+      }
     })
     window.addEventListener('online', fetchUsers)
   })
 
   onUnmounted(() => {
-    if (ws) {
-      ws.close()
+    if (websocket.readyState === websocket.OPEN) {
+      websocket.close()
     }
   })
 
-  return { players }
+  return { players, fetchUser }
 })
