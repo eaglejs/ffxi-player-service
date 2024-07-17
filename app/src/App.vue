@@ -2,7 +2,7 @@
   <nav class="navbar">
     <div class="container-fluid ms-2 me-2">
       <h1>
-        <a class="navbar-brand" href="#">FFXI Stats</a>
+        <RouterLink class="navbar-brand" to="/"><img :src="`${imagesPath}sam.webp`" alt="Samurai" class="me-2 logo" />FFXI Stats</RouterLink>
       </h1>
       <div class="d-flex">
         <button ref="fullScreenElement" class="theme-btn btn btn-light me-1" v-if="isDesktop" @click="toggleFullscreen"  data-bs-toggle="tooltip"
@@ -28,6 +28,7 @@ import { RouterView } from 'vue-router'
 import { watch, onMounted, computed, ref, onUpdated, onBeforeUpdate, onUnmounted } from 'vue'
 import { mdiWeatherSunny, mdiWeatherNight, mdiFullscreen, mdiFullscreenExit } from '@mdi/js'
 import { useThemeStore } from '@/stores/theme'
+import { imagesPath } from '@/helpers/config'
 import * as bootstrap from 'bootstrap'
 
 const themeStore = useThemeStore()
@@ -105,12 +106,16 @@ onUnmounted(() => {
 </script>
 
 <style scoped lang="scss">
+.logo {
+  height: calc(82px / 1.3);
+  width: calc(49px / 1.3);
+}
 .theme-btn {
   background: none;
   border: none;
   font-size: 1.5rem;
-  width: 50px;
   height: 50px;
+  width: 50px;
 }
 .fill {
   fill: v-bind(themeColor);
