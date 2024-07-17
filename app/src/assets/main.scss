@@ -14,6 +14,10 @@ body {
   color: #fff;
 }
 
+h2 {
+  font-size: 1.3rem;
+}
+
 [data-bs-theme="gray-dark"] {
   --bs-body-color: var(--bs-white);
   --bs-body-color-rgb: #{to-rgb($gray-dark)};
@@ -21,6 +25,10 @@ body {
   --bs-body-bg-rgb: #{to-rgb($blue)};
   --bs-tertiary-bg: #{$blue-600};
   --bs-progress-bg: var(--bs-gray-600);
+
+  a {
+    color: var(--bs-white);
+  }
 }
 
 [data-bs-theme="gray-light"] {
@@ -30,4 +38,8 @@ body {
   --bs-body-bg-rgb: #{to-rgb($blue)};
   --bs-tertiary-bg: #{$blue-600};
   --bs-progress-bg: var(--bs-gray-400);
+
+  a {
+    color: var(--bs-black);
+  }
 }
