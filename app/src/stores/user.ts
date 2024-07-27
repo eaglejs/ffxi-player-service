@@ -6,9 +6,7 @@ import { useServerStore } from '@/stores/server'
 import { fullUrl } from '@/helpers/config'
 
 export const useUserStore = defineStore('user', () => {
-  let ws: WebSocket | null = null
   const players = ref([] as any)
-  const websocketRetry = ref()
   const { websocket, connectWebSocket } = useServerStore()
 
   const fetchUsers = async () => {
@@ -31,27 +29,14 @@ export const useUserStore = defineStore('user', () => {
     return Promise.resolve(response.data)
   }
 
-  websocket.onopen = () => {
-    clearInterval(websocketRetry.value);
-    setInterval(() => {
-      if (ws && websocket.readyState === websocket.OPEN) {
-        websocket.send('pong');
-      }
-    }, 5000); // Send ping every 5 seconds
-  };
-
   websocket.onmessage = (event) => {
     if (event.data === 'ping') {
-      if (ws && websocket.readyState === websocket.OPEN) {
+      if (websocket.readyState === websocket.OPEN) {
         websocket.send('pong');
       }
     } else {
       updatePlayer(event.data)
     }
-  };
-
-  websocket.onclose = () => {
-    websocketRetry.value = setInterval(connectWebSocket, 5000); // Try to reconnect every 5 seconds
   };
 
   const updatePlayer = (data: any) => {
