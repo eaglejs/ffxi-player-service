@@ -14,13 +14,17 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { ref, watch } from 'vue'
 import User from '@/components/User.vue'
 import { useUserStore } from '@/stores/user'
 import moment from 'moment'
 
 const userStore = useUserStore()
-const players = computed(() => userStore.players.filter((user: any) => moment().diff(moment.unix(user?.lastOnline), 'minutes') < 5))
+const players = ref(userStore.players.filter((user: any) => moment().diff(moment.unix(user?.lastOnline), 'minutes') < 5))
+
+watch(() => userStore.players, () => {
+  players.value = userStore.players.filter((user: any) => moment().diff(moment.unix(user?.lastOnline), 'minutes') < 5)
+}, {deep: true})
 
 </script>
 

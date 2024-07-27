@@ -1,12 +1,15 @@
-import { ref, onMounted, onUnmounted, h } from 'vue'
+import { ref, onMounted } from 'vue'
 import { defineStore } from 'pinia'
 import axios from 'axios'
+import { useServerStore } from '@/stores/server'
 
-import { fullUrl, websocket, connectWebSocket } from '@/helpers/config'
+import { fullUrl } from '@/helpers/config'
 
 export const useUserStore = defineStore('user', () => {
-  let ws: WebSocket | null = null;
+  let ws: WebSocket | null = null
   const players = ref([] as any)
+  const websocketRetry = ref()
+  const { websocket, connectWebSocket } = useServerStore()
 
   const fetchUsers = async () => {
     const response = await axios.get(`${fullUrl}/get_users`)
@@ -29,6 +32,7 @@ export const useUserStore = defineStore('user', () => {
   }
 
   websocket.onopen = () => {
+    clearInterval(websocketRetry.value);
     setInterval(() => {
       if (ws && websocket.readyState === websocket.OPEN) {
         websocket.send('pong');
@@ -37,10 +41,6 @@ export const useUserStore = defineStore('user', () => {
   };
 
   websocket.onmessage = (event) => {
-    const data = JSON.parse(event.data)
-    if (!data.hasOwnProperty('playerName') || !data) {
-      console.log(event)
-    }
     if (event.data === 'ping') {
       if (ws && websocket.readyState === websocket.OPEN) {
         websocket.send('pong');
@@ -51,7 +51,7 @@ export const useUserStore = defineStore('user', () => {
   };
 
   websocket.onclose = () => {
-    setInterval(connectWebSocket, 5000); // Try to reconnect every 5 seconds
+    websocketRetry.value = setInterval(connectWebSocket, 5000); // Try to reconnect every 5 seconds
   };
 
   const updatePlayer = (data: any) => {
@@ -78,11 +78,5 @@ export const useUserStore = defineStore('user', () => {
     window.addEventListener('online', fetchUsers)
   })
 
-  onUnmounted(() => {
-    if (websocket.readyState === websocket.OPEN) {
-      websocket.close()
-    }
-  })
-
-  return { players, fetchUsers,fetchUser }
+  return { players, fetchUsers, fetchUser }
 })

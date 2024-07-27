@@ -20,12 +20,4 @@ const imagesPath = import.meta.env.MODE === 'staging' || import.meta.env.PROD
   ? `/assets/`
   : `/src/assets/images/`;
 
-let websocket: WebSocket = new WebSocket(`${fullWsUrl}`)
-
-const connectWebSocket = () => {
-  if (websocket.readyState === websocket.CLOSED) {
-    websocket = new WebSocket(`${fullWsUrl}`)
-  }
-}
-
-export { connectWebSocket, websocket, fullUrl, iconsPath, imagesPath }
+export { fullUrl, fullWsUrl, iconsPath, imagesPath }

@@ -89,8 +89,7 @@ const props = defineProps({
 })
 
 const currentExemplar = computed(() => parseInt(props?.user?.currentExemplar).toLocaleString())
-const exemplarProgress = computed(() => (props?.user?.currentExemplar / props?.user?.requiredExemplar) * 100)
-const exemplarProgressRounded = computed(() => Math.round(exemplarProgress.value))
+const exemplarProgressRounded = computed(() => Math.floor(exemplarProgress.value))
 const playerBuffs = computed(() => props?.user?.buffs)
 const playerName = computed(() => props?.user?.playerName.charAt(0).toUpperCase() + props?.user?.playerName.slice(1))
 const requiredExemplar = computed(() => parseInt(props?.user?.requiredExemplar).toLocaleString())
@@ -99,6 +98,13 @@ const themeColor = computed(() => themeStore.theme === 'dark' ? '#fff' : '#000')
 const themeStore = useThemeStore()
 const getTP = computed(() => (props?.user?.tp / 3000) * 100 + '%')
 const playerAbilities = ref([])
+const exemplarProgress = computed(() => { 
+  if (props?.user?.requiredExemplar - props?.user?.currentExemplar <= 1) {
+    return 100
+  }  else {
+    return (props?.user?.currentExemplar / props?.user?.requiredExemplar) * 100
+  }
+})
 
 const filterAbilties = () => {
   let abilities = typeof props?.user?.abilities === 'string' ? JSON.parse(props?.user?.abilities) : props?.user?.abilities

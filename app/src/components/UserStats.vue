@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="card p-2" v-if="stats">
-      <p class="mb-0"><b>Offensive Stats</b></p>
+      <p class="card-title mb-0"><b>Offensive Stats</b></p>
       <section v-for="stat, index in baseStats" :key="stat.id">
         {{ stat.name }}: {{ stats[stat.id] }} + {{ stats[addedStats[index].id] }}
       </section>

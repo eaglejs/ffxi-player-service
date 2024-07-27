@@ -16,7 +16,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, computed } from 'vue'
+import { onMounted, watch, ref } from 'vue'
 import { useUserStore } from '@/stores/user'
 import User from '@/components/User.vue'
 import UserInformation from '@/components/UserInformation.vue'
@@ -24,7 +24,11 @@ import UserInformation from '@/components/UserInformation.vue'
 const username = window.location.pathname.split('/').pop()
 
 const userStore = useUserStore()
-const user = computed(() => userStore.players.find((player: any) => player.playerName === username))
+const user = ref(userStore.players.find((player: any) => player.playerName === username))
+
+watch(() => userStore.players, () => {
+  user.value = userStore.players.find((player: any) => player.playerName === username)
+}, {deep: true})
 
 onMounted(() => {
   if (username) {
