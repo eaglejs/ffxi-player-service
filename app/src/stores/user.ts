@@ -1,4 +1,4 @@
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, h } from 'vue'
 import { defineStore } from 'pinia'
 import axios from 'axios'
 
@@ -31,13 +31,21 @@ export const useUserStore = defineStore('user', () => {
   websocket.onopen = () => {
     setInterval(() => {
       if (ws && websocket.readyState === websocket.OPEN) {
-        websocket.send('ping');
+        websocket.send('pong');
       }
     }, 5000); // Send ping every 5 seconds
   };
 
   websocket.onmessage = (event) => {
-    if (event.data !== 'pong') {
+    const data = JSON.parse(event.data)
+    if (!data.hasOwnProperty('playerName') || !data) {
+      console.log(event)
+    }
+    if (event.data === 'ping') {
+      if (ws && websocket.readyState === websocket.OPEN) {
+        websocket.send('pong');
+      }
+    } else {
       updatePlayer(event.data)
     }
   };
@@ -76,5 +84,5 @@ export const useUserStore = defineStore('user', () => {
     }
   })
 
-  return { players, fetchUser }
+  return { players, fetchUsers,fetchUser }
 })

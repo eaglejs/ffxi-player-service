@@ -5,6 +5,7 @@ const protectedRoutes = [
   '/set_hpp',
   '/set_mpp',
   '/set_stats',
+  '/set_currency2',
   '/set_buffs',
   '/set_zone',
 ];

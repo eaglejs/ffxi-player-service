@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const router = express.Router();
 const WebSocket = require('ws');
+const userScheme = require('../schemas/User');
 
 mongoose.connect('mongodb://localhost:27017/ffxi');
 
@@ -10,54 +11,24 @@ const wss = new WebSocket.Server({ port: 8081 });
 
 wss.on('connection', function connection(ws) {
   ws.send('{"msg": "Hello! I am the server!"}')
+
+  // Set up a ping interval to keep the connection alive
+  const pingInterval = setInterval(() => {
+    if (ws.readyState === WebSocket.OPEN) {
+      ws.ping();
+    }
+  }, 30000); // Ping every 30 seconds
+
+  ws.on('close', () => {
+    clearInterval(pingInterval);
+  });
+
+  ws.on('pong', () => {
+    console.log('Received pong from client');
+  });
 });
 
-const userSchema = new mongoose.Schema({
-  abilities: Array,
-  attack: Number,
-  buffs: String,
-  currentExemplar: Number,
-  defense: Number,
-  lastOnline: Number,
-  mainJobLevel: Number,
-  masterLevel: Number,
-  nationRank: Number,
-  requiredExemplar: Number,
-  status: Number,
-  stats: {
-    baseSTR: Number,
-    baseDEX: Number,
-    baseVIT: Number,
-    baseAGI: Number,
-    baseINT: Number,
-    baseMND: Number,
-    baseCHR: Number,
-    addedSTR: Number,
-    addedDEX: Number,
-    addedVIT: Number,
-    addedAGI: Number,
-    addedINT: Number,
-    addedMND: Number,
-    addedCHR: Number,
-    fireResistance: Number,
-    iceResistance: Number,
-    windResistance: Number,
-    earthResistance: Number,
-    lightningResistance: Number,
-    waterResistance: Number,
-    lightResistance: Number,
-    darkResistance: Number,
-  },
-  hpp: Number,
-  mainJob: String,
-  mpp: Number,
-  playerName: String,
-  subJob: String,
-  subJobLevel: Number,
-  title: String,
-  tp: Number,
-  zone: String,
-});
+const userSchema = new mongoose.Schema(userScheme);
 
 const users = mongoose.model('users', userSchema);
 
@@ -251,7 +222,7 @@ router.post('/set_tp', async (req, res) => {
         { $set: { tp: tp } },
         { upsert: true, new: true }
       );
-      
+
     wss.clients.forEach(client => {
       if (client.readyState === WebSocket.OPEN) {
         client.send(JSON.stringify({
@@ -272,10 +243,10 @@ router.post('/set_stats', async (req, res) => {
   const data = req.body;
   const playerName = data.playerName.toLowerCase();
   const { masterLevel, mainJobLevel, subJobLevel, attack, defense, currentExemplar, requiredExemplar,
-    title, nationRank, fireResistance, iceResistance, windResistance, earthResistance, lightningResistance, 
-     waterResistance, lightResistance, darkResistance, 
-     baseSTR, baseAGI, baseDEX, baseVIT, baseINT, baseMND, baseCHR, addedSTR, addedAGI, addedDEX, addedVIT, addedINT, addedMND, addedCHR
-     } = data;
+    title, nationRank, fireResistance, iceResistance, windResistance, earthResistance, lightningResistance,
+    waterResistance, lightResistance, darkResistance,
+    baseSTR, baseAGI, baseDEX, baseVIT, baseINT, baseMND, baseCHR, addedSTR, addedAGI, addedDEX, addedVIT, addedINT, addedMND, addedCHR
+  } = data;
   const stats = {
     baseSTR, baseAGI, baseDEX, baseVIT, baseINT, baseMND, baseCHR, addedSTR, addedAGI, addedDEX, addedVIT, addedINT, addedMND, addedCHR,
     fireResistance, iceResistance, windResistance, earthResistance, lightningResistance, waterResistance, lightResistance, darkResistance
@@ -324,6 +295,34 @@ router.post('/set_stats', async (req, res) => {
     console.error(error);
     res.status(500).send('An error occurred while updating the stats.');
   }
+});
+
+router.post('/set_currency2', async (req, res) => {
+  const data = req.body;
+  const playerName = data.playerName.toLowerCase();
+  const currency2 = { domainPoints,eschaBeads,eschaSilt,gallantry,gallimaufry,hallmarks,mogSegments,mweyaPlasmCorpuscles,potpourri } = data;
+
+  try {
+    await users.findOneAndUpdate(
+      { playerName: playerName },
+      { $set: { currency2: currency2 } },
+      { upsert: true, new: true }
+    );
+    res.send(`Currency2: OK`);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('An error occurred while updating the currency2.');
+  }
+
+  wss.clients.forEach(client => {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(JSON.stringify({
+        playerName: playerName,
+        currency2: currency2
+      }));
+    }
+  });
+
 });
 
 router.post('/set_buffs', async (req, res) => {
