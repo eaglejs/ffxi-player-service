@@ -1,10 +1,21 @@
 <template>
   <div>
-    <div class="card p-2" v-if="stats">
-      <p class="card-title mb-0"><b>Offensive Stats</b></p>
-      <section v-for="stat, index in baseStats" :key="stat.id">
-        {{ stat.name }}: {{ stats[stat.id] }} + {{ stats[addedStats[index].id] }}
-      </section>
+    <div class="card" v-if="stats">
+      <div class="card-header">
+        <h3 class="mb-0">Offensive Stats</h3>
+      </div>
+      <div class="card-body">
+        <section class="container-fluid">
+          <section class="row" v-for="stat, index in baseStats" :key="stat.id">
+            <div class="col-7 p-0">
+              {{ stat.name }}:
+            </div>
+            <div class="col-5 ms-auto p-0 text-end">
+              <b>{{ stats[stat.id] }} + <span class="text-success">{{ stats[addedStats[index].id] }}</span></b>
+            </div>
+          </section>
+        </section>
+      </div>
     </div>
     <UserResistances class="mt-3" :resistances="stats" />
   </div>

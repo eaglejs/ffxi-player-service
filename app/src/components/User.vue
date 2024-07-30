@@ -1,11 +1,11 @@
 <template>
-  <div class="card mb-3 mt-3 p-0" :data-bs-theme="theme">
+  <div class="card" :data-bs-theme="theme">
     <svg ref="deadElement" class="dead" viewBox="0 0 25 25" width="30" height="30">
       <path class="skull-fill" :d="mdiSkullCrossbones"></path>
     </svg>
     <div class="card-header">
       <div class="d-flex justify-content-between">
-        <h2 class="card-title mb-0">
+        <h2 class="mb-0">
           <span ref="titleElement" :class="onlineStatusDot" :title="onlineTitleText" data-bs-toggle="tooltip"
             data-bs-placement="top"></span><RouterLink :to="`/users/${user?.playerName}`">{{ playerName }}</RouterLink>
           M. lvl: {{ user?.masterLevel }}
@@ -17,7 +17,7 @@
       </div>
     </div>
     <div class="card-body" :class="{ 'dead-mask': dead }">
-      <div class="row">
+      <div class="row mb-2">
         <section class="col-6">
           <p class="mb-0"><b>Exemplar</b></p>
           <div class="progress mt-1" :data-bs-theme="theme">
@@ -61,11 +61,6 @@
           </div>
         </section>
       </div>
-      <!-- <div class="row mt-1">
-        <section class="col-12">
-          <Abilities :abilities="playerAbilities" />
-        </section>
-      </div> -->
     </div>
   </div>
 </template>
@@ -80,8 +75,6 @@ import { mdiSkullCrossbones } from "@mdi/js"
 import * as bootstrap from 'bootstrap'
 import moment from 'moment'
 import Buffs from '@/components/Buffs.vue'
-import Abilities from '@/components/Abilities.vue'
-import type { Ability } from "@/types/Ability"
 
 const userStore = useUserStore()
 const props = defineProps({

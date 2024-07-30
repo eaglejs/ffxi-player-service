@@ -53,7 +53,6 @@ export const useUserStore = defineStore('user', () => {
 
   onMounted(() => {
     fetchUsers();
-    connectWebSocket();
     window.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') {
         fetchUsers()

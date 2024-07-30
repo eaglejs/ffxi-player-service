@@ -116,6 +116,35 @@ router.post('/set_jobs', async (req, res) => {
   }
 });
 
+router.post('/set_gil', async (req, res) => {
+  const data = req.body;
+  const playerName = data.playerName.toLowerCase();
+  const gil = data.gil;
+
+  try {
+    await users.findOneAndUpdate
+      (
+        { playerName: playerName },
+        { $set: { gil: gil } },
+        { upsert: true, new: true }
+      );
+
+    wss.clients.forEach(client => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(JSON.stringify({
+          playerName: playerName,
+          gil: gil
+        }));
+      }
+    });
+
+    res.send(`Gil: OK`);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('An error occurred while updating the gil.');
+  }
+});
+
 router.post('/set_player_status', async (req, res) => {
   const data = req.body;
   const playerName = data.playerName.toLowerCase();

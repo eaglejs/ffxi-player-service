@@ -18,6 +18,10 @@ h2 {
   font-size: 1.3rem;
 }
 
+h3 {
+  font-size: 1.2rem;
+}
+
 [data-bs-theme="gray-dark"] {
   --bs-body-color: var(--bs-white);
   --bs-body-color-rgb: #{to-rgb($gray-dark)};
