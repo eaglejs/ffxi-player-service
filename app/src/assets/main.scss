@@ -22,6 +22,11 @@ h3 {
   font-size: 1.2rem;
 }
 
+#app {
+  max-width: 1920px;
+  margin: 0 auto;
+}
+
 [data-bs-theme="gray-dark"] {
   --bs-body-color: var(--bs-white);
   --bs-body-color-rgb: #{to-rgb($gray-dark)};
