@@ -4,11 +4,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, onBeforeUpdate, watch, onUpdated, onUnmounted } from 'vue'
+import { computed, onMounted, ref, onBeforeUpdate, onUpdated, onUnmounted } from 'vue'
+import type { ComputedRef } from 'vue'
 import * as bootstrap from 'bootstrap'
 import { iconsPath } from '@/helpers/config'
 
-let tooltip: any = null
+let tooltip: bootstrap.Tooltip | null = null
 const buffElement = ref()
 
 const props = defineProps({
@@ -16,7 +17,7 @@ const props = defineProps({
   buffName: String,
 })
 
-const buffIcon: any = computed(() => {
+const buffIcon: ComputedRef<string> = computed(() => {
   return `${iconsPath}${props.buffId}.webp`
 })
 
@@ -36,9 +37,7 @@ onBeforeUpdate(() => {
 })
 
 onUnmounted(() => {
-  if (tooltip) {
-    tooltip.dispose()
-  }
+  tooltip?.dispose()
 })
 
 </script>

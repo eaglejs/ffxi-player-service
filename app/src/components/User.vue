@@ -73,7 +73,6 @@ import { useThemeStore } from '@/stores/theme'
 import { useUserStore } from '@/stores/user'
 import { mdiSkullCrossbones } from "@mdi/js"
 import * as bootstrap from 'bootstrap'
-import moment from 'moment'
 import Buffs from '@/components/Buffs.vue'
 
 const userStore = useUserStore()
@@ -104,7 +103,8 @@ const filterAbilties = () => {
   let filteredAbilities: any = []
 
   for (const ability of abilities) {
-    if (moment().diff(moment.unix(ability?.recast), 'seconds') <= 0){
+    const recastTime: Date = new Date(ability?.recast * 1000);
+    if ((new Date().getTime() - recastTime.getTime()) <= 0){
       filteredAbilities.push(ability)
     }
   }
@@ -137,15 +137,15 @@ const dead = computed(() => {
 })
 
 
-let tooltip: any = null
+let tooltip: bootstrap.Tooltip | null = null
 const titleElement = ref()
 const deadElement = ref()
-const isOnline = ref(moment().diff(moment.unix(props?.user?.lastOnline), 'minutes') < 1)
+const isOnline = ref((Date.now() - (props?.user?.lastOnline * 1000)) < 60000)
 const onlineTitleText = ref('Offline')
 const onlineStatusDot = ref('offline-dot')
 
 const checkOnlineState = () => {
-  isOnline.value = moment().diff(moment.unix(props?.user?.lastOnline), 'minutes') < 1
+  isOnline.value = (Date.now() - (props?.user?.lastOnline * 1000)) < 60000
   onlineTitleText.value = isOnline.value ? 'Online' : 'Offline'
   onlineStatusDot.value = isOnline.value ? 'online-dot' : 'offline-dot'
 }

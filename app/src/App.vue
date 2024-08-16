@@ -26,6 +26,7 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
 import { watch, onMounted, computed, ref, onUpdated, onBeforeUpdate, onUnmounted } from 'vue'
+import type { ComputedRef, Ref } from 'vue'
 import { mdiWeatherSunny, mdiWeatherNight, mdiFullscreen, mdiFullscreenExit } from '@mdi/js'
 import { useThemeStore } from '@/stores/theme'
 import { imagesPath } from '@/helpers/config'
@@ -35,26 +36,23 @@ const themeStore = useThemeStore()
 const fullScreenElement = ref()
 const themeElement = ref()
 
-const theme: any = computed(() => {
-  return themeStore.theme
-})
+const theme: ComputedRef<string> = computed(() => themeStore.theme)
+const themeColor: ComputedRef<string> = computed(() => theme.value === 'dark' ? '#fff' : '#000')
+const themeTitleText: ComputedRef<string> = computed(() => theme.value === 'dark' ? 'Set Light Theme' : 'Set Dark Theme')
+const getThemeIcon: ComputedRef<string> = computed(() => theme.value === 'dark' ? mdiWeatherSunny : mdiWeatherNight)
+const getFullScreenIcon: ComputedRef<string> = computed(() => isFullscreen.value ? mdiFullscreenExit : mdiFullscreen)
+const fullScreenTitleText: ComputedRef<string> = computed(() => isFullscreen.value ? 'Exit Fullscreen' : 'Enter Fullscreen')
+const isDesktop: ComputedRef<boolean> = computed(() => !(/iPhone|Android/i.test(navigator.userAgent)))
 
-const toggleTheme: any = () => {
+const isFullscreen: Ref<boolean> = ref(false)
+let fullScreenToolTip: bootstrap.Tooltip | null = null
+let themeToolTip: bootstrap.Tooltip | null = null
+
+function toggleTheme(): void {
   themeStore.setTheme(theme.value === 'dark' ? 'light' : 'dark')
 }
 
-const themeColor = computed(() => theme.value === 'dark' ? '#fff' : '#000')
-const themeTitleText = computed(() => theme.value === 'dark' ? 'Set Light Theme' : 'Set Dark Theme')
-const getThemeIcon: any = computed(() => theme.value === 'dark' ? mdiWeatherSunny : mdiWeatherNight)
-const getFullScreenIcon: any = computed(() => isFullscreen.value ? mdiFullscreenExit : mdiFullscreen)
-const fullScreenTitleText = computed(() => isFullscreen.value ? 'Exit Fullscreen' : 'Enter Fullscreen')
-const isDesktop = computed(() => !(/iPhone|Android/i.test(navigator.userAgent)))
-
-const isFullscreen = ref(false)
-let fullScreenToolTip: any = null
-let themeToolTip: any = null
-
-const toggleFullscreen: any = () => {
+function toggleFullscreen(): void {
   if (!document.fullscreenElement && !isFullscreen.value) {
     document.documentElement.requestFullscreen()
     isFullscreen.value = true
@@ -90,17 +88,13 @@ onUpdated(() => {
 onBeforeUpdate(() => {
   fullScreenToolTip = bootstrap.Tooltip.getInstance(fullScreenElement.value)
   themeToolTip = bootstrap.Tooltip.getInstance(themeElement.value)
-  if (fullScreenToolTip) {
-    fullScreenToolTip.dispose()
-  }
-  if (themeToolTip) {
-    themeToolTip.dispose()
-  }
+  fullScreenToolTip?.dispose()
+  themeToolTip?.dispose()
 })
 
 onUnmounted(() => {
-  fullScreenToolTip.dispose()
-  themeToolTip.dispose()
+  fullScreenToolTip?.dispose()
+  themeToolTip?.dispose()
 })
 
 </script>

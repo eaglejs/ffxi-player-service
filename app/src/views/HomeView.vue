@@ -14,18 +14,31 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import User from '@/components/User.vue'
 import { useUserStore } from '@/stores/user'
-import moment from 'moment'
 
 const userStore = useUserStore()
-const players = ref(userStore.players.filter((user: any) => moment().diff(moment.unix(user?.lastOnline), 'minutes') < 5))
+const players = ref(userStore.players.filter((user: any) => getOnlinePlayers(user)))
 
 watch(() => userStore.players, () => {
-  players.value = userStore.players.filter((user: any) => moment().diff(moment.unix(user?.lastOnline), 'minutes') < 5)
+  players.value = userStore.players.filter((user: any) => getOnlinePlayers(user))
 }, {deep: true})
 
+onMounted(() => {
+  window.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      players.value = userStore.players.filter((user: any) => getOnlinePlayers(user))
+    }
+  })
+})
+
+function getOnlinePlayers(user: any){
+  const now = Date.now();
+  const lastOnline = user?.lastOnline * 1000; // Convert to milliseconds
+  const diffInMinutes = (now - lastOnline) / (1000 * 60); // Convert milliseconds to minutes
+  return diffInMinutes < 5;
+}
 </script>
 
 <style scoped lang="scss">

@@ -1,47 +1,55 @@
 <template>
   <div class="buffs-wrapper mt-1">
     <span v-for="(buffId, index) in buffIds" :key="index">
-      <Buff :buff-id="buffId" :buff-name="formattedBuffNames[buffId].en" />
+      <Buff :buff-id="buffId" :buff-name="formattedBuffNames.get(buffId)?.en" />
     </span>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
+import type { ComputedRef } from 'vue'
 import Buff from '@/components/Buff.vue'
 import { BUFFS } from '@/constants/buffs'
+
+type BuffType = {
+  id: number;
+  en: string;
+};
 
 const props = defineProps({
   buffData: String
 })
 
-const buffNames: any = computed(() => {
+const buffNames: ComputedRef<string[]> = computed(() => {
   if (!props?.buffData) {
     return []
   }
   return props?.buffData?.split(',').sort()
 })
 
-const buffIds: any = computed(() => {
+const buffIds: ComputedRef<(number | 'Not found')[]> = computed(() => {
   if (!buffNames.value) {
     return []
   }
   return buffNames.value.map((name: string) => {
-    const buff: any = Object.values(BUFFS).find((b: any) => b.en === name)
+    const buff: BuffType | undefined = Object.values(BUFFS).find((b: any): b is BuffType => b.en === name)
     return buff ? buff.id : 'Not found'
   }) || []
 })
 
-const formattedBuffNames: any = computed(() => {
-  const result: any = {}
-  buffIds.value.forEach((buffId: string) => {
-    const buff = BUFFS[buffId]
-    if (buff) {
-      result[buffId] = { en: buff.en.charAt(0).toUpperCase() + buff.en.slice(1) }
-    } else {
-      result[buffId] = { en: 'Not found' }
+const formattedBuffNames: ComputedRef<Map<number, { en: string }>> = computed(() => {
+  const result: Map<number, { en: string }> = new Map()
+  buffIds.value.forEach((buffId: number | "Not found") => {
+    if (typeof buffId === 'number') {
+      const buff = BUFFS[buffId]
+      if (buff) {
+        result.set( buffId, { en: buff.en.charAt(0).toUpperCase() + buff.en.slice(1) })
+      } else {
+        result.set(buffId, { en: 'Not found' })
+      }
     }
-  })
+  });
   return result
 })
 

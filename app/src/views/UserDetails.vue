@@ -1,11 +1,7 @@
 <template>
   <main class="user-details">
     <div class="container-fluid mb-5 p-0">
-      <div class="row justify-content-md-center">
-        <div class="col-md-12">
-          <UserInformation class="ms-1 me-1" v-if="user" :user="user" />
-        </div>
-      </div>
+      <UserInformation class="ms-1 me-1" v-if="user" :user="user" />
     </div>
   </main>
 </template>
@@ -22,7 +18,7 @@ const user = ref(userStore.players.find((player: any) => player.playerName === u
 
 watch(() => userStore.players, () => {
   user.value = userStore.players.find((player: any) => player.playerName === username)
-}, {deep: true})
+}, { deep: true })
 
 onMounted(() => {
   if (username) {

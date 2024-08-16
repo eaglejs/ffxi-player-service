@@ -51,15 +51,19 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
+  function reconnectData() {
+    fetchUsers()
+    connectWebSocket()
+  }
+
   onMounted(() => {
-    fetchUsers();
+    fetchUsers()
     window.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') {
-        fetchUsers()
-        connectWebSocket()
+        reconnectData()
       }
     })
-    window.addEventListener('online', fetchUsers)
+    window.addEventListener('online', reconnectData)
   })
 
   return { players, fetchUsers, fetchUser }
