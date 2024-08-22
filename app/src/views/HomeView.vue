@@ -17,23 +17,24 @@
 import { onMounted, ref, watch } from 'vue'
 import User from '@/components/User.vue'
 import { useUserStore } from '@/stores/user'
+import type { Player } from '@/types/Player'
 
 const userStore = useUserStore()
-const players = ref(userStore.players.filter((user: any) => getOnlinePlayers(user)))
+const players = ref(userStore.players.filter((user: Player) => getOnlinePlayers(user)))
 
 watch(() => userStore.players, () => {
-  players.value = userStore.players.filter((user: any) => getOnlinePlayers(user))
+  players.value = userStore.players.filter((user: Player) => getOnlinePlayers(user))
 }, {deep: true})
 
 onMounted(() => {
   window.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') {
-      players.value = userStore.players.filter((user: any) => getOnlinePlayers(user))
+      players.value = userStore.players.filter((user: Player) => getOnlinePlayers(user))
     }
   })
 })
 
-function getOnlinePlayers(user: any){
+function getOnlinePlayers(user: Player): boolean{
   const now = Date.now();
   const lastOnline = user?.lastOnline * 1000; // Convert to milliseconds
   const diffInMinutes = (now - lastOnline) / (1000 * 60); // Convert milliseconds to minutes

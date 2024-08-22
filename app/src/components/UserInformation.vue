@@ -24,11 +24,15 @@
         </div>
       </div>
       <div class="row">
-        <div class="col-lg-3 col-sm-6">
+        <div class="col-lg-3 col-sm-6 mt-lg-0 mt-md-0 mt-sm-0 mt-xs-0 mt-0">
+          <UserCurrencies v-if="user?.currency1" :currencies="user?.currency1" :type="1" />
+          <UserCurrencies class="mt-3" :currencies="user?.currency2" :type="2" />
+        </div>
+        <div class="col-lg-3 col-sm-6 mt-lg-0 mt-md-0 mt-sm-0 mt-xs-0 mt-3">
           <UserStats :stats="user?.stats" />
         </div>
-        <div class="col-lg-3 col-sm-6 mt-sm-0 mt-3">
-          <UserCurrency2 :currencies="user?.currency2" />
+        <div class="col-lg-6 col-sm-12 mt-lg-0 mt-3">
+          <ChatLog v-if="user?.chatLog" :chatLog="user?.chatLog" />
         </div>
       </div>
     </div>
@@ -40,16 +44,18 @@ import { computed, type ComputedRef } from 'vue'
 import { useThemeStore } from '@/stores/theme'
 import { iconsPath } from '@/helpers/config'
 import UserStats from '@/components/UserStats.vue'
-import UserCurrency2 from '@/components/UserCurrency2.vue'
+import UserCurrencies from '@/components/UserCurrencies.vue'
 import User from '@/components/User.vue'
+import ChatLog from './ChatLog.vue'
+import type { Player } from '@/types/Player'
 
 const themeStore = useThemeStore()
 const props = defineProps({
-  user: Object,
+  user: Object as () => Player,
 })
 
 const theme: ComputedRef<"gray-dark" | "gray-light"> = computed(() => themeStore.theme === 'dark' ? 'gray-dark' : 'gray-light')
-const formattedGil: ComputedRef<string> = computed(() => parseInt(props.user?.gil).toLocaleString() || "0")
+const formattedGil: ComputedRef<string> = computed(() => parseInt(String(props.user?.gil)).toLocaleString() || "0")
 const gilIcon: ComputedRef<string> = computed(() =>`${iconsPath}gil.webp`)
 </script>
 

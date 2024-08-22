@@ -2,8 +2,9 @@ import { ref, onMounted } from 'vue'
 import { defineStore } from 'pinia'
 import axios from 'axios'
 import { useServerStore } from '@/stores/server'
-
 import { fullUrl } from '@/helpers/config'
+import type { Player } from '@/types/Player'
+
 
 export const useUserStore = defineStore('user', () => {
   const players = ref([] as any)
@@ -18,10 +19,10 @@ export const useUserStore = defineStore('user', () => {
   const fetchUser = async (playerName: string) => {
     const response = await axios.get(`${fullUrl}/get_user?playerName=${playerName}`)
     // find player in players and update
-    const index = players.value.findIndex((p: any) => p.playerName === playerName)
+    const index = players.value.findIndex((player: Player) => player.playerName === playerName)
     if (index !== -1) {
       for (const key in response.data) {
-        if (response.data.hasOwnProperty(key)) {
+        if (Object.prototype.hasOwnProperty.call(response.data, key)) {
           players.value[index][key] = response.data[key]
         }
       }
@@ -39,13 +40,17 @@ export const useUserStore = defineStore('user', () => {
     }
   };
 
-  const updatePlayer = (data: any) => {
-    const player = JSON.parse(data)
-    const index = players.value.findIndex((p: any) => p.playerName === player.playerName)
+  const updatePlayer = (data: string) => {
+    const player: any = JSON.parse(data)
+    const index = players.value.findIndex((p: Player) => p.playerName === player.playerName)
     if (index !== -1) {
       for (const key in player) {
-        if (player.hasOwnProperty(key)) {
-          players.value[index][key] = player[key]
+        if (Object.prototype.hasOwnProperty.call(player, key)) {
+          if ( key === 'chatLog') {
+            players.value[index][key].push(player[key])
+          } else {
+            players.value[index][key] = player[key]
+          }
         }
       }
     }

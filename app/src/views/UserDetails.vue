@@ -10,14 +10,15 @@
 import { onMounted, watch, ref } from 'vue'
 import { useUserStore } from '@/stores/user'
 import UserInformation from '@/components/UserInformation.vue'
+import type { Player } from '@/types/Player'
 
 const username = window.location.pathname.split('/').pop()
 
 const userStore = useUserStore()
-const user = ref(userStore.players.find((player: any) => player.playerName === username))
+const user = ref(userStore.players.find((player: Player) => player.playerName === username))
 
 watch(() => userStore.players, () => {
-  user.value = userStore.players.find((player: any) => player.playerName === username)
+  user.value = userStore.players.find((player: Player) => player.playerName === username)
 }, { deep: true })
 
 onMounted(() => {

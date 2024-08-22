@@ -28,19 +28,19 @@ const buffNames: ComputedRef<string[]> = computed(() => {
   return props?.buffData?.split(',').sort()
 })
 
-const buffIds: ComputedRef<(number | 'Not found')[]> = computed(() => {
+const buffIds: ComputedRef<(number)[]> = computed(() => {
   if (!buffNames.value) {
     return []
   }
   return buffNames.value.map((name: string) => {
-    const buff: BuffType | undefined = Object.values(BUFFS).find((b: any): b is BuffType => b.en === name)
-    return buff ? buff.id : 'Not found'
-  }) || []
+    const buff: BuffType = Object.values(BUFFS).find((b: BuffType): b is BuffType => b.en === name) ?? { id: -1, en: 'Not found' }
+    return buff.id
+  })
 })
 
 const formattedBuffNames: ComputedRef<Map<number, { en: string }>> = computed(() => {
   const result: Map<number, { en: string }> = new Map()
-  buffIds.value.forEach((buffId: number | "Not found") => {
+  buffIds.value.forEach((buffId: number | 'Not found' | undefined) => {
     if (typeof buffId === 'number') {
       const buff = BUFFS[buffId]
       if (buff) {

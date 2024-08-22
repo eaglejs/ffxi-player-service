@@ -2,6 +2,22 @@ const userSchema = {
   abilities: Array,
   attack: Number,
   buffs: String,
+  chatLog: [{
+    messageType: String,
+    message: String,
+    timeStamp: String
+  }],
+  currency1: {
+    conquestPointsSandoria: Number,
+    conquestPointsBastok: Number,
+    conquestPointsWindurst: Number,
+    imperialStanding: Number,
+    dominionNotes: Number,
+    sparksOfEminence: Number,
+    unityAccolades: Number,
+    loginPoints: Number,
+    deeds: Number
+  },
   currency2: {
     domainPoints: Number,
     eschaBeads: Number,

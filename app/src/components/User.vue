@@ -71,9 +71,11 @@ import "bootstrap"
 import { computed, onMounted, onUpdated, onUnmounted, onBeforeUpdate, ref, watch } from 'vue'
 import { useThemeStore } from '@/stores/theme'
 import { useUserStore } from '@/stores/user'
-import { mdiSkullCrossbones } from "@mdi/js"
+import { mdiSkullCrossbones } from '@mdi/js'
 import * as bootstrap from 'bootstrap'
 import Buffs from '@/components/Buffs.vue'
+import type { ComputedRef } from 'vue'
+import type { Ability } from '@/types/Ability'
 
 const userStore = useUserStore()
 const props = defineProps({
@@ -85,11 +87,11 @@ const exemplarProgressRounded = computed(() => Math.floor(exemplarProgress.value
 const playerBuffs = computed(() => props?.user?.buffs)
 const playerName = computed(() => props?.user?.playerName.charAt(0).toUpperCase() + props?.user?.playerName.slice(1))
 const requiredExemplar = computed(() => parseInt(props?.user?.requiredExemplar).toLocaleString())
-const theme: any = computed(() => themeStore.theme === 'dark' ? 'gray-dark' : 'gray-light')
+const theme: ComputedRef<string> = computed(() => themeStore.theme === 'dark' ? 'gray-dark' : 'gray-light')
 const themeColor = computed(() => themeStore.theme === 'dark' ? '#fff' : '#000')
 const themeStore = useThemeStore()
 const getTP = computed(() => (props?.user?.tp / 3000) * 100 + '%')
-const playerAbilities = ref([])
+const playerAbilities = ref([] as Ability[]) 
 const exemplarProgress = computed(() => { 
   if (props?.user?.requiredExemplar - props?.user?.currentExemplar <= 1) {
     return 100
@@ -100,7 +102,7 @@ const exemplarProgress = computed(() => {
 
 const filterAbilties = () => {
   let abilities = typeof props?.user?.abilities === 'string' ? JSON.parse(props?.user?.abilities) : props?.user?.abilities
-  let filteredAbilities: any = []
+  let filteredAbilities:  Ability[] = []
 
   for (const ability of abilities) {
     const recastTime: Date = new Date(ability?.recast * 1000);

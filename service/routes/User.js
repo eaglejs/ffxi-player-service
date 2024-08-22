@@ -326,6 +326,43 @@ router.post('/set_stats', async (req, res) => {
   }
 });
 
+router.post('/set_currency1', async (req, res) => {
+  const data = req.body;
+  const playerName = data.playerName.toLowerCase();
+  const currency1 = { 
+    conquestPointsSandoria,
+    conquestPointsBastok,
+    conquestPointsWindurst,
+    imperialStanding,
+    dominionNotes,
+    sparksOfEminence,
+    unityAccolades,
+    loginPoints,
+    deeds
+  } = data;
+
+  try {
+    await users.findOneAndUpdate(
+      { playerName: playerName },
+      { $set: { currency1: currency1 } },
+      { upsert: true, new: true }
+    );
+    res.send(`Currency1: OK`);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('An error occurred while updating the currency1.');
+  }
+
+  wss.clients.forEach(client => {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(JSON.stringify({
+        playerName: playerName,
+        currency1: currency1
+      }));
+    }
+  });
+});
+
 router.post('/set_currency2', async (req, res) => {
   const data = req.body;
   const playerName = data.playerName.toLowerCase();
@@ -351,7 +388,6 @@ router.post('/set_currency2', async (req, res) => {
       }));
     }
   });
-
 });
 
 router.post('/set_buffs', async (req, res) => {
@@ -447,6 +483,43 @@ router.post('/set_zone', async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).send('An error occurred while updating the zone.');
+  }
+});
+
+router.post('/set_message', async (req, res) => {
+  const data = req.body;
+  const playerName = data.playerName.toLowerCase();
+  const message = data.message.replace(/\n/g, '');;
+  const messageType = data.messageType;
+  const timeStamp = new Date().toISOString();
+
+  try {
+    await users.findOneAndUpdate(
+      { playerName: playerName },
+      {
+        $push: {
+          chatLog: {
+            $each: [{ messageType, message, timeStamp }],
+            $slice: -1000 // Keep only the latest 1000 messages
+          }
+        }
+      },
+      { upsert: true, new: true }
+    );
+
+    wss.clients.forEach(client => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(JSON.stringify({
+          playerName: playerName,
+          chatLog: { messageType, message, timeStamp }
+        }));
+      }
+    });
+
+    res.send(`Message: OK`);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('An error occurred while updating the message.');
   }
 });
 
