@@ -31,6 +31,7 @@
 import { onMounted, onUpdated, ref } from 'vue';
 import { mdiChevronUp, mdiChevronDown } from '@mdi/js';
 import GenIcon from '@/components/GenIcon.vue';
+import { auto } from '@popperjs/core';
 
 const props = defineProps<{
   chatLog: { messageType: string; message: string; timeStamp: string }[]
@@ -40,6 +41,7 @@ const chatLogEl = ref<HTMLElement | undefined>();
 const firstChildEl = ref<HTMLElement | undefined>();
 const lastChildEl = ref<HTMLElement | undefined>();
 const timeStampsEnabled = ref<boolean>(localStorage.getItem('timeStampsEnabled') === 'true' || false);
+const autoScrollIsActive = ref<boolean>(true);
 
 const chatColor = (messageType: string) => {
   switch (messageType?.toLowerCase()) {
@@ -72,6 +74,7 @@ const toLocalTime = (timeStamp: string) => {
 };
 
 const scrollToLastChild = (behavior: ScrollBehavior) => {
+  autoScrollIsActive.value = true;
   chatLogEl.value?.scrollTo({
     top: chatLogEl.value.scrollHeight,
     behavior
@@ -93,11 +96,20 @@ onMounted(() => {
       scrollToLastChild('instant');
     }
   })
+  chatLogEl.value!.addEventListener('wheel', () => {
+    if (chatLogEl.value!.scrollTop < chatLogEl.value!.scrollHeight - chatLogEl.value!.clientHeight) {
+      autoScrollIsActive.value = false;
+    } else {
+      autoScrollIsActive.value = true;
+    }
+  });
 });
 
 onUpdated(() => {
   if (props.chatLog.length === 0) return;
-  scrollToLastChild('smooth');
+  if (autoScrollIsActive.value) { 
+    scrollToLastChild('smooth')
+  };
 });
 
 </script>
