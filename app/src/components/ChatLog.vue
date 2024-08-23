@@ -4,6 +4,10 @@
       <div class="d-flex">
         <h3 class="p-0 m-0">Chat</h3>
         <section class="flex-grow-1">
+          <section class="form-check form-switch float-end">
+            <label class="form-check-label" for="flexSwitchCheckChecked">Timestamp</label>
+            <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked" @click="toggleTimeStamp" :checked="timeStampsEnabled">
+          </section>
           <button class="btn btn-sm arrow-btns float-end" @click="scrollToFirstChild('smooth')">
             <GenIcon :icon="mdiChevronUp" size="lg" />
           </button>
@@ -16,7 +20,7 @@
     <div ref="chatLogEl" class="card-body chat-log">
       <section ref="firstChildEl" />
       <pre v-for="item in chatLog" :key="item.timeStamp" encoding="shift-jis" font="Meiryo">
-<code :class="chatColor(item?.messageType)" >{{ `${item?.message}` }}</code>
+<code :class="chatColor(item?.messageType)"><span v-if="timeStampsEnabled">[{{ toLocalTime(item.timeStamp) }}]</span>{{ `${item?.message}` }}</code>
       </pre>
       <section ref="lastChildEl" />
     </div>
@@ -24,7 +28,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue';
+import { onMounted, onUpdated, ref } from 'vue';
 import { mdiChevronUp, mdiChevronDown } from '@mdi/js';
 import GenIcon from '@/components/GenIcon.vue';
 
@@ -35,6 +39,7 @@ const props = defineProps<{
 const chatLogEl = ref<HTMLElement | undefined>();
 const firstChildEl = ref<HTMLElement | undefined>();
 const lastChildEl = ref<HTMLElement | undefined>();
+const timeStampsEnabled = ref<boolean>(localStorage.getItem('timeStampsEnabled') === 'true' || false);
 
 const chatColor = (messageType: string) => {
   switch (messageType?.toLowerCase()) {
@@ -53,6 +58,12 @@ const chatColor = (messageType: string) => {
     default:
       return 'say'
   }
+};
+
+
+const toggleTimeStamp = () => {
+  timeStampsEnabled.value = !timeStampsEnabled.value;
+  localStorage.setItem('timeStampsEnabled', (timeStampsEnabled.value).toString());
 };
 
 const toLocalTime = (timeStamp: string) => {
@@ -84,11 +95,9 @@ onMounted(() => {
   })
 });
 
-watch(props.chatLog, () => {
-  if (props.chatLog.length <= 10) return;
-  setTimeout(() => {
-    scrollToLastChild('smooth');
-  }, 300);
+onUpdated(() => {
+  if (props.chatLog.length === 0) return;
+  scrollToLastChild('smooth');
 });
 
 </script>
@@ -108,7 +117,7 @@ pre {
 
 code {
   span {
-    color: var(--bs-primary-bg-subtle);
+    color: var(--bs-info-text-emphasis);
   }
 }
 
