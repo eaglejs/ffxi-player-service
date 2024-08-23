@@ -84,7 +84,7 @@ const props = defineProps({
 
 const currentExemplar = computed(() => parseInt(props?.user?.currentExemplar).toLocaleString())
 const exemplarProgressRounded = computed(() => Math.floor(exemplarProgress.value))
-const playerBuffs = computed(() => props?.user?.buffs)
+const playerBuffs = computed(() => props?.user?.buffs ?? [])
 const playerName = computed(() => props?.user?.playerName.charAt(0).toUpperCase() + props?.user?.playerName.slice(1))
 const requiredExemplar = computed(() => parseInt(props?.user?.requiredExemplar).toLocaleString())
 const theme: ComputedRef<string> = computed(() => themeStore.theme === 'dark' ? 'gray-dark' : 'gray-light')
