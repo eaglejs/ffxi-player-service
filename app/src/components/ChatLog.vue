@@ -19,7 +19,7 @@
     </div>
     <div ref="chatLogEl" class="card-body chat-log">
       <section ref="firstChildEl" />
-      <pre v-for="item in chatLog" :key="item.timeStamp" encoding="shift-jis" font="Meiryo">
+      <pre v-for="item in chatLog" :key="item.timeStamp" >
 <code :class="chatColor(item?.messageType)"><span v-if="timeStampsEnabled">[{{ toLocalTime(item.timeStamp) }}]</span>{{ `${item?.message}` }}</code>
       </pre>
       <section ref="lastChildEl" />
@@ -31,7 +31,6 @@
 import { onMounted, onUpdated, ref } from 'vue';
 import { mdiChevronUp, mdiChevronDown } from '@mdi/js';
 import GenIcon from '@/components/GenIcon.vue';
-import { auto } from '@popperjs/core';
 
 const props = defineProps<{
   chatLog: { messageType: string; message: string; timeStamp: string }[]
@@ -82,6 +81,7 @@ const scrollToLastChild = (behavior: ScrollBehavior) => {
 };
 
 const scrollToFirstChild = (behavior: ScrollBehavior) => {
+  autoScrollIsActive.value = false;
   chatLogEl.value?.scrollTo({
     top: 0,
     behavior
@@ -96,20 +96,25 @@ onMounted(() => {
       scrollToLastChild('instant');
     }
   })
-  chatLogEl.value!.addEventListener('wheel', () => {
-    if (chatLogEl.value!.scrollTop < chatLogEl.value!.scrollHeight - chatLogEl.value!.clientHeight) {
-      autoScrollIsActive.value = false;
-    } else {
-      autoScrollIsActive.value = true;
-    }
-  });
+  chatLogEl.value!.addEventListener('wheel', handleScrollEvent);
+  chatLogEl.value!.addEventListener('touchmove', handleScrollEvent);
 });
+
+const handleScrollEvent = () => {
+  if (chatLogEl.value!.scrollTop + chatLogEl.value!.clientHeight < chatLogEl.value!.scrollHeight) {
+    autoScrollIsActive.value = false;
+  } else {
+    autoScrollIsActive.value = true;
+  }
+};
 
 onUpdated(() => {
   if (props.chatLog.length === 0) return;
+  const newHeight = chatLogEl.value!.clientHeight === 500 ? 501 : 500;
+  chatLogEl.value!.setAttribute('style', `max-height: ${newHeight}px;`);
   if (autoScrollIsActive.value) { 
     scrollToLastChild('smooth')
-  };
+  }
 });
 
 </script>
