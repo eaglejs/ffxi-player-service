@@ -88,7 +88,7 @@ watch(props.chatLog, () => {
   if (props.chatLog.length <= 10) return;
   setTimeout(() => {
     scrollToLastChild('smooth');
-  }, 1000);
+  }, 300);
 });
 
 </script>
