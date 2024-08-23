@@ -1,10 +1,21 @@
 <template>
   <div class="card">
     <div class="card-header">
-      <h3 class="p-0 m-0">Chat</h3>
+      <div class="d-flex">
+        <h3 class="p-0 m-0">Chat</h3>
+        <section class="flex-grow-1">
+          <button class="btn btn-sm arrow-btns float-end" @click="scrollToFirstChild('smooth')">
+            <GenIcon :icon="mdiChevronUp" size="lg" />
+          </button>
+          <button class="btn btn-sm arrow-btns float-end" @click="scrollToLastChild('smooth')">
+            <GenIcon :icon="mdiChevronDown" size="lg" />
+          </button>
+        </section>
+      </div>
     </div>
     <div ref="chatLogEl" class="card-body chat-log">
-      <pre v-for="item in chatLog" :key="item.timeStamp">
+      <section ref="firstChildEl" />
+      <pre v-for="item in chatLog" :key="item.timeStamp" encoding="shift-jis" font="Meiryo">
 <code :class="chatColor(item?.messageType)" >{{ `${item?.message}` }}</code>
       </pre>
       <section ref="lastChildEl" />
@@ -14,12 +25,15 @@
 
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue';
+import { mdiChevronUp, mdiChevronDown } from '@mdi/js';
+import GenIcon from '@/components/GenIcon.vue';
 
 const props = defineProps<{
   chatLog: { messageType: string; message: string; timeStamp: string }[]
 }>();
 
 const chatLogEl = ref<HTMLElement | undefined>();
+const firstChildEl = ref<HTMLElement | undefined>();
 const lastChildEl = ref<HTMLElement | undefined>();
 
 const chatColor = (messageType: string) => {
@@ -46,24 +60,45 @@ const toLocalTime = (timeStamp: string) => {
   return date.toLocaleString();
 };
 
+const scrollToLastChild = (behavior: ScrollBehavior) => {
+  chatLogEl.value?.scrollTo({
+    top: chatLogEl.value.scrollHeight,
+    behavior
+  });
+};
+
+const scrollToFirstChild = (behavior: ScrollBehavior) => {
+  chatLogEl.value?.scrollTo({
+    top: 0,
+    behavior
+  });
+};
+
 onMounted(() => {
   if (props.chatLog.length === 0) return;
-  lastChildEl.value?.scrollIntoView({
-    behavior: 'smooth',
-  });
+  scrollToLastChild('instant');
+  window.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      scrollToLastChild('instant');
+    }
+  })
 });
 
-watch(() => props.chatLog, () => {
+watch(props.chatLog, () => {
   if (props.chatLog.length <= 10) return;
   setTimeout(() => {
-    lastChildEl.value?.scrollIntoView({
-      behavior: 'smooth',
-    });
+    scrollToLastChild('smooth');
   }, 1000);
 });
 
 </script>
 <style scoped lang="scss">
+
+.arrow-btns {
+  max-height: 23px;
+  display: inline-flex;
+  padding: 0 5px;
+}
 
 pre {
   text-wrap: wrap;

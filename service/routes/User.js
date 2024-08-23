@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const router = express.Router();
+const iconv = require('iconv-lite');
 const WebSocket = require('ws');
 const userScheme = require('../schemas/User');
 
@@ -489,17 +490,24 @@ router.post('/set_zone', async (req, res) => {
 router.post('/set_message', async (req, res) => {
   const data = req.body;
   const playerName = data.playerName.toLowerCase();
-  const message = data.message.replace(/\n/g, '');;
+  const message = data.message;
   const messageType = data.messageType;
   const timeStamp = new Date().toISOString();
 
   try {
+    // Step 1: Convert the comma-separated string into an array of integers
+    const byteArray = message.split(',').map(Number);
+    // Step 2: Create a Buffer from the byte array
+    const buffer = Buffer.from(byteArray);
+    // Step 3: Decode the Buffer from Shift-JIS to a UTF-8 string
+    const decodedMessage = iconv.decode(buffer, 'Shift_JIS').replace(/\n/g, '');;
+    
     await users.findOneAndUpdate(
       { playerName: playerName },
       {
         $push: {
           chatLog: {
-            $each: [{ messageType, message, timeStamp }],
+            $each: [{ messageType, message: decodedMessage, timeStamp }],
             $slice: -1000 // Keep only the latest 1000 messages
           }
         }
@@ -511,7 +519,7 @@ router.post('/set_message', async (req, res) => {
       if (client.readyState === WebSocket.OPEN) {
         client.send(JSON.stringify({
           playerName: playerName,
-          chatLog: { messageType, message, timeStamp }
+          chatLog: { messageType, message: decodedMessage, timeStamp }
         }));
       }
     });
