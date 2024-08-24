@@ -31,6 +31,7 @@
 import { onMounted, onUpdated, ref } from 'vue';
 import { mdiChevronUp, mdiChevronDown } from '@mdi/js';
 import GenIcon from '@/components/GenIcon.vue';
+import { isIPhone, isAndroid } from '@/helpers/utils';
 
 const props = defineProps<{
   chatLog: { messageType: string; message: string; timeStamp: string }[]
@@ -97,7 +98,9 @@ onMounted(() => {
     }
   })
   chatLogEl.value!.addEventListener('wheel', handleScrollEvent);
-  chatLogEl.value!.addEventListener('touchmove', handleScrollEvent);
+  if (isIPhone() || isAndroid()) {
+    chatLogEl.value!.addEventListener('touchmove', handleScrollEvent);
+  }
 });
 
 const handleScrollEvent = () => {
@@ -110,8 +113,10 @@ const handleScrollEvent = () => {
 
 onUpdated(() => {
   if (props.chatLog.length === 0) return;
-  const newHeight = chatLogEl.value!.clientHeight === 500 ? 501 : 500;
-  chatLogEl.value!.setAttribute('style', `max-height: ${newHeight}px;`);
+  if (isIPhone() || isAndroid()) {
+    const newHeight = chatLogEl.value!.clientHeight === 500 ? 501 : 500;
+    chatLogEl.value!.setAttribute('style', `max-height: ${newHeight}px;`);
+  }
   if (autoScrollIsActive.value) { 
     scrollToLastChild('smooth')
   }
@@ -140,6 +145,7 @@ code {
 
 .chat-log {
   background-color: #031633;
+  border-radius: 7px;
   max-height: 500px;
   overflow-y: auto;
 }
