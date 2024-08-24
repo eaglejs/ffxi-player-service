@@ -14,7 +14,27 @@ const router = createRouter({
       name: 'user-details',
       component: () => import('../views/UserDetails.vue')
     },
-  ]
+  ],
+  scrollBehavior(to, from, savedPosition) {
+    if (savedPosition) {
+      savedPosition.behavior = 'instant';
+      return savedPosition;
+    } else {
+      return { 
+        top: 0,
+        left: 0,
+        behavior: 'instant'
+      };
+    }
+  },
 })
+
+router.afterEach((to, from) => {
+  window.scrollTo({
+    top: 0,
+    left: 0,
+    behavior: 'instant'
+  });
+});
 
 export default router
