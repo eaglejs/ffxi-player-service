@@ -17,12 +17,10 @@
         </section>
       </div>
     </div>
-    <UserResistances class="mt-3" :resistances="stats" />
   </div>
 </template>
 
 <script setup lang="ts">
-import UserResistances from '@/components/UserResistances.vue'
 const baseStats = [
   {id: 'baseSTR', name: 'STR'},
   {id: 'baseDEX', name: 'DEX'},

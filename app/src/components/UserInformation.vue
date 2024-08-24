@@ -26,10 +26,11 @@
       <div class="row">
         <div class="col-lg-3 col-sm-6 mt-lg-0 mt-md-0 mt-sm-0 mt-xs-0 mt-0">
           <UserCurrencies v-if="user?.currency1" :currencies="user?.currency1" :type="1" />
-          <UserCurrencies class="mt-3" :currencies="user?.currency2" :type="2" />
+          <UserStats class="mt-3" :stats="user?.stats" />
         </div>
         <div class="col-lg-3 col-sm-6 mt-lg-0 mt-md-0 mt-sm-0 mt-xs-0 mt-3">
-          <UserStats :stats="user?.stats" />
+          <UserCurrencies :currencies="user?.currency2" :type="2" />
+          <UserResistances class="mt-3" :resistances="user?.stats" />
         </div>
         <div class="col-lg-6 col-sm-12 mt-lg-0 mt-3">
           <ChatLog v-if="user?.chatLog" :chatLog="user?.chatLog" />
@@ -44,6 +45,7 @@ import { computed, type ComputedRef } from 'vue'
 import { useThemeStore } from '@/stores/theme'
 import { iconsPath } from '@/helpers/config'
 import UserStats from '@/components/UserStats.vue'
+import UserResistances from '@/components/UserResistances.vue'
 import UserCurrencies from '@/components/UserCurrencies.vue'
 import User from '@/components/User.vue'
 import ChatLog from './ChatLog.vue'
