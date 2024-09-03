@@ -145,7 +145,8 @@ code {
 
 .chat-log {
   background-color: #031633;
-  border-radius: 7px;
+  border-bottom-left-radius: 7px;
+  border-bottom-right-radius: 7px;
   max-height: 500px;
   overflow-y: auto;
 }

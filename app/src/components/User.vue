@@ -1,5 +1,5 @@
 <template>
-  <div class="card" :data-bs-theme="theme">
+  <div class="card user-card" :data-bs-theme="theme">
     <svg ref="deadElement" class="dead" viewBox="0 0 25 25" width="30" height="30">
       <path class="skull-fill" :d="mdiSkullCrossbones"></path>
     </svg>
@@ -183,7 +183,9 @@ watch( userStore?.players, () => {
 
 <style scoped lang="scss">
 .card {
-  height: calc(100% - 15px);
+  &.user-card {
+    height: 100%;
+  }
 
   %status-dot {
     content: '';

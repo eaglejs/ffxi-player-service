@@ -18,12 +18,15 @@
       </div>
     </div>
     <div class="container-fluid">
-      <div class="row">
-        <div class="col-md-12">
+      <div class="row gx-3">
+        <div class="col-md-6">
           <User :user="user" />
         </div>
+        <div class="col-md-6">
+          <ExperiencePoints :user="user" />
+        </div>
       </div>
-      <div class="row">
+      <div class="row mt-3 gx-3">
         <div class="col-lg-3 col-sm-6 mt-lg-0 mt-md-0 mt-sm-0 mt-xs-0 mt-0">
           <UserCurrencies v-if="user?.currency1" :currencies="user?.currency1" :type="1" />
           <UserStats class="mt-3" :stats="user?.stats" />
@@ -47,6 +50,7 @@ import { iconsPath } from '@/helpers/config'
 import UserStats from '@/components/UserStats.vue'
 import UserResistances from '@/components/UserResistances.vue'
 import UserCurrencies from '@/components/UserCurrencies.vue'
+import ExperiencePoints from './ExperiencePoints.vue'
 import User from '@/components/User.vue'
 import ChatLog from './ChatLog.vue'
 import type { Player } from '@/types/Player'

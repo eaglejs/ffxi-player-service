@@ -495,12 +495,14 @@ router.post('/set_message', async (req, res) => {
   const timeStamp = new Date().toISOString();
 
   try {
-    // Step 1: Convert the comma-separated string into an array of integers
-    const byteArray = message.split(',').map(Number);
-    // Step 2: Create a Buffer from the byte array
-    const buffer = Buffer.from(byteArray);
-    // Step 3: Decode the Buffer from Shift-JIS to a UTF-8 string
-    const decodedMessage = iconv.decode(buffer, 'Shift_JIS').replace(/\n/g, '');;
+    // // Step 1: Convert the comma-separated string into an array of integers
+    // const byteArray = message.split(',').map(Number);
+    // // Step 2: Create a Buffer from the byte array
+    // const buffer = Buffer.from(byteArray);
+    // // Step 3: Decode the Buffer from Shift-JIS to a UTF-8 string
+    // const decodedMessage = iconv.decode(buffer, 'Shift_JIS').replace(/\n/g, '');
+
+    const decodedMessage = message.replace(/\n/g, '');
     
     await users.findOneAndUpdate(
       { playerName: playerName },
