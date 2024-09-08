@@ -43,7 +43,7 @@ const experience = ref({
   datasets: [
     {
       label: 'Experience Points',
-      data: JSON.parse(JSON.stringify(exemplarHistory)),
+      data: [],
       fill: false,
       borderColor: 'rgb(75, 192, 192)',
       tension: 0.1
@@ -59,16 +59,17 @@ const options = {
 }
 
 const data = computed(() => experience.value);
+const justExemplarPoints = computed(() => exemplarHistory.map((points, index) => points));
 
 function renderLatestData (debug = false) {
   let currentExemplarPoints: number;
   if (debug) {
     const min = 750;
-    const max = 1100; 
+    const max = 1100;
     const randomPoints = Math.floor(random(min, max));
     exemplarHistory.push(randomPoints)
   } else if (previousCurrentExemplar.value === 0) {
-    exemplarHistory.push(0)
+    exemplarHistory.push({points: 0, ts: new Date().getTime()/1000})
   } else {
     currentExemplarPoints = (props.user?.currentExemplar ?? 0) - (previousCurrentExemplar.value ?? 0)
     if (currentExemplarPoints < 0) {
@@ -86,7 +87,7 @@ function renderLatestData (debug = false) {
     datasets: [
       {
         label: 'Exemplar Points',
-        data: exemplarHistory,
+        data: justExemplarPoints.value,
         fill: false,
         borderColor: 'rgb(75, 192, 192)',
         tension: 0.1
@@ -98,24 +99,37 @@ function renderLatestData (debug = false) {
 }
 
 function analyzePoints(experiencePoints: Array<number>) {
-  let running_total = 0;
-  let rate;
+  let t = new Date().getTime()/1000
+  let running_total = 0
+  let maximum_timestamp = 29
+  experiencePoints.forEach((points) => { 
+    let time_diff = t - points.ts
+    if (t - points.ts > 600) {
+      points.ts = null
+    } else {
+      running_total += points
+      if (time_diff > maximum_timestamp) {
+        maximum_timestamp = time_diff
   
-  for (let points of experiencePoints) {
-    running_total += points;
+      }
+    }
+  })
+
+  let rate
+  if (maximum_timestamp == 29) {
+    rate = 0
+  } else {
+    rate = Math.floor((running_total/maximum_timestamp)*3600)
   }
-  
-  rate = parseInt(((running_total / 3600 / experiencePoints.length) * 100).toFixed(1));
 
   return rate
 }
 
-setInterval(() => {
-  renderLatestData(true)
-}, 3000)
+// setInterval(() => {
+//   renderLatestData(true)
+// }, 3000)
 
 watch(() => props.user?.currentExemplar, () => renderLatestData() )
-
 </script>
 
 <style scoped lang="scss">

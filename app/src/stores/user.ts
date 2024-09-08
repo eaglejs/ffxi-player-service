@@ -3,31 +3,33 @@ import { defineStore } from 'pinia'
 import axios from 'axios'
 import { useServerStore } from '@/stores/server'
 import { fullUrl } from '@/helpers/config'
-import type { Player } from '@/types/Player'
 
 
 export const useUserStore = defineStore('user', () => {
-  const players = ref([] as any)
+  const players = ref(new Map<number, any>() as Map<number, any>);
+  const chatLog = ref([] as any);
+
   const { websocket, connectWebSocket } = useServerStore()
 
   const fetchUsers = async () => {
     const response = await axios.get(`${fullUrl}/get_users`)
-    players.value = response.data
+    response.data.forEach((player: any) => {
+      players.value.set(player.playerId, player);
+    });
     return Promise.resolve(players.value)
   }
 
-  const fetchUser = async (playerName: string) => {
-    const response = await axios.get(`${fullUrl}/get_user?playerName=${playerName}`)
-    // find player in players and update
-    const index = players.value.findIndex((player: Player) => player.playerName === playerName)
-    if (index !== -1) {
-      for (const key in response.data) {
-        if (Object.prototype.hasOwnProperty.call(response.data, key)) {
-          players.value[index][key] = response.data[key]
-        }
-      }
-    }
-    return Promise.resolve(response.data)
+  const fetchUser = async (playerId: number) => {
+    const response = await axios.get(`${fullUrl}/get_user?playerId=${playerId}`)
+
+    players.value.set(response.data.playerId, response.data);
+    return Promise.resolve(response.data);
+  }
+
+  const fetchChatLog = async (playerId: number) => {
+    const response = await axios.get(`${fullUrl}/get_chat_log?playerId=${playerId}`)
+    chatLog.value = response.data;
+    return Promise.resolve(response.data);
   }
 
   websocket.onmessage = (event) => {
@@ -41,28 +43,32 @@ export const useUserStore = defineStore('user', () => {
   };
 
   const updatePlayer = (data: string) => {
+    const playerId = parseInt(window.location.pathname.split('/').pop() || '0');
     const player: any = JSON.parse(data)
-    const index = players.value.findIndex((p: Player) => p.playerName === player.playerName)
-    if (index !== -1) {
-      for (const key in player) {
-        if (Object.prototype.hasOwnProperty.call(player, key)) {
-          if ( key === 'chatLog') {
-            players.value[index][key].push(player[key])
-          } else {
-            players.value[index][key] = player[key]
-          }
-        }
+    const playerToUpdate = players.value.get(parseInt(player.playerId))
+    if (playerToUpdate === undefined) {
+      return;
+    }
+    if ('chatLog' in player) {
+      if (playerId === player.playerId) {
+        chatLog.value.push(player.chatLog)
+      }
+      return;
+    }
+    for (const key in player) {
+      if (key in playerToUpdate) {
+        playerToUpdate[key] = player[key];
+        continue
       }
     }
+    players.value.set(parseInt(player.playerId), playerToUpdate)
   }
 
   function reconnectData() {
-    fetchUsers()
     connectWebSocket()
   }
 
   onMounted(() => {
-    fetchUsers()
     window.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') {
         reconnectData()
@@ -71,5 +77,5 @@ export const useUserStore = defineStore('user', () => {
     window.addEventListener('online', reconnectData)
   })
 
-  return { players, fetchUsers, fetchUser }
+  return { players, chatLog, fetchUsers, fetchUser, fetchChatLog }
 })

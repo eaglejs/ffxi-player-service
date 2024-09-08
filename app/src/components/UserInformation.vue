@@ -22,7 +22,7 @@
         <div class="col-md-6">
           <User :user="user" />
         </div>
-        <div class="col-md-6">
+        <div class="col-md-6 mt-lg-0 mt-md-0 mt-3">
           <ExperiencePoints :user="user" />
         </div>
       </div>
@@ -36,7 +36,7 @@
           <UserResistances class="mt-3" :resistances="user?.stats" />
         </div>
         <div class="col-lg-6 col-sm-12 mt-lg-0 mt-3">
-          <ChatLog v-if="user?.chatLog" :chatLog="user?.chatLog" />
+          <ChatLog />
         </div>
       </div>
     </div>

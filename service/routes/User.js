@@ -5,6 +5,7 @@ const router = express.Router();
 const iconv = require('iconv-lite');
 const WebSocket = require('ws');
 const userScheme = require('../schemas/User');
+const chatScheme = require('../schemas/Chat');
 
 mongoose.connect('mongodb://localhost:27017/ffxi');
 
@@ -30,17 +31,39 @@ wss.on('connection', function connection(ws) {
 });
 
 const userSchema = new mongoose.Schema(userScheme);
+const chatSchema = new mongoose.Schema(chatScheme);
 
 const users = mongoose.model('users', userSchema);
+const chats = mongoose.model('chats', chatSchema);
 
 router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({ extended: true }));
 
-router.get('/get_user', async (req, res) => {
-  const playerName = req.query.playerName.toLowerCase();
+router.post('/initialize_user', async (req, res) => {
+  const data = req.body;
+  const playerId = parseInt(data.playerId);
+  const playerName = data.playerName.toLowerCase();
+  const lastOnline = parseInt(data.lastOnline);
 
   try {
-    const user = await users.findOne({ playerName });
+    await users.findOneAndUpdate(
+      { playerName: playerName }, 
+      { $set: { playerId: playerId, playerName: playerName, lastOnline: lastOnline } },
+      { upsert: true, new: true }
+    );
+
+    res.send(`User ${playerName} initialized`);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('An error occurred while initializing the user.');
+  }
+});
+
+router.get('/get_user', async (req, res) => {
+  const playerId = req.query.playerId;
+
+  try {
+    const user = await users.findOne({ playerId });
     res.send(user);
   } catch (error) {
     console.error(error);
@@ -60,19 +83,21 @@ router.get('/get_users', async (req, res) => {
 
 router.post('/set_online', async (req, res) => {
   const data = req.body;
+  const playerId = parseInt(data.playerId);
   const playerName = data.playerName.toLowerCase();
   const last_online = parseInt(data.lastOnline);
 
   try {
     await users.findOneAndUpdate(
-      { playerName: playerName },
-      { $set: { lastOnline: last_online } },
+      { playerId: playerId },
+      { $set: { playerId: playerId, playerName: playerName, lastOnline: last_online } },
       { upsert: true, new: true }
     );
 
     wss.clients.forEach(client => {
       if (client.readyState === WebSocket.OPEN) {
         client.send(JSON.stringify({
+          playerId: playerId,
           playerName: playerName,
           lastOnline: last_online
         }));
@@ -87,15 +112,15 @@ router.post('/set_online', async (req, res) => {
 });
 
 router.post('/set_jobs', async (req, res) => {
-
   const data = req.body;
   const main_job = data.mainJob;
   const sub_job = data.subJob;
-  const playerName = data.playerName.toLowerCase();;
+  const playerId = parseInt(data.playerId);
+  const playerName = data.playerName.toLowerCase();
 
   try {
     await users.findOneAndUpdate(
-      { playerName: playerName },
+      { playerId: playerId },
       { $set: { mainJob: main_job, subJob: sub_job } },
       { upsert: true, new: true }
     );
@@ -103,6 +128,7 @@ router.post('/set_jobs', async (req, res) => {
     wss.clients.forEach(client => {
       if (client.readyState === WebSocket.OPEN) {
         client.send(JSON.stringify({
+          playerId: playerId,
           playerName: playerName,
           mainJob: main_job,
           subJob: sub_job
@@ -119,13 +145,14 @@ router.post('/set_jobs', async (req, res) => {
 
 router.post('/set_gil', async (req, res) => {
   const data = req.body;
+  const playerId = parseInt(data.playerId);
   const playerName = data.playerName.toLowerCase();
   const gil = data.gil;
 
   try {
     await users.findOneAndUpdate
       (
-        { playerName: playerName },
+        { playerId: playerId },
         { $set: { gil: gil } },
         { upsert: true, new: true }
       );
@@ -133,6 +160,7 @@ router.post('/set_gil', async (req, res) => {
     wss.clients.forEach(client => {
       if (client.readyState === WebSocket.OPEN) {
         client.send(JSON.stringify({
+          playerId: playerId,
           playerName: playerName,
           gil: gil
         }));
@@ -148,13 +176,14 @@ router.post('/set_gil', async (req, res) => {
 
 router.post('/set_player_status', async (req, res) => {
   const data = req.body;
+  const playerId = parseInt(data.playerId);
   const playerName = data.playerName.toLowerCase();
   const status = data.status;
 
   try {
     await users.findOneAndUpdate
       (
-        { playerName: playerName },
+        { playerId: playerId },
         { $set: { status: status } },
         { upsert: true, new: true }
       );
@@ -162,6 +191,7 @@ router.post('/set_player_status', async (req, res) => {
     wss.clients.forEach(client => {
       if (client.readyState === WebSocket.OPEN) {
         client.send(JSON.stringify({
+          playerId: playerId,
           playerName: playerName,
           status: status
         }));
@@ -177,13 +207,14 @@ router.post('/set_player_status', async (req, res) => {
 
 router.post('/set_hpp', async (req, res) => {
   const data = req.body;
+  const playerId = parseInt(data.playerId);
   const playerName = data.playerName.toLowerCase();
   const hpp = data.hpp;
   const debug = false;
 
   try {
     await users.findOneAndUpdate(
-      { playerName: playerName },
+      { playerId: playerId },
       { $set: { hpp: hpp } },
       { upsert: true, new: true }
     );
@@ -192,11 +223,13 @@ router.post('/set_hpp', async (req, res) => {
       if (client.readyState === WebSocket.OPEN) {
         if (playerName == "piplup" && debug) {
           client.send(JSON.stringify({
+            playerId: playerId,
             playerName: playerName,
             hpp: 0
           }));
         } else {
           client.send(JSON.stringify({
+            playerId: playerId,
             playerName: playerName,
             hpp: hpp
           }));
@@ -214,12 +247,13 @@ router.post('/set_hpp', async (req, res) => {
 
 router.post('/set_mpp', async (req, res) => {
   const data = req.body;
+  const playerId = parseInt(data.playerId);
   const playerName = data.playerName.toLowerCase();
   const mpp = data.mpp;
 
   try {
     await users.findOneAndUpdate(
-      { playerName: playerName },
+      { playerId: playerId },
       { $set: { mpp: mpp } },
       { upsert: true, new: true }
     );
@@ -227,6 +261,7 @@ router.post('/set_mpp', async (req, res) => {
     wss.clients.forEach(client => {
       if (client.readyState === WebSocket.OPEN) {
         client.send(JSON.stringify({
+          playerId: playerId,
           playerName: playerName,
           mpp: mpp
         }));
@@ -242,13 +277,14 @@ router.post('/set_mpp', async (req, res) => {
 
 router.post('/set_tp', async (req, res) => {
   const data = req.body;
+  const playerId = parseInt(data.playerId);
   const playerName = data.playerName.toLowerCase();
   const tp = data.tp;
 
   try {
     await users.findOneAndUpdate
       (
-        { playerName: playerName },
+        { playerId: playerId },
         { $set: { tp: tp } },
         { upsert: true, new: true }
       );
@@ -256,6 +292,7 @@ router.post('/set_tp', async (req, res) => {
     wss.clients.forEach(client => {
       if (client.readyState === WebSocket.OPEN) {
         client.send(JSON.stringify({
+          playerId: playerId,
           playerName: playerName,
           tp: tp
         }));
@@ -271,6 +308,7 @@ router.post('/set_tp', async (req, res) => {
 
 router.post('/set_stats', async (req, res) => {
   const data = req.body;
+  const playerId = parseInt(data.playerId);
   const playerName = data.playerName.toLowerCase();
   const { masterLevel, mainJobLevel, subJobLevel, attack, defense, currentExemplar, requiredExemplar,
     title, nationRank, fireResistance, iceResistance, windResistance, earthResistance, lightningResistance,
@@ -284,7 +322,7 @@ router.post('/set_stats', async (req, res) => {
 
   try {
     await users.findOneAndUpdate(
-      { playerName: playerName },
+      { playerId: playerId },
       {
         $set: {
           masterLevel: masterLevel,
@@ -305,6 +343,7 @@ router.post('/set_stats', async (req, res) => {
     wss.clients.forEach(client => {
       if (client.readyState === WebSocket.OPEN) {
         client.send(JSON.stringify({
+          playerId: playerId,
           playerName: playerName,
           masterLevel: masterLevel,
           mainJobLevel: mainJobLevel,
@@ -329,6 +368,7 @@ router.post('/set_stats', async (req, res) => {
 
 router.post('/set_currency1', async (req, res) => {
   const data = req.body;
+  const playerId = parseInt(data.playerId);
   const playerName = data.playerName.toLowerCase();
   const currency1 = { 
     conquestPointsSandoria,
@@ -344,7 +384,7 @@ router.post('/set_currency1', async (req, res) => {
 
   try {
     await users.findOneAndUpdate(
-      { playerName: playerName },
+      { playerId: playerId },
       { $set: { currency1: currency1 } },
       { upsert: true, new: true }
     );
@@ -357,6 +397,7 @@ router.post('/set_currency1', async (req, res) => {
   wss.clients.forEach(client => {
     if (client.readyState === WebSocket.OPEN) {
       client.send(JSON.stringify({
+        playerId: playerId,
         playerName: playerName,
         currency1: currency1
       }));
@@ -366,12 +407,13 @@ router.post('/set_currency1', async (req, res) => {
 
 router.post('/set_currency2', async (req, res) => {
   const data = req.body;
+  const playerId = parseInt(data.playerId);
   const playerName = data.playerName.toLowerCase();
   const currency2 = { domainPoints,eschaBeads,eschaSilt,gallantry,gallimaufry,hallmarks,mogSegments,mweyaPlasmCorpuscles,potpourri } = data;
 
   try {
     await users.findOneAndUpdate(
-      { playerName: playerName },
+      { playerId: playerId },
       { $set: { currency2: currency2 } },
       { upsert: true, new: true }
     );
@@ -384,6 +426,7 @@ router.post('/set_currency2', async (req, res) => {
   wss.clients.forEach(client => {
     if (client.readyState === WebSocket.OPEN) {
       client.send(JSON.stringify({
+        playerId: playerId,
         playerName: playerName,
         currency2: currency2
       }));
@@ -393,6 +436,7 @@ router.post('/set_currency2', async (req, res) => {
 
 router.post('/set_buffs', async (req, res) => {
   const data = req.body;
+  const playerId = parseInt(data.playerId);
   const playerName = data.playerName.toLowerCase();
   let buffs = data.buffs;
 
@@ -403,7 +447,7 @@ router.post('/set_buffs', async (req, res) => {
 
   try {
     await users.findOneAndUpdate(
-      { playerName: playerName },
+      { playerId: playerId },
       { $set: { buffs: buffs } },
       { upsert: true, new: true }
     );
@@ -411,6 +455,7 @@ router.post('/set_buffs', async (req, res) => {
     wss.clients.forEach(client => {
       if (client.readyState === WebSocket.OPEN) {
         client.send(JSON.stringify({
+          playerId: playerId,
           playerName: playerName,
           buffs: buffs
         }));
@@ -426,7 +471,7 @@ router.post('/set_buffs', async (req, res) => {
 });
 
 router.post('/set_ability_recasts', async (req, res) => {
-  const { playerName, abilities } = req.body;
+  const { playerId, playerName, abilities } = req.body;
   const abilitiesParsed = JSON.parse(abilities) || [];
   // Basic validation
   if (typeof playerName !== 'string' || !Array.isArray(abilitiesParsed)) {
@@ -437,7 +482,7 @@ router.post('/set_ability_recasts', async (req, res) => {
 
   try {
     const user = await users.findOneAndUpdate(
-      { playerName: lowerCasePlayerName },
+      { playerId: playerId },
       { $set: { abilities: abilitiesParsed } },
       { upsert: true, new: true }
     );
@@ -446,6 +491,7 @@ router.post('/set_ability_recasts', async (req, res) => {
     wss.clients.forEach(client => {
       if (client.readyState === WebSocket.OPEN) {
         client.send(JSON.stringify({
+          playerId: playerId,
           playerName: lowerCasePlayerName,
           abilities: user.abilities
         }));
@@ -461,12 +507,13 @@ router.post('/set_ability_recasts', async (req, res) => {
 
 router.post('/set_zone', async (req, res) => {
   const data = req.body;
+  const playerId = parseInt(data.playerId);
   const playerName = data.playerName.toLowerCase();
   const zone = data.zone;
 
   try {
     await users.findOneAndUpdate(
-      { playerName: playerName },
+      { playerId: playerId },
       { $set: { zone: zone } },
       { upsert: true, new: true }
     );
@@ -474,6 +521,7 @@ router.post('/set_zone', async (req, res) => {
     wss.clients.forEach(client => {
       if (client.readyState === WebSocket.OPEN) {
         client.send(JSON.stringify({
+          playerId: playerId,
           playerName: playerName,
           zone: zone
         }));
@@ -487,25 +535,31 @@ router.post('/set_zone', async (req, res) => {
   }
 });
 
+router.get('/get_chat_log', async (req, res) => {
+  const playerId = parseInt(req.query.playerId);
+
+  try {
+    const chat = await chats.findOne({ playerId: playerId });
+    res.send(chat.chatLog);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('An error occurred while retrieving the chat log.');
+  }
+});
+
 router.post('/set_message', async (req, res) => {
   const data = req.body;
+  const playerId = parseInt(data.playerId);
   const playerName = data.playerName.toLowerCase();
   const message = data.message;
   const messageType = data.messageType;
   const timeStamp = new Date().toISOString();
 
   try {
-    // // Step 1: Convert the comma-separated string into an array of integers
-    // const byteArray = message.split(',').map(Number);
-    // // Step 2: Create a Buffer from the byte array
-    // const buffer = Buffer.from(byteArray);
-    // // Step 3: Decode the Buffer from Shift-JIS to a UTF-8 string
-    // const decodedMessage = iconv.decode(buffer, 'Shift_JIS').replace(/\n/g, '');
-
-    const decodedMessage = message.replace(/\n/g, '');
+    const decodedMessage = message.replace(/(\x7F1|\n)/g, '');
     
-    await users.findOneAndUpdate(
-      { playerName: playerName },
+    await chats.findOneAndUpdate(
+      { playerName: playerName, playerId: playerId },
       {
         $push: {
           chatLog: {
@@ -521,6 +575,7 @@ router.post('/set_message', async (req, res) => {
       if (client.readyState === WebSocket.OPEN) {
         client.send(JSON.stringify({
           playerName: playerName,
+          playerId: playerId,
           chatLog: { messageType, message: decodedMessage, timeStamp }
         }));
       }

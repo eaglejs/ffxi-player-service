@@ -7,7 +7,7 @@
       <div class="d-flex justify-content-between">
         <h2 class="mb-0">
           <span ref="titleElement" :class="onlineStatusDot" :title="onlineTitleText" data-bs-toggle="tooltip"
-            data-bs-placement="top"></span><RouterLink :to="`/users/${user?.playerName}`">{{ playerName }}</RouterLink>
+            data-bs-placement="top"></span><RouterLink :to="`/users/${user?.playerId}`">{{ playerName }}</RouterLink>
           M. lvl: {{ user?.masterLevel }}
           ({{ user?.mainJob }}{{ user?.mainJobLevel }}/{{ user?.subJob }}{{ user?.subJobLevel }})
           - <span>
@@ -175,9 +175,9 @@ onUnmounted(() => {
   }
 })
 
-watch( userStore?.players, () => {
-  playerAbilities.value = filterAbilties()
-})
+// watch( userStore?.players, () => {
+//   playerAbilities.value = filterAbilties()
+// })
 
 </script>
 

@@ -2,11 +2,6 @@ const userSchema = {
   abilities: Array,
   attack: Number,
   buffs: String,
-  chatLog: [{
-    messageType: String,
-    message: String,
-    timeStamp: String
-  }],
   currency1: {
     conquestPointsSandoria: Number,
     conquestPointsBastok: Number,
@@ -39,6 +34,7 @@ const userSchema = {
   masterLevel: Number,
   mpp: Number,
   nationRank: Number,
+  playerId: Number,
   playerName: String,
   requiredExemplar: Number,
   stats: {

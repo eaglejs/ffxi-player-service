@@ -4,11 +4,6 @@ export interface Player {
   abilities: Ability[],
   attack: number,
   buffs: string,
-  chatLog: [{
-    messageType: string,
-    message: string,
-    timeStamp: string,
-  }],
   currency1: {
     conquestPointsSandoria: number,
     conquestPointsBastok: number,
@@ -41,6 +36,7 @@ export interface Player {
   masterLevel: number,
   mpp: number,
   nationRank: number,
+  playerId: number,
   playerName: string,
   requiredExemplar: number,
   stats: {

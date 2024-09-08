@@ -20,18 +20,20 @@ import { useUserStore } from '@/stores/user'
 import type { Player } from '@/types/Player'
 
 const userStore = useUserStore()
-const players = ref(userStore.players.filter((user: Player) => getOnlinePlayers(user)))
+const players = ref(getPlayers())
 
 watch(() => userStore.players, () => {
-  players.value = userStore.players.filter((user: Player) => getOnlinePlayers(user))
+  players.value = getPlayers()
 }, {deep: true})
 
 onMounted(() => {
+  userStore.fetchUsers();
   window.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') {
-      players.value = userStore.players.filter((user: Player) => getOnlinePlayers(user))
+      userStore.fetchUsers();
+      players.value = getPlayers();
     }
-  })
+  });
 })
 
 function getOnlinePlayers(user: Player): boolean{
@@ -40,6 +42,11 @@ function getOnlinePlayers(user: Player): boolean{
   const diffInMinutes = (now - lastOnline) / (1000 * 60); // Convert milliseconds to minutes
   return diffInMinutes < 5;
 }
+
+function getPlayers() {
+  return Array.from(userStore.players, ([playerId, value]) => (value)).filter((user: Player) => getOnlinePlayers(user)).sort((a: Player, b: Player) => a.playerName.localeCompare(b.playerName));
+}
+
 </script>
 
 <style scoped lang="scss">

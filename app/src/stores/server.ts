@@ -5,7 +5,7 @@ import { fullWsUrl } from '@/helpers/config'
 
 
 export const useServerStore = defineStore('server', () => {
-  let websocket: Ref<WebSocket> = ref(new WebSocket(fullWsUrl))
+  const websocket: Ref<WebSocket> = ref(new WebSocket(fullWsUrl))
   const websocketRetry = ref()
   const connectWebSocket = () => {
     console.log("Attempting to connect to WebSocket...")

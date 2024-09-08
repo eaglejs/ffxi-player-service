@@ -20,12 +20,21 @@ local PlayerService = {
   debugger = true
 }
 
+function PlayerService.initialize_user()
+  local player = windower.ffxi.get_player()
+  if not player then
+    return
+  end
+  local data = ("playerId=%s&playerName=%s&lastOnline=%s"):format(player.id, player.name, os.time())
+  PSUI.post('initialize_user', data)
+end
+
 function PlayerService.set_online()
   local player = windower.ffxi.get_player()
   if not player or not PlayerService.active then
     return
   end
-  local data = ("playerName=%s&lastOnline=%s"):format(player.name, os.time())
+  local data = ("playerId=%s&playerName=%s&lastOnline=%s"):format(player.id, player.name, os.time())
   PSUI.post('set_online', data)
 end
 
@@ -36,7 +45,7 @@ function PlayerService.set_jobs()
     return
   end
 
-  local data = ("playerName=%s&mainJob=%s&subJob=%s"):format(player.name, player.main_job, player.sub_job)
+  local data = ("playerId=%s&playerName=%s&mainJob=%s&subJob=%s"):format(player.id, player.name, player.main_job, player.sub_job)
 
   PSUI.post('set_jobs', data)
 end
@@ -47,7 +56,7 @@ function PlayerService.set_player_status(new, old)
   if not player or not PlayerService.active then
     return
   end
-  local data = ("playerName=%s&status=%s"):format(player.name, new)
+  local data = ("playerId=%s&playerName=%s&status=%s"):format(player.id, player.name, new)
   PSUI.post('set_player_status', data)
 end
 
@@ -58,7 +67,7 @@ function PlayerService.set_hpp()
     return
   end
 
-  local data = ("playerName=%s&hpp=%s"):format(player.name, player.vitals.hpp)
+  local data = ("playerId=%s&playerName=%s&hpp=%s"):format(player.id, player.name, player.vitals.hpp)
 
   PSUI.post('set_hpp', data)
 end
@@ -70,7 +79,7 @@ function PlayerService.set_mpp()
     return
   end
 
-  local data = ("playerName=%s&mpp=%s"):format(player.name, player.vitals.mpp)
+  local data = ("playerId=%s&playerName=%s&mpp=%s"):format(player.id, player.name, player.vitals.mpp)
 
   PSUI.post('set_mpp', data)
 end
@@ -82,7 +91,7 @@ function PlayerService.set_tp(newTP, oldTP)
     return
   end
 
-  local data = ("playerName=%s&tp=%s"):format(player.name, newTP)
+  local data = ("playerId=%s&playerName=%s&tp=%s"):format(player.id, player.name, newTP)
 
   PSUI.post('set_tp', data)
 end
@@ -159,8 +168,8 @@ function PlayerService.set_stats(original)
     ['currentExemplar'] = packet_stats.currentExemplar,
     ['requiredExemplar'] = packet_stats.requiredExemplar
   }
-  local data = ('playerName=%s&mainJobLevel=%s&subJobLevel=%s&masterLevel=%s&attack=%s&defense=%s&currentExemplar=%s&requiredExemplar=%s&baseSTR=%s&baseDEX=%s&baseVIT=%s&baseAGI=%s&baseINT=%s&baseMND=%s&baseCHR=%s&addedSTR=%s&addedDEX=%s&addedVIT=%s&addedAGI=%s&addedINT=%s&addedMND=%s&addedCHR=%s&fireResistance=%s&iceResistance=%s&windResistance=%s&earthResistance=%s&lightningResistance=%s&waterResistance=%s&lightResistance=%s&darkResistance=%s&title=%s&nationRank=%s')
-    :format(player.name,
+  local data = ('playerId=%s&playerName=%s&mainJobLevel=%s&subJobLevel=%s&masterLevel=%s&attack=%s&defense=%s&currentExemplar=%s&requiredExemplar=%s&baseSTR=%s&baseDEX=%s&baseVIT=%s&baseAGI=%s&baseINT=%s&baseMND=%s&baseCHR=%s&addedSTR=%s&addedDEX=%s&addedVIT=%s&addedAGI=%s&addedINT=%s&addedMND=%s&addedCHR=%s&fireResistance=%s&iceResistance=%s&windResistance=%s&earthResistance=%s&lightningResistance=%s&waterResistance=%s&lightResistance=%s&darkResistance=%s&title=%s&nationRank=%s')
+    :format(player.id, player.name,
     stats.mainJobLevel,
     stats.subJobLevel,
     stats.masterLevel or 0,
@@ -218,8 +227,8 @@ function PlayerService.set_currency1(original)
     ['deeds'] = packet['Deeds'] or 0,
   }
 
-  local data = ('playerName=%s&conquestPointsSandoria=%s&conquestPointsBastok=%s&conquestPointsWindurst=%s&imperialStanding=%s&dominionNotes=%s&sparksOfEminence=%s&unityAccolades=%s&loginPoints=%s&deeds=%s')
-    :format(player.name,
+  local data = ('playerId=%s&playerName=%s&conquestPointsSandoria=%s&conquestPointsBastok=%s&conquestPointsWindurst=%s&imperialStanding=%s&dominionNotes=%s&sparksOfEminence=%s&unityAccolades=%s&loginPoints=%s&deeds=%s')
+    :format(player.id, player.name,
     packet_currency.conquestPointsSandoria,
     packet_currency.conquestPointsBastok,
     packet_currency.conquestPointsWindurst,
@@ -254,8 +263,8 @@ function PlayerService.set_currency2(original)
     ['potpourri'] = packet['Potpourri']
   }
 
-  local data = ('playerName=%s&domainPoints=%s&eschaBeads=%s&eschaSilt=%s&gallantry=%s&gallimaufry=%s&hallmarks=%s&mogSegments=%s&mweyaPlasmCorpuscles=%s&potpourri=%s')
-    :format(player.name,
+  local data = ('playerId=%s&playerName=%s&domainPoints=%s&eschaBeads=%s&eschaSilt=%s&gallantry=%s&gallimaufry=%s&hallmarks=%s&mogSegments=%s&mweyaPlasmCorpuscles=%s&potpourri=%s')
+    :format(player.id, player.name,
     packet_currency.domainPoints or 0,
     packet_currency.eschaBeads or 0,
     packet_currency.eschaSilt or 0,
@@ -289,7 +298,7 @@ function PlayerService.set_buffs()
     end
   end
 
-  local data = ("playerName=%s&buffs=%s"):format(player.name, buffString)
+  local data = ("playerId=%s&playerName=%s&buffs=%s"):format(player.id, player.name, buffString)
 
   PSUI.post('set_buffs', data)
 end
@@ -304,7 +313,7 @@ function PlayerService.set_zone()
     return
   end
 
-  local data = ("playerName=%s&zone=%s"):format(player.name, res.zones[gameInfo.zone].en)
+  local data = ("playerId=%s&playerName=%s&zone=%s"):format(player.id, player.name, res.zones[gameInfo.zone].en)
 
   PSUI.post('set_zone', data)
 end
@@ -316,6 +325,13 @@ function PlayerService.incoming_chunk_handler(id, original, modified, injected, 
     PlayerService.set_currency2(original)
   elseif id == 0x113 then
     PlayerService.set_currency1(original)
+  elseif id == 0x063 then -- the packet character data is in
+    local packet = packets.parse(id, data)
+    if packet['Order'] == 0x09 then -- the sub packet buff data is in
+        local buffs = packet['Buffs'] -- an array of 32 buff IDs
+        local times = packet['Time'] -- an array of the durations, each corresponding to the buffs array above
+        -- do whatever with them, probably send an update to your server
+    end
   end
 
   if ((os.time() - pingClock) > 15) then
@@ -325,7 +341,7 @@ function PlayerService.incoming_chunk_handler(id, original, modified, injected, 
     if not player or not PlayerService.active then
       return
     end
-    local data = ("playerName=%s&gil=%s"):format(player.name, windower.ffxi.get_items('gil'))
+    local data = ("playerId=%s&playerName=%s&gil=%s"):format(player.id, player.name, windower.ffxi.get_items('gil'))
     PSUI.post('set_gil', data)
   end
 end
@@ -346,7 +362,7 @@ function PlayerService.handle_action(action)
           table.insert(filtered_ability_recasts, { recast=os.time() + math.round(v), ability=res.ability_recasts[i].en})
         end
       end
-      PSUI.set_ability_recasts(windower.ffxi.get_player().name, filtered_ability_recasts)
+      PSUI.set_ability_recasts(windower.ffxi.get_player().id, windower.ffxi.get_player().name, filtered_ability_recasts)
     end
   end
 end
@@ -364,7 +380,7 @@ function PlayerService.set_ability_recasts()
       table.insert(filtered_ability_recasts, { recast=os.time() + math.round(v), ability=res.ability_recasts[i].en})
     end
   end
-  PSUI.set_ability_recasts(windower.ffxi.get_player().name, filtered_ability_recasts)
+  PSUI.set_ability_recasts(windower.ffxi.get_player().id, windower.ffxi.get_player().name, filtered_ability_recasts)
 end
 
 function PlayerService.fetchPlayerStats(playerName)
@@ -397,7 +413,8 @@ function PlayerService.handle_incoming_text(original, modified, original_mode, m
     return
   end
 
-  newMessage = Utils.convert_to_utf8(original)
+  -- newMessage = original
+  newMessage = Utils.strip_colors(original)
 
   matchResult = string.match(newMessage, '^%(%a+%)') -- Party
   if matchResult then
@@ -467,7 +484,8 @@ function PlayerService.handle_incoming_text(original, modified, original_mode, m
   -- -- Convert byte array to a string representation
   -- local byteArrayStr = table.concat(byteArray, ",")
 
-  local data = ("playerName=%s&messageType=%s&message=%s"):format(player.name, messageType, newMessage)
+  local data = ("playerId=%s&playerName=%s&messageType=%s&message=%s"):format(player.id, player.name, messageType, Utils.convert_to_utf8(newMessage))
+  -- local data = ("playerId=%s&playerName=%s&messageType=%s&message=%s"):format(player.id, player.name, messageType, newMessage:hex(' '))
   PSUI.post('set_message', data)
 end
 
@@ -487,5 +505,15 @@ windower.register_event('job change', PlayerService.set_jobs)
 windower.register_event('zone change', PlayerService.set_zone)
 windower.register_event('status change', PlayerService.set_player_status)
 windower.register_event('time change', PlayerService.set_ability_recasts)
+
+windower.register_event('commands', function( ...)
+  local args = T{...}
+  if args[1] == 'debug' then
+    PlayerService.debugger = not PlayerService.debugger
+    windower.add_to_chat(207, 'PlayerService Debugger: ' .. tostring(PlayerService.debugger))
+  elseif args[1] == 'init' then
+    PlayerService.initialize_player()
+  end
+end)
 
 PlayerService.set_online()

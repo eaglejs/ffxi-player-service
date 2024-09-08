@@ -28,15 +28,17 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUpdated, ref } from 'vue';
+import { onMounted, onUpdated, ref, watch } from 'vue';
 import { mdiChevronUp, mdiChevronDown } from '@mdi/js';
 import GenIcon from '@/components/GenIcon.vue';
+import { useUserStore } from '@/stores/user';
 import { isIPhone, isAndroid } from '@/helpers/utils';
 
-const props = defineProps<{
-  chatLog: { messageType: string; message: string; timeStamp: string }[]
-}>();
+const userStore = useUserStore();
+const playerId = parseInt(window.location.pathname.split('/').pop() || '')
 
+const instantFlag = ref(false);
+const chatLog = ref(userStore.chatLog);
 const chatLogEl = ref<HTMLElement | undefined>();
 const firstChildEl = ref<HTMLElement | undefined>();
 const lastChildEl = ref<HTMLElement | undefined>();
@@ -90,8 +92,8 @@ const scrollToFirstChild = (behavior: ScrollBehavior) => {
 };
 
 onMounted(() => {
-  if (props.chatLog.length === 0) return;
-  scrollToLastChild('instant');
+  userStore.fetchChatLog(playerId);
+  instantFlag.value = true;
   window.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') {
       scrollToLastChild('instant');
@@ -111,15 +113,19 @@ const handleScrollEvent = () => {
   }
 };
 
-onUpdated(() => {
-  if (props.chatLog.length === 0) return;
+onUpdated(() => {  
   if (isIPhone() || isAndroid()) {
     const newHeight = chatLogEl.value!.clientHeight === 500 ? 501 : 500;
     chatLogEl.value!.setAttribute('style', `max-height: ${newHeight}px;`);
   }
   if (autoScrollIsActive.value) { 
-    scrollToLastChild('smooth')
+    scrollToLastChild(instantFlag.value ? 'instant' : 'smooth')
+    instantFlag.value = false;
   }
+});
+
+watch(() => userStore.chatLog, () => {
+  chatLog.value = userStore.chatLog;
 });
 
 </script>
