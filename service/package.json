@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "start": "PORT=8080 node app.js --host 0.0.0.0",
+    "start": "PORT=8080 node app.js",
     "dev": "PORT=8080 nodemon app.js --host 0.0.0.0"
   },
   "dependencies": {

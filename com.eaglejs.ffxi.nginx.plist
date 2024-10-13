@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+         "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>Label</key>
+    <string>com.eaglejs.ffxi.nginx</string>
+    <key>ProgramArguments</key>
+    <array>
+      <string>/opt/homebrew/opt/nginx/bin/nginx</string>
+      <string>-g</string>
+      <string>daemon off;</string>
+    </array>
+    
+    <key>RunAtLoad</key>
+    <true/>
+    <key>StartInterval</key>
+    <integer>3600</integer>
+    <key>KeepAlive</key>
+    <true/>
+    <key>Restart</key>
+    <dict>
+      <key>WhenBoot</key>
+      <true/>
+      <key>WhenIdle</key>
+      <true/>
+      <key>WhenWake</key>
+      <true/>
+    </dict>
+  </dict>
+</plist>
