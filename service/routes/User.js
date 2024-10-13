@@ -47,7 +47,7 @@ router.post('/initialize_user', async (req, res) => {
 
   try {
     await users.findOneAndUpdate(
-      { playerName: playerName }, 
+      { playerName: playerName },
       { $set: { playerId: playerId, playerName: playerName, lastOnline: lastOnline } },
       { upsert: true, new: true }
     );
@@ -368,19 +368,24 @@ router.post('/set_stats', async (req, res) => {
 
 router.post('/set_currency1', async (req, res) => {
   const data = req.body;
-  const playerId = parseInt(data.playerId);
+  const playerId = parseInt(data?.playerId) || '';
   const playerName = data.playerName.toLowerCase();
-  const currency1 = { 
-    conquestPointsSandoria,
+  const currency1 = {
     conquestPointsBastok,
+    conquestPointsSandoria,
     conquestPointsWindurst,
-    imperialStanding,
+    deeds,
     dominionNotes,
+    imperialStanding,
+    loginPoints,
     sparksOfEminence,
     unityAccolades,
-    loginPoints,
-    deeds
+    voidstones,
   } = data;
+
+  if (playerId === '') {
+    return res.status(400).send('Invalid input');
+  }
 
   try {
     await users.findOneAndUpdate(
@@ -407,9 +412,13 @@ router.post('/set_currency1', async (req, res) => {
 
 router.post('/set_currency2', async (req, res) => {
   const data = req.body;
-  const playerId = parseInt(data.playerId);
+  const playerId = parseInt(data.playerId) ?? '';
   const playerName = data.playerName.toLowerCase();
-  const currency2 = { domainPoints,eschaBeads,eschaSilt,gallantry,gallimaufry,hallmarks,mogSegments,mweyaPlasmCorpuscles,potpourri } = data;
+  const currency2 = { domainPoints, eschaBeads, eschaSilt, gallantry, gallimaufry, hallmarks, mogSegments, mweyaPlasmCorpuscles, potpourri, coalitionImprimaturs } = data;
+
+  if (playerId === '') {
+    return res.status(400).send('Invalid input');
+  }
 
   try {
     await users.findOneAndUpdate(
@@ -557,7 +566,7 @@ router.post('/set_message', async (req, res) => {
 
   try {
     const decodedMessage = message.replace(/(\x7F1|\n)/g, '');
-    
+
     await chats.findOneAndUpdate(
       { playerName: playerName, playerId: playerId },
       {

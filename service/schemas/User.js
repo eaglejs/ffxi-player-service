@@ -3,17 +3,19 @@ const userSchema = {
   attack: Number,
   buffs: String,
   currency1: {
-    conquestPointsSandoria: Number,
     conquestPointsBastok: Number,
+    conquestPointsSandoria: Number,
     conquestPointsWindurst: Number,
-    imperialStanding: Number,
+    deeds: Number,
     dominionNotes: Number,
+    imperialStanding: Number,
+    loginPoints: Number,
     sparksOfEminence: Number,
     unityAccolades: Number,
-    loginPoints: Number,
-    deeds: Number
+    voidstones: Number,
   },
   currency2: {
+    coalitionImprimaturs: Number,
     domainPoints: Number,
     eschaBeads: Number,
     eschaSilt: Number,

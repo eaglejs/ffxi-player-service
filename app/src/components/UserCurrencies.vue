@@ -20,17 +20,19 @@
 
 <script setup lang="ts">
 const currencyData1 = [
-  { id: 'conquestPointsSandoria', name: 'San d\'Oria' },
   { id: 'conquestPointsBastok', name: 'Bastok' },
+  { id: 'conquestPointsSandoria', name: 'San d\'Oria' },
   { id: 'conquestPointsWindurst', name: 'Windurst' },
-  { id: 'imperialStanding', name: 'Imperial' },
+  { id: 'deeds', name: 'Deeds' },
   { id: 'dominionNotes', name: 'Dominion' },
+  { id: 'imperialStanding', name: 'Imperial' },
+  { id: 'loginPoints', name: 'Login Points' },
   { id: 'sparksOfEminence', name: 'Sparks' },
   { id: 'unityAccolades', name: 'Accolades' },
-  { id: 'loginPoints', name: 'Login Points' },
-  { id: 'deeds', name: 'Deeds' },
+  { id: 'voidstones', name: 'Voidstones' },
 ];
 const currencyData2 = [
+  { id: 'coalitionImprimaturs', name: 'Col. Imprimaturs'},
   { id: 'domainPoints', name: 'Domain Points' },
   { id: 'eschaBeads', name: 'Escha Beads' },
   { id: 'eschaSilt', name: 'Escha Silt' },

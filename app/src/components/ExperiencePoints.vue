@@ -4,7 +4,7 @@
       <div class="d-flex">
         <h3 class="mb-0">Experience Points</h3>
         <section class="flex-grow-1">
-          <span class="float-end">{{ analyzePts }} Ex/hr</span>
+          <span class="float-end">{{ analyzePts.toLocaleString() }} Ex/hr</span>
         </section>
       </div>
     </div>
@@ -30,13 +30,15 @@ import {
 import { Line } from 'vue-chartjs'
 import type { Player } from '@/types/Player'
 
+interface Experience { points: number, ts: number }
+
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend)
 
 const props = defineProps<{
   user: Player | undefined
 }>()
 const previousCurrentExemplar = ref<number>(0);
-const exemplarHistory: number[] = [];
+const exemplarHistory: Experience[] = [];
 const analyzePts = ref(0);
 const experience = ref({
   labels: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'], // 1st through 5th kill of an enemy
@@ -59,7 +61,6 @@ const options = {
 }
 
 const data = computed(() => experience.value);
-const justExemplarPoints = computed(() => exemplarHistory.map((points, index) => points));
 
 function renderLatestData (debug = false) {
   let currentExemplarPoints: number;
@@ -67,15 +68,15 @@ function renderLatestData (debug = false) {
     const min = 750;
     const max = 1100;
     const randomPoints = Math.floor(random(min, max));
-    exemplarHistory.push(randomPoints)
+    exemplarHistory.push({ points: randomPoints, ts: new Date().getTime() / 1000 });
   } else if (previousCurrentExemplar.value === 0) {
-    exemplarHistory.push({points: 0, ts: new Date().getTime()/1000})
+    exemplarHistory.push({points: 0, ts: new Date().getTime() / 1000})
   } else {
     currentExemplarPoints = (props.user?.currentExemplar ?? 0) - (previousCurrentExemplar.value ?? 0)
     if (currentExemplarPoints < 0) {
       currentExemplarPoints = 0
     }
-    exemplarHistory.push(currentExemplarPoints)
+    exemplarHistory.push({ points: currentExemplarPoints, ts: new Date().getTime() / 1000 });
   }
 
   if (exemplarHistory.length > 10) {
@@ -87,7 +88,7 @@ function renderLatestData (debug = false) {
     datasets: [
       {
         label: 'Exemplar Points',
-        data: justExemplarPoints.value,
+        data: exemplarHistory.map((points) => points.points) as any,
         fill: false,
         borderColor: 'rgb(75, 192, 192)',
         tension: 0.1
@@ -98,19 +99,18 @@ function renderLatestData (debug = false) {
   previousCurrentExemplar.value = props.user?.currentExemplar || 0;
 }
 
-function analyzePoints(experiencePoints: Array<number>) {
+function analyzePoints(experiencePoints: Experience[]) {
   let t = new Date().getTime()/1000
   let running_total = 0
   let maximum_timestamp = 29
-  experiencePoints.forEach((points) => { 
+  experiencePoints.forEach((points: Experience) => { 
     let time_diff = t - points.ts
     if (t - points.ts > 600) {
-      points.ts = null
+      points.ts = 0
     } else {
-      running_total += points
+      running_total += points.points
       if (time_diff > maximum_timestamp) {
         maximum_timestamp = time_diff
-  
       }
     }
   })
@@ -119,7 +119,7 @@ function analyzePoints(experiencePoints: Array<number>) {
   if (maximum_timestamp == 29) {
     rate = 0
   } else {
-    rate = Math.floor((running_total/maximum_timestamp)*3600)
+    rate = Math.floor(( running_total / maximum_timestamp ) * 3600)
   }
 
   return rate
