@@ -41,7 +41,7 @@ const previousCurrentExemplar = ref<number>(0);
 const exemplarHistory: Experience[] = [];
 const analyzePts = ref(0);
 const experience = ref({
-  labels: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'], // 1st through 5th kill of an enemy
+  labels: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'], // 1st through 10th kill of an enemy
   datasets: [
     {
       label: 'Experience Points',
@@ -84,7 +84,7 @@ function renderLatestData (debug = false) {
   }
 
   experience.value = {
-    labels: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'], // 1st through 5th kill of an enemy
+    labels: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'], // 1st through 10th kill of an enemy
     datasets: [
       {
         label: 'Exemplar Points',

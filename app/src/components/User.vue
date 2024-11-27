@@ -115,19 +115,22 @@ const filterAbilties = () => {
 }
 
 const dead = computed(() => {
-  if (props?.user?.status == 2 && deadElement.value) {
+  return props?.user?.status == 2
+})
+
+watch(dead, (newVal) => {
+  if (newVal && deadElement.value) {
     deadElement.value.classList.add('transition')
     setTimeout(() => {
       deadElement.value.classList.add('fade-in')
     }, 50)
-    return true
   } else {
     if (!deadElement.value) {
-      return false
+      return
     }
     setTimeout(() => {
       if (!deadElement.value) {
-        return false
+        return
       }
       deadElement.value.classList.remove('transition')
     }, 350)
@@ -135,7 +138,6 @@ const dead = computed(() => {
       deadElement.value.classList.remove('fade-in')
     }
   }
-  return false
 })
 
 

@@ -153,7 +153,7 @@ code {
   background-color: #031633;
   border-bottom-left-radius: 7px;
   border-bottom-right-radius: 7px;
-  max-height: 500px;
+  max-height: 490px;
   overflow-y: auto;
 }
 

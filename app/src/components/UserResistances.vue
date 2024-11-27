@@ -4,19 +4,19 @@
       <h3 class="p-0 m-0">Elemental Resistance</h3>
     </div>
     <div class="card-body">
-      <div class="row">
-        <section class="col-12">
-          <span v-for="resistance in resistancesGroupLight" :key="resistance.id">
-            <img :src="`${iconsPath}${resistance.id}.webp`" class="me-2" />
-            <span class="me-2">
+      <div>
+        <section class=" grid row">
+          <span class="col-3 text-center ps-1 pe-1" v-for="resistance in resistancesGroupLight" :key="resistance.id">
+            <img :src="`${iconsPath}${resistance.id}.webp`" class="me-1" />
+            <span>
               {{ getValue(resistance.id) }}
             </span>
           </span>
         </section>
-        <section class="col-12">
-          <span v-for="resistance in resistancesGroupDark" :key="resistance.id">
-            <img :src="`${iconsPath}${resistance.id}.webp`" class="me-2" />
-            <span class="me-2">
+        <section class="grid row mt-1">
+          <span class="col-3 text-center ps-1 pe-1" v-for="resistance in resistancesGroupDark" :key="resistance.id">
+            <img :src="`${iconsPath}${resistance.id}.webp`" class="me-1" />
+            <span>
               {{ getValue(resistance.id) }}
             </span>
           </span>

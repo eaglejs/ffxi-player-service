@@ -1,7 +1,14 @@
 <template>
   <main class="user-details">
     <div class="container-fluid mb-5 p-0">
-      <UserInformation class="ms-1 me-1" v-if="user" :user="user" />
+      <div class="row">
+        <!-- <div class="col-3">
+          <PlayerNavigation v-if="players" :players="players" />
+        </div> -->
+        <div class="col-12">
+          <UserInformation class="ms-1 me-1" v-if="user" :user="user" />
+        </div>
+      </div>
     </div>
   </main>
 </template>
@@ -10,10 +17,12 @@
 import { onMounted, watch, ref } from 'vue'
 import { useUserStore } from '@/stores/user'
 import UserInformation from '@/components/UserInformation.vue'
+import PlayerNavigation from '@/components/PlayerNavigation.vue';
 
 const playerId = parseInt(window.location.pathname.split('/').pop() || '')
 
 const userStore = useUserStore();
+const players = ref(userStore.players);
 const user = ref(userStore.players.get(playerId));
 
 watch(() => userStore.players, () => {
@@ -31,7 +40,7 @@ onMounted(() => {
 <style scoped lang="scss">
 .user-details {
   margin: 0 auto;
-  max-width: 1280px;
+  max-width: 1920px;
   width: 100%;
 }
 </style>

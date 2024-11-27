@@ -378,7 +378,9 @@ router.post('/set_currency1', async (req, res) => {
     dominionNotes,
     imperialStanding,
     loginPoints,
+    nyzulTokens,
     sparksOfEminence,
+    therionIchor,
     unityAccolades,
     voidstones,
   } = data;

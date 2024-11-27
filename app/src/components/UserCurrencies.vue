@@ -4,7 +4,7 @@
       <h3 class="p-0 m-0">Currency {{ type }}</h3>
     </div>
     <div class="card-body">
-      <section class="container-fluid" v-if="currencies">
+      <section class="container-fluid currency-wrapper" v-if="currencies">
         <div class="row" v-for="currency in currencyData" :key="currency.id">
           <div class="col-7 p-0">
             {{ currency.name }}:
@@ -20,15 +20,17 @@
 
 <script setup lang="ts">
 const currencyData1 = [
-  { id: 'conquestPointsBastok', name: 'Bastok' },
-  { id: 'conquestPointsSandoria', name: 'San d\'Oria' },
-  { id: 'conquestPointsWindurst', name: 'Windurst' },
+  { id: 'conquestPointsBastok', name: 'CP. Bastok' },
+  { id: 'conquestPointsSandoria', name: 'CP. San d\'Oria' },
+  { id: 'conquestPointsWindurst', name: 'CP. Windurst' },
   { id: 'deeds', name: 'Deeds' },
   { id: 'dominionNotes', name: 'Dominion' },
-  { id: 'imperialStanding', name: 'Imperial' },
+  { id: 'imperialStanding', name: 'Imp. Standing' },
   { id: 'loginPoints', name: 'Login Points' },
+  { id: 'nyzulTokens', name: 'Nyzul Tokens' },
   { id: 'sparksOfEminence', name: 'Sparks' },
-  { id: 'unityAccolades', name: 'Accolades' },
+  { id: 'therionIchor', name: 'Therion Ichor' },
+  { id: 'unityAccolades', name: 'Un. Accolades' },
   { id: 'voidstones', name: 'Voidstones' },
 ];
 const currencyData2 = [
@@ -55,3 +57,10 @@ const formattedCurrency = (value: number) => {
   return value.toLocaleString()
 }
 </script>
+
+<style scoped lang="scss">
+.currency-wrapper {
+  overflow-y: auto;
+  max-height: 200px;
+}
+</style>
