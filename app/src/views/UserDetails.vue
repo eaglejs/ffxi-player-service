@@ -1,15 +1,6 @@
 <template>
   <main class="user-details">
-    <div class="container-fluid mb-5 p-0">
-      <div class="row">
-        <!-- <div class="col-3">
-          <PlayerNavigation v-if="players" :players="players" />
-        </div> -->
-        <div class="col-12">
-          <UserInformation class="ms-1 me-1" v-if="user" :user="user" />
-        </div>
-      </div>
-    </div>
+    <UserInformation class="ms-1 me-1" v-if="user" :user="user" />
   </main>
 </template>
 
@@ -17,24 +8,27 @@
 import { onMounted, watch, ref } from 'vue'
 import { useUserStore } from '@/stores/user'
 import UserInformation from '@/components/UserInformation.vue'
-import PlayerNavigation from '@/components/PlayerNavigation.vue';
+import PlayerNavigation from '@/components/PlayerNavigation.vue'
 
 const playerId = parseInt(window.location.pathname.split('/').pop() || '')
 
-const userStore = useUserStore();
-const players = ref(userStore.players);
-const user = ref(userStore.players.get(playerId));
+const userStore = useUserStore()
+const players = ref(userStore.players)
+const user = ref(userStore.players.get(playerId))
 
-watch(() => userStore.players, () => {
-  user.value = userStore.players.get(playerId)
-}, { deep: true })
+watch(
+  () => userStore.players,
+  () => {
+    user.value = userStore.players.get(playerId)
+  },
+  { deep: true }
+)
 
 onMounted(() => {
   if (playerId) {
     userStore.fetchUser(playerId)
   }
 })
-
 </script>
 
 <style scoped lang="scss">

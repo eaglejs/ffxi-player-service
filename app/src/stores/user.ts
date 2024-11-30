@@ -1,4 +1,4 @@
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { defineStore } from 'pinia'
 import axios from 'axios'
 import { useServerStore } from '@/stores/server'
@@ -8,8 +8,9 @@ import { fullUrl } from '@/helpers/config'
 export const useUserStore = defineStore('user', () => {
   const players = ref(new Map<number, any>() as Map<number, any>);
   const chatLog = ref([] as any);
-
+  
   const { websocket, connectWebSocket } = useServerStore()
+  const refreshInterval = ref(setInterval(connectWebSocket, 5000));
 
   const fetchUsers = async () => {
     const response = await axios.get(`${fullUrl}/get_users`)
@@ -64,17 +65,23 @@ export const useUserStore = defineStore('user', () => {
     players.value.set(parseInt(player.playerId), playerToUpdate)
   }
 
-  function reconnectData() {
-    connectWebSocket()
-  }
-
   onMounted(() => {
     window.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') {
-        reconnectData()
+        connectWebSocket()
       }
     })
-    window.addEventListener('online', reconnectData)
+    window.addEventListener('online', connectWebSocket)
+  })
+
+  onUnmounted(() => {
+    clearInterval(refreshInterval.value)
+    window.removeEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        connectWebSocket()
+      }
+    })
+    window.removeEventListener('online', connectWebSocket)
   })
 
   return { players, chatLog, fetchUsers, fetchUser, fetchChatLog }

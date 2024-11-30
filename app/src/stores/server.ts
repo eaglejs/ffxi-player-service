@@ -7,7 +7,7 @@ import { fullWsUrl } from '@/helpers/config'
 export const useServerStore = defineStore('server', () => {
   const websocket: Ref<WebSocket> = ref(new WebSocket(fullWsUrl))
   const websocketRetry = ref()
-  const connectWebSocket = () => {
+  const connectWebSocket = function () {
     console.log("Attempting to connect to WebSocket...")
     if (websocket.value.readyState === websocket.value.OPEN) {
       console.log("Already connected to WebSocket")
