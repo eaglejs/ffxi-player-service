@@ -6,7 +6,14 @@
         <section class="flex-grow-1">
           <section class="form-check form-switch float-end">
             <label class="form-check-label" for="flexSwitchCheckChecked">Timestamp</label>
-            <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked" @click="toggleTimeStamp" :checked="timeStampsEnabled">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              role="switch"
+              id="flexSwitchCheckChecked"
+              @click="toggleTimeStamp"
+              :checked="timeStampsEnabled"
+            />
           </section>
           <button class="btn btn-sm arrow-btns float-end" @click="scrollToFirstChild('smooth')">
             <GenIcon :icon="mdiChevronUp" size="lg" />
@@ -14,36 +21,73 @@
           <button class="btn btn-sm arrow-btns float-end" @click="scrollToLastChild('smooth')">
             <GenIcon :icon="mdiChevronDown" size="lg" />
           </button>
+          <div class="dropdown float-end">
+            <button
+              class="btn btn-secondary btn-sm dropdown-toggle"
+              type="button"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              {{ chatFilterValue }}
+            </button>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="#" @click="setChatFilter('None')">None</a></li>
+              <li><a class="dropdown-item" href="#" @click="setChatFilter('Say')">Say</a></li>
+              <li><a class="dropdown-item" href="#" @click="setChatFilter('Tell')">Tell</a></li>
+              <li><a class="dropdown-item" href="#" @click="setChatFilter('Party')">Party</a></li>
+              <li>
+                <a class="dropdown-item" href="#" @click="setChatFilter('Linkshell')">Linkshell</a>
+              </li>
+              <li><a class="dropdown-item" href="#" @click="setChatFilter('Yell')">Yell</a></li>
+              <li><a class="dropdown-item" href="#" @click="setChatFilter('Unity')">Unity</a></li>
+              <li><a class="dropdown-item" href="#" @click="setChatFilter('Cutscene')">NPC</a></li>
+            </ul>
+          </div>
         </section>
       </div>
     </div>
-    <div ref="chatLogEl" class="card-body chat-log">
+    <div ref="chatLogEl" v-if="chatLog.length" class="card-body chat-log">
       <section ref="firstChildEl" />
-      <pre v-for="item in chatLog" :key="item.timeStamp" >
+      <pre v-for="item in chatLog" :key="item.timeStamp">
 <code :class="chatColor(item?.messageType)"><span v-if="timeStampsEnabled">[{{ toLocalTime(item.timeStamp) }}]</span>{{ `${item?.message}` }}</code>
       </pre>
       <section ref="lastChildEl" />
+    </div>
+    <div v-else class="card-body chat-log">
+      <p class="text-center mt-3">No {{ chatFilterValue }} messages found.</p>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUpdated, ref, watch } from 'vue';
-import { mdiChevronUp, mdiChevronDown } from '@mdi/js';
-import GenIcon from '@/components/GenIcon.vue';
-import { useUserStore } from '@/stores/user';
-import { isIPhone, isAndroid } from '@/helpers/utils';
+import { computed, onMounted, onUpdated, ref, watch } from 'vue'
+import { mdiChevronUp, mdiChevronDown } from '@mdi/js'
+import GenIcon from '@/components/GenIcon.vue'
+import { useUserStore } from '@/stores/user'
+import { isIPhone, isAndroid } from '@/helpers/utils'
 
-const userStore = useUserStore();
+const userStore = useUserStore()
 const playerId = parseInt(window.location.pathname.split('/').pop() || '')
 
-const instantFlag = ref(false);
-const chatLog = ref(userStore.chatLog);
-const chatLogEl = ref<HTMLElement | undefined>();
-const firstChildEl = ref<HTMLElement | undefined>();
-const lastChildEl = ref<HTMLElement | undefined>();
-const timeStampsEnabled = ref<boolean>(localStorage.getItem('timeStampsEnabled') === 'true' || false);
-const autoScrollIsActive = ref<boolean>(true);
+const instantFlag = ref(false)
+const chatLogEl = ref<HTMLElement | undefined>()
+const firstChildEl = ref<HTMLElement | undefined>()
+const lastChildEl = ref<HTMLElement | undefined>()
+const chatFilterValue = ref<string>('Chat Filter')
+const timeStampsEnabled = ref<boolean>(
+  localStorage.getItem('timeStampsEnabled') === 'true' || false
+)
+const autoScrollIsActive = ref<boolean>(true)
+
+const chatLog = computed(() => {
+  return userStore.chatLog.filter((item: any) => {
+    if (chatFilterValue.value === 'None' || chatFilterValue.value === 'Chat Filter') {
+      return true
+    } else {
+      return item.messageType?.toLowerCase() === chatFilterValue.value?.toLowerCase()
+    }
+  })
+})
 
 const chatColor = (messageType: string) => {
   switch (messageType?.toLowerCase()) {
@@ -62,75 +106,85 @@ const chatColor = (messageType: string) => {
     default:
       return 'say'
   }
-};
-
+}
 
 const toggleTimeStamp = () => {
-  timeStampsEnabled.value = !timeStampsEnabled.value;
-  localStorage.setItem('timeStampsEnabled', (timeStampsEnabled.value).toString());
-};
+  timeStampsEnabled.value = !timeStampsEnabled.value
+  localStorage.setItem('timeStampsEnabled', timeStampsEnabled.value.toString())
+}
 
 const toLocalTime = (timeStamp: string) => {
-  const date = new Date(timeStamp);
-  return date.toLocaleString();
-};
+  const date = new Date(timeStamp)
+  return date.toLocaleString()
+}
 
 const scrollToLastChild = (behavior: ScrollBehavior) => {
-  autoScrollIsActive.value = true;
-  chatLogEl.value?.scrollTo({
-    top: chatLogEl.value.scrollHeight,
-    behavior
-  });
-};
+  autoScrollIsActive.value = true
+  if (chatLog.value.length) {
+    chatLogEl.value?.scrollTo({
+      top: chatLogEl.value.scrollHeight,
+      behavior
+    })
+  }
+}
 
 const scrollToFirstChild = (behavior: ScrollBehavior) => {
-  autoScrollIsActive.value = false;
+  autoScrollIsActive.value = false
   chatLogEl.value?.scrollTo({
     top: 0,
     behavior
-  });
-};
+  })
+}
 
 onMounted(() => {
-  userStore.fetchChatLog(playerId);
-  instantFlag.value = true;
+  userStore.fetchChatLog(playerId)
+  instantFlag.value = true
   window.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') {
-      scrollToLastChild('instant');
+      scrollToLastChild('instant')
     }
   })
-  chatLogEl.value!.addEventListener('wheel', handleScrollEvent);
+  chatLogEl.value?.addEventListener('wheel', handleScrollEvent)
   if (isIPhone() || isAndroid()) {
-    chatLogEl.value!.addEventListener('touchmove', handleScrollEvent);
+    chatLogEl.value!.addEventListener('touchmove', handleScrollEvent)
   }
-});
+})
 
 const handleScrollEvent = () => {
   if (chatLogEl.value!.scrollTop + chatLogEl.value!.clientHeight < chatLogEl.value!.scrollHeight) {
-    autoScrollIsActive.value = false;
+    autoScrollIsActive.value = false
   } else {
-    autoScrollIsActive.value = true;
+    autoScrollIsActive.value = true
   }
-};
+}
 
-onUpdated(() => {  
+function setChatFilter(filter: string) {
+  if (filter === 'None') {
+    chatFilterValue.value = 'Chat Filter'
+  } else {
+    chatFilterValue.value = filter ?? 'Chat Filter'
+  }
+}
+
+onUpdated(() => {
   if (isIPhone() || isAndroid()) {
-    const newHeight = chatLogEl.value!.clientHeight === 500 ? 501 : 500;
-    chatLogEl.value!.setAttribute('style', `max-height: ${newHeight}px;`);
+    const newHeight = chatLogEl.value!.clientHeight === 500 ? 501 : 500
+    chatLogEl.value!.setAttribute('style', `max-height: ${newHeight}px;`)
   }
-  if (autoScrollIsActive.value) { 
+  if (autoScrollIsActive.value) {
     scrollToLastChild(instantFlag.value ? 'instant' : 'smooth')
-    instantFlag.value = false;
+    instantFlag.value = false
   }
-});
+})
 
-watch(() => userStore.chatLog, () => {
-  chatLog.value = userStore.chatLog;
-});
-
+watch(
+  () => userStore.chatLog,
+  () => {
+    chatLog.value = userStore.chatLog
+  }
+)
 </script>
 <style scoped lang="scss">
-
 .arrow-btns {
   max-height: 23px;
   display: inline-flex;
