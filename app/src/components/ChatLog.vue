@@ -60,7 +60,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onUpdated, ref, watch } from 'vue'
+import { computed, onMounted, onUpdated, ref } from 'vue'
 import { mdiChevronUp, mdiChevronDown } from '@mdi/js'
 import GenIcon from '@/components/GenIcon.vue'
 import { useUserStore } from '@/stores/user'
@@ -103,6 +103,8 @@ const chatColor = (messageType: string) => {
       return 'unity'
     case 'tell':
       return 'tell'
+    case 'trial':
+      return 'trial'
     default:
       return 'say'
   }
@@ -177,12 +179,6 @@ onUpdated(() => {
   }
 })
 
-watch(
-  () => userStore.chatLog,
-  () => {
-    chatLog.value = userStore.chatLog
-  }
-)
 </script>
 <style scoped lang="scss">
 .arrow-btns {
@@ -207,7 +203,7 @@ code {
   background-color: #031633;
   border-bottom-left-radius: 7px;
   border-bottom-right-radius: 7px;
-  max-height: 490px;
+  height: 490px;
   overflow-y: auto;
 }
 
@@ -233,5 +229,9 @@ code {
 
 .say {
   color: var(--chat-log-brown);
+}
+
+.trial {
+  color: var(--chat-log-mint);
 }
 </style>

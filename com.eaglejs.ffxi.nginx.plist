@@ -11,6 +11,11 @@
       <string>-g</string>
       <string>daemon off;</string>
     </array>
+
+    <key>StandardErrorPath</key>
+    <string>/tmp/com.eaglejs.ffxi.node.err</string>
+    <key>StandardOutPath</key>
+    <string>/tmp/com.eaglejs.ffxi.node.out</string>
     
     <key>RunAtLoad</key>
     <true/>
