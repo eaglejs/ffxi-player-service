@@ -77,7 +77,6 @@ import * as bootstrap from 'bootstrap'
 import Buffs from '@/components/Buffs.vue'
 import type { ComputedRef } from 'vue'
 import type { Ability } from '@/types/Ability'
-import { connect } from "http2"
 
 const userStore = useUserStore()
 const serverStore = useServerStore()
