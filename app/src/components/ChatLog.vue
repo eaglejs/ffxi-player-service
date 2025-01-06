@@ -65,6 +65,7 @@ import { mdiChevronUp, mdiChevronDown } from '@mdi/js'
 import GenIcon from '@/components/GenIcon.vue'
 import { useUserStore } from '@/stores/user'
 import { isIPhone, isAndroid } from '@/helpers/utils'
+import { auto } from '@popperjs/core'
 
 const userStore = useUserStore()
 const playerId = parseInt(window.location.pathname.split('/').pop() || '')
@@ -79,6 +80,16 @@ const timeStampsEnabled = ref<boolean>(
 )
 const autoScrollIsActive = ref<boolean>(true)
 
+const messageTypeMap = {
+  party: 'party',
+  linkshell: 'linkshell',
+  shout: 'shout',
+  yell: 'shout',
+  unity: 'unity',
+  tell: 'tell',
+  trial: 'trial'
+};
+
 const chatLog = computed(() => {
   return userStore.chatLog.filter((item: any) => {
     if (chatFilterValue.value === 'None' || chatFilterValue.value === 'Chat Filter') {
@@ -89,25 +100,8 @@ const chatLog = computed(() => {
   })
 })
 
-const chatColor = (messageType: string) => {
-  switch (messageType?.toLowerCase()) {
-    case 'party':
-      return 'party'
-    case 'linkshell':
-      return 'linkshell'
-    case 'shout':
-      return 'shout'
-    case 'yell':
-      return 'shout'
-    case 'unity':
-      return 'unity'
-    case 'tell':
-      return 'tell'
-    case 'trial':
-      return 'trial'
-    default:
-      return 'say'
-  }
+function chatColor(messageType: string) {
+  return messageTypeMap[messageType.toLowerCase() as keyof typeof messageTypeMap] || 'say';
 }
 
 const toggleTimeStamp = () => {
@@ -161,11 +155,16 @@ const handleScrollEvent = () => {
 }
 
 function setChatFilter(filter: string) {
+  instantFlag.value = true
   if (filter === 'None') {
     chatFilterValue.value = 'Chat Filter'
   } else {
     chatFilterValue.value = filter ?? 'Chat Filter'
   }
+  scrollToLastChild('instant')
+  setTimeout(() => {
+    instantFlag.value = false
+  }, 300)
 }
 
 onUpdated(() => {
