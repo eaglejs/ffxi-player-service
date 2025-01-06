@@ -71,7 +71,6 @@ import "bootstrap"
 import { computed, onMounted, onUpdated, onUnmounted, onBeforeUpdate, ref, watch } from 'vue'
 import { useThemeStore } from '@/stores/theme'
 import { useUserStore } from '@/stores/user'
-import { useServerStore } from '@/stores/server'
 import { mdiSkullCrossbones } from '@mdi/js'
 import * as bootstrap from 'bootstrap'
 import Buffs from '@/components/Buffs.vue'
@@ -79,7 +78,6 @@ import type { ComputedRef } from 'vue'
 import type { Ability } from '@/types/Ability'
 
 const userStore = useUserStore()
-const serverStore = useServerStore()
 const props = defineProps({
   user: Object,
 })
@@ -182,11 +180,11 @@ onUnmounted(() => {
 //   playerAbilities.value = filterAbilties()
 // })
 
-watch( onlineStatusDot, (newValue: string) => {
-  if (newValue == 'offline-dot') {
-    serverStore.connectWebSocket()
-  }
-})
+// watch( onlineStatusDot, (newValue: string) => {
+//   if (newValue == 'offline-dot') {
+//     serverStore.connectWebSocket()
+//   }
+// })
 
 </script>
 
