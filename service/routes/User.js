@@ -40,12 +40,12 @@ router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({ extended: true }));
 
 router.post('/initialize_user', async (req, res) => {
-  const data = req.body;
-  const playerId = parseInt(data.playerId);
-  const playerName = data.playerName.toLowerCase();
-  const lastOnline = parseInt(data.lastOnline);
-
   try {
+    const data = req.body;
+    const playerId = parseInt(data.playerId);
+    const playerName = data.playerName.toLowerCase();
+    const lastOnline = parseInt(data.lastOnline);
+
     await users.findOneAndUpdate(
       { playerName: playerName },
       { $set: { playerId: playerId, playerName: playerName, lastOnline: lastOnline } },
@@ -60,9 +60,8 @@ router.post('/initialize_user', async (req, res) => {
 });
 
 router.get('/get_user', async (req, res) => {
-  const playerId = req.query.playerId;
-
   try {
+    const playerId = req.query.playerId;
     const user = await users.findOne({ playerId });
     res.send(user);
   } catch (error) {
@@ -82,12 +81,12 @@ router.get('/get_users', async (req, res) => {
 });
 
 router.post('/set_online', async (req, res) => {
-  const data = req.body;
-  const playerId = parseInt(data.playerId);
-  const playerName = data.playerName.toLowerCase();
-  const last_online = parseInt(data.lastOnline);
-
   try {
+    const data = req.body;
+    const playerId = parseInt(data.playerId);
+    const playerName = data.playerName.toLowerCase();
+    const last_online = parseInt(data.lastOnline);
+
     await users.findOneAndUpdate(
       { playerId: playerId },
       { $set: { playerId: playerId, playerName: playerName, lastOnline: last_online } },
@@ -112,13 +111,13 @@ router.post('/set_online', async (req, res) => {
 });
 
 router.post('/set_jobs', async (req, res) => {
-  const data = req.body;
-  const main_job = data.mainJob;
-  const sub_job = data.subJob;
-  const playerId = parseInt(data.playerId);
-  const playerName = data.playerName.toLowerCase();
-
   try {
+    const data = req.body;
+    const main_job = data.mainJob;
+    const sub_job = data.subJob;
+    const playerId = parseInt(data.playerId);
+    const playerName = data.playerName.toLowerCase();
+
     await users.findOneAndUpdate(
       { playerId: playerId },
       { $set: { mainJob: main_job, subJob: sub_job } },
@@ -144,12 +143,12 @@ router.post('/set_jobs', async (req, res) => {
 });
 
 router.post('/set_gil', async (req, res) => {
-  const data = req.body;
-  const playerId = parseInt(data.playerId);
-  const playerName = data.playerName.toLowerCase();
-  const gil = data.gil;
-
   try {
+    const data = req.body;
+    const playerId = parseInt(data.playerId);
+    const playerName = data.playerName.toLowerCase();
+    const gil = data.gil;
+
     await users.findOneAndUpdate
       (
         { playerId: playerId },
@@ -175,12 +174,12 @@ router.post('/set_gil', async (req, res) => {
 });
 
 router.post('/set_player_status', async (req, res) => {
-  const data = req.body;
-  const playerId = parseInt(data.playerId);
-  const playerName = data.playerName.toLowerCase();
-  const status = data.status;
-
   try {
+    const data = req.body;
+    const playerId = parseInt(data.playerId);
+    const playerName = data.playerName.toLowerCase();
+    const status = data.status;
+
     await users.findOneAndUpdate
       (
         { playerId: playerId },
@@ -206,13 +205,13 @@ router.post('/set_player_status', async (req, res) => {
 });
 
 router.post('/set_hpp', async (req, res) => {
-  const data = req.body;
-  const playerId = parseInt(data.playerId);
-  const playerName = data.playerName.toLowerCase();
-  const hpp = data.hpp;
-  const debug = false;
-
   try {
+    const data = req.body;
+    const playerId = parseInt(data.playerId);
+    const playerName = data.playerName.toLowerCase();
+    const hpp = data.hpp;
+    const debug = false;
+
     await users.findOneAndUpdate(
       { playerId: playerId },
       { $set: { hpp: hpp } },
@@ -246,12 +245,12 @@ router.post('/set_hpp', async (req, res) => {
 });
 
 router.post('/set_mpp', async (req, res) => {
-  const data = req.body;
-  const playerId = parseInt(data.playerId);
-  const playerName = data.playerName.toLowerCase();
-  const mpp = data.mpp;
-
   try {
+    const data = req.body;
+    const playerId = parseInt(data.playerId);
+    const playerName = data.playerName.toLowerCase();
+    const mpp = data.mpp;
+
     await users.findOneAndUpdate(
       { playerId: playerId },
       { $set: { mpp: mpp } },
@@ -276,12 +275,12 @@ router.post('/set_mpp', async (req, res) => {
 });
 
 router.post('/set_tp', async (req, res) => {
-  const data = req.body;
-  const playerId = parseInt(data.playerId);
-  const playerName = data.playerName.toLowerCase();
-  const tp = data.tp;
-
   try {
+    const data = req.body;
+    const playerId = parseInt(data.playerId);
+    const playerName = data.playerName.toLowerCase();
+    const tp = data.tp;
+
     await users.findOneAndUpdate
       (
         { playerId: playerId },
@@ -307,20 +306,20 @@ router.post('/set_tp', async (req, res) => {
 });
 
 router.post('/set_stats', async (req, res) => {
-  const data = req.body;
-  const playerId = parseInt(data.playerId);
-  const playerName = data.playerName.toLowerCase();
-  const { masterLevel, mainJobLevel, subJobLevel, attack, defense, currentExemplar, requiredExemplar,
-    title, nationRank, fireResistance, iceResistance, windResistance, earthResistance, lightningResistance,
-    waterResistance, lightResistance, darkResistance,
-    baseSTR, baseAGI, baseDEX, baseVIT, baseINT, baseMND, baseCHR, addedSTR, addedAGI, addedDEX, addedVIT, addedINT, addedMND, addedCHR
-  } = data;
-  const stats = {
-    baseSTR, baseAGI, baseDEX, baseVIT, baseINT, baseMND, baseCHR, addedSTR, addedAGI, addedDEX, addedVIT, addedINT, addedMND, addedCHR,
-    fireResistance, iceResistance, windResistance, earthResistance, lightningResistance, waterResistance, lightResistance, darkResistance
-  }
-
   try {
+    const data = req.body;
+    const playerId = parseInt(data.playerId);
+    const playerName = data.playerName.toLowerCase();
+    const { masterLevel, mainJobLevel, subJobLevel, attack, defense, currentExemplar, requiredExemplar,
+      title, nationRank, fireResistance, iceResistance, windResistance, earthResistance, lightningResistance,
+      waterResistance, lightResistance, darkResistance,
+      baseSTR, baseAGI, baseDEX, baseVIT, baseINT, baseMND, baseCHR, addedSTR, addedAGI, addedDEX, addedVIT, addedINT, addedMND, addedCHR
+    } = data;
+    const stats = {
+      baseSTR, baseAGI, baseDEX, baseVIT, baseINT, baseMND, baseCHR, addedSTR, addedAGI, addedDEX, addedVIT, addedINT, addedMND, addedCHR,
+      fireResistance, iceResistance, windResistance, earthResistance, lightningResistance, waterResistance, lightResistance, darkResistance
+    }
+
     await users.findOneAndUpdate(
       { playerId: playerId },
       {
@@ -367,96 +366,96 @@ router.post('/set_stats', async (req, res) => {
 });
 
 router.post('/set_currency1', async (req, res) => {
-  const data = req.body;
-  const playerId = parseInt(data?.playerId) || '';
-  const playerName = data.playerName.toLowerCase();
-  const currency1 = {
-    conquestPointsBastok,
-    conquestPointsSandoria,
-    conquestPointsWindurst,
-    deeds,
-    dominionNotes,
-    imperialStanding,
-    loginPoints,
-    nyzulTokens,
-    sparksOfEminence,
-    therionIchor,
-    unityAccolades,
-    voidstones,
-  } = data;
-
-  if (playerId === '') {
-    return res.status(400).send('Invalid input');
-  }
-
   try {
+    const data = req.body;
+    const playerId = parseInt(data?.playerId) || '';
+    const playerName = data.playerName.toLowerCase();
+    const currency1 = {
+      conquestPointsBastok,
+      conquestPointsSandoria,
+      conquestPointsWindurst,
+      deeds,
+      dominionNotes,
+      imperialStanding,
+      loginPoints,
+      nyzulTokens,
+      sparksOfEminence,
+      therionIchor,
+      unityAccolades,
+      voidstones,
+    } = data;
+
+    if (playerId === '') {
+      return res.status(400).send('Invalid input');
+    }
+
     await users.findOneAndUpdate(
       { playerId: playerId },
       { $set: { currency1: currency1 } },
       { upsert: true, new: true }
     );
     res.send(`Currency1: OK`);
+    wss.clients.forEach(client => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(JSON.stringify({
+          playerId: playerId,
+          playerName: playerName,
+          currency1: currency1
+        }));
+      }
+    });
   } catch (error) {
     console.error(error);
     res.status(500).send('An error occurred while updating the currency1.');
   }
 
-  wss.clients.forEach(client => {
-    if (client.readyState === WebSocket.OPEN) {
-      client.send(JSON.stringify({
-        playerId: playerId,
-        playerName: playerName,
-        currency1: currency1
-      }));
-    }
-  });
 });
 
 router.post('/set_currency2', async (req, res) => {
-  const data = req.body;
-  const playerId = parseInt(data.playerId) ?? '';
-  const playerName = data.playerName.toLowerCase();
-  const currency2 = { domainPoints, eschaBeads, eschaSilt, gallantry, gallimaufry, hallmarks, mogSegments, mweyaPlasmCorpuscles, potpourri, coalitionImprimaturs } = data;
-
-  if (playerId === '') {
-    return res.status(400).send('Invalid input');
-  }
-
   try {
+    const data = req.body;
+    const playerId = parseInt(data.playerId) ?? '';
+    const playerName = data.playerName.toLowerCase();
+    const currency2 = { domainPoints, eschaBeads, eschaSilt, gallantry, gallimaufry, hallmarks, mogSegments, mweyaPlasmCorpuscles, potpourri, coalitionImprimaturs } = data;
+
+    if (playerId === '') {
+      return res.status(400).send('Invalid input');
+    }
+
     await users.findOneAndUpdate(
       { playerId: playerId },
       { $set: { currency2: currency2 } },
       { upsert: true, new: true }
     );
     res.send(`Currency2: OK`);
+    wss.clients.forEach(client => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(JSON.stringify({
+          playerId: playerId,
+          playerName: playerName,
+          currency2: currency2
+        }));
+      }
+    });
   } catch (error) {
     console.error(error);
     res.status(500).send('An error occurred while updating the currency2.');
   }
 
-  wss.clients.forEach(client => {
-    if (client.readyState === WebSocket.OPEN) {
-      client.send(JSON.stringify({
-        playerId: playerId,
-        playerName: playerName,
-        currency2: currency2
-      }));
-    }
-  });
 });
 
 router.post('/set_buffs', async (req, res) => {
-  const data = req.body;
-  const playerId = parseInt(data.playerId);
-  const playerName = data.playerName.toLowerCase();
-  let buffs = data.buffs;
-
-  // Remove the last character if it is a comma
-  if (buffs[buffs.length - 1] === ',') {
-    buffs = buffs.slice(0, -1);
-  }
-
   try {
+    const data = req.body;
+    const playerId = parseInt(data.playerId);
+    const playerName = data.playerName.toLowerCase();
+    let buffs = data.buffs;
+
+    // Remove the last character if it is a comma
+    if (buffs[buffs.length - 1] === ',') {
+      buffs = buffs.slice(0, -1);
+    }
+
     await users.findOneAndUpdate(
       { playerId: playerId },
       { $set: { buffs: buffs } },
@@ -481,17 +480,47 @@ router.post('/set_buffs', async (req, res) => {
 
 });
 
-router.post('/set_ability_recasts', async (req, res) => {
-  const { playerId, playerName, abilities } = req.body;
-  const abilitiesParsed = JSON.parse(abilities) || [];
-  // Basic validation
-  if (typeof playerName !== 'string' || !Array.isArray(abilitiesParsed)) {
-    return res.status(400).send('Invalid input');
-  }
-
-  const lowerCasePlayerName = playerName.toLowerCase();
-
+router.post('/set_buffs_json', async (req, res) => {
   try {
+    const data = req.body;
+    const playerId = parseInt(data.playerId);
+    const playerName = data.playerName.toLowerCase();
+    const buffs = data.buffs;
+    console.log(buffs);
+    await users.findOneAndUpdate(
+      { playerId: playerId },
+      { $set: { buffs: buffs } },
+      { upsert: true, new: true }
+    );
+
+    wss.clients.forEach(client => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(JSON.stringify({
+          playerId: playerId,
+          playerName: playerName,
+          buffs: buffs
+        }));
+      }
+    });
+
+    res.send(`Buffs: OK`);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('An error occurred while updating the buffs.');
+  }
+});
+
+router.post('/set_ability_recasts', async (req, res) => {
+  try {
+    const { playerId, playerName, abilities } = req.body;
+    const abilitiesParsed = JSON.parse(abilities) || [];
+    // Basic validation
+    if (typeof playerName !== 'string' || !Array.isArray(abilitiesParsed)) {
+      return res.status(400).send('Invalid input');
+    }
+
+    const lowerCasePlayerName = playerName.toLowerCase();
+
     const user = await users.findOneAndUpdate(
       { playerId: playerId },
       { $set: { abilities: abilitiesParsed } },
@@ -517,12 +546,12 @@ router.post('/set_ability_recasts', async (req, res) => {
 });
 
 router.post('/set_zone', async (req, res) => {
-  const data = req.body;
-  const playerId = parseInt(data.playerId);
-  const playerName = data.playerName.toLowerCase();
-  const zone = data.zone;
-
   try {
+    const data = req.body;
+    const playerId = parseInt(data.playerId);
+    const playerName = data.playerName.toLowerCase();
+    const zone = data.zone;
+
     await users.findOneAndUpdate(
       { playerId: playerId },
       { $set: { zone: zone } },
@@ -547,10 +576,10 @@ router.post('/set_zone', async (req, res) => {
 });
 
 router.get('/get_chat_log', async (req, res) => {
-  const playerId = parseInt(req.query.playerId);
-
   try {
+    const playerId = parseInt(req.query.playerId);
     const chat = await chats.findOne({ playerId: playerId });
+
     res.send(chat.chatLog);
   } catch (error) {
     console.error(error);
@@ -559,14 +588,14 @@ router.get('/get_chat_log', async (req, res) => {
 });
 
 router.post('/set_message', async (req, res) => {
-  const data = req.body;
-  const playerId = parseInt(data.playerId);
-  const playerName = data.playerName.toLowerCase();
-  const message = data.message;
-  const messageType = data.messageType;
-  const timeStamp = new Date().toISOString();
-
   try {
+    const data = req.body;
+    const playerId = parseInt(data.playerId);
+    const playerName = data.playerName.toLowerCase();
+    const message = data.message;
+    const messageType = data.messageType;
+    const timeStamp = new Date().toISOString();
+
     const decodedMessage = message.replace(/(\x7F1|\n)/g, '');
 
     await chats.findOneAndUpdate(

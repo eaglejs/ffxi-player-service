@@ -1,7 +1,7 @@
 <template>
   <div class="buffs-wrapper mt-1">
-    <span v-for="(buffId, index) in buffIds" :key="index">
-      <Buff :buff-id="buffId" :buff-name="formattedBuffNames.get(buffId)?.en" />
+    <span v-for="(buff, index) in buffList" :key="index">
+      <Buff :buff-id="buff.buff_id" :buff-name="buff.buff_name" :duration="buff.buff_duration" :utc-time="buff.utc_time" />
     </span>
   </div>
 </template>
@@ -10,47 +10,14 @@
 import { computed } from 'vue'
 import type { ComputedRef } from 'vue'
 import Buff from '@/components/Buff.vue'
-import { BUFFS } from '@/constants/buffs'
-
-type BuffType = {
-  id: number;
-  en: string;
-};
+import type { Buff as BuffData} from '@/types/buff'
 
 const props = defineProps({
-  buffData: String
+  buffData: Object as () => Map<string, BuffData>
 })
 
-const buffNames: ComputedRef<string[]> = computed(() => {
-  if (!props?.buffData) {
-    return []
-  }
-  return props?.buffData?.split(',').sort()
-})
-
-const buffIds: ComputedRef<(number)[]> = computed(() => {
-  if (!buffNames.value) {
-    return []
-  }
-  return buffNames.value.map((name: string) => {
-    const buff: BuffType = Object.values(BUFFS).find((b: BuffType): b is BuffType => b.en === name) ?? { id: -1, en: 'Not found' }
-    return buff.id
-  })
-})
-
-const formattedBuffNames: ComputedRef<Map<number, { en: string }>> = computed(() => {
-  const result: Map<number, { en: string }> = new Map()
-  buffIds.value.forEach((buffId: number | 'Not found' | undefined) => {
-    if (typeof buffId === 'number') {
-      const buff = BUFFS[buffId]
-      if (buff) {
-        result.set( buffId, { en: buff.en.charAt(0).toUpperCase() + buff.en.slice(1) })
-      } else {
-        result.set(buffId, { en: 'Not found' })
-      }
-    }
-  });
-  return result
+const buffList: ComputedRef<BuffData[]> = computed(() => {
+  return Array.from((props.buffData ?? new Map()).values())
 })
 
 </script>

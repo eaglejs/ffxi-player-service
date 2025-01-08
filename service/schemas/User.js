@@ -1,7 +1,15 @@
 const userSchema = {
   abilities: Array,
   attack: Number,
-  buffs: String,
+  buffs: {
+    type: Map,
+    of: {
+      buff_id: Number,
+      buff_name: String,
+      buff_duration: Number,
+      utc_time: String,
+    }
+  },
   currency1: {
     conquestPointsBastok: Number,
     conquestPointsSandoria: Number,
