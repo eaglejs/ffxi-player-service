@@ -55,13 +55,17 @@ export const useUserStore = defineStore('user', () => {
       }
       return;
     }
-    for (const key in player) {
+
+    Object.keys(player).forEach((key) => {
       if (key in playerToUpdate) {
-        playerToUpdate[key] = player[key];
-        continue
+        playerToUpdate[key] = player[key]
       }
-    }
+    })
     players.value.set(parseInt(player.playerId), playerToUpdate)
+  }
+
+  function refreshBuffs(player: { playerId: number, playerName: string }) {
+    return axios.post(`${fullUrl}/refresh_buffs`, player)
   }
 
   onMounted(() => {
@@ -73,5 +77,5 @@ export const useUserStore = defineStore('user', () => {
     window.addEventListener('online', connectWebSocket)
   })
 
-  return { players, chatLog, fetchUsers, fetchUser, fetchChatLog }
+  return { players, chatLog, fetchUsers, fetchUser, fetchChatLog, refreshBuffs }
 })

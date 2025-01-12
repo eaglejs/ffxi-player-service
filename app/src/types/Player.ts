@@ -1,4 +1,5 @@
 import type { Ability } from './Ability';
+import type { Experience } from './Experience';
 
 export interface Player {
   abilities: Ability[],
@@ -28,6 +29,11 @@ export interface Player {
   },
   currentExemplar: number,
   defense: number,
+  expHistory: {
+    experience: Array<Experience>,
+    capacity: Array<Experience>,
+    exemplar: Array<Experience>
+  }
   gil: number,
   hpp: number,
   lastOnline: number,
