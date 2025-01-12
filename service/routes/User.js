@@ -6,6 +6,7 @@ const iconv = require('iconv-lite');
 const WebSocket = require('ws');
 const userScheme = require('../schemas/User');
 const chatScheme = require('../schemas/Chat');
+const e = require('express');
 
 mongoose.connect('mongodb://localhost:27017/ffxi');
 
@@ -61,7 +62,7 @@ router.post('/initialize_user', async (req, res) => {
 
 router.get('/get_user', async (req, res) => {
   try {
-    const playerId = req.query.playerId;
+    const playerId = parseInt(req.query.playerId);
     const user = await users.findOne({ playerId });
     res.send(user);
   } catch (error) {
@@ -368,7 +369,7 @@ router.post('/set_stats', async (req, res) => {
 router.post('/set_currency1', async (req, res) => {
   try {
     const data = req.body;
-    const playerId = parseInt(data?.playerId) || '';
+    const playerId = parseInt(data?.playerId);
     const playerName = data.playerName.toLowerCase();
     const currency1 = {
       conquestPointsBastok,
@@ -414,7 +415,7 @@ router.post('/set_currency1', async (req, res) => {
 router.post('/set_currency2', async (req, res) => {
   try {
     const data = req.body;
-    const playerId = parseInt(data.playerId) ?? '';
+    const playerId = parseInt(data.playerId);
     const playerName = data.playerName.toLowerCase();
     const currency2 = { domainPoints, eschaBeads, eschaSilt, gallantry, gallimaufry, hallmarks, mogSegments, mweyaPlasmCorpuscles, potpourri, coalitionImprimaturs } = data;
 
@@ -444,6 +445,74 @@ router.post('/set_currency2', async (req, res) => {
 
 });
 
+router.post('/update_exp_history', async (req, res) => {
+  try {
+    // (8|253) = exp, (371|372) = limit, (718|735) = capacity, (809|810) = exemplar
+    const expIds = [8, 253, 371, 372, 718, 735, 809, 810];
+    const data = req.body;
+    const playerId = parseInt(data.playerId);
+    const playerName = data.playerName.toLowerCase();
+    const expType = parseInt(data.expType);
+    const points = parseInt(data.points);
+    const chain = parseInt(data.chain);
+    const timestamp = data.timestamp
+    let type = '';
+
+    if (!expIds.includes(expType)) {
+      return res.status(400).send('Invalid input');
+    }
+
+    if ([8, 253, 371, 372].includes(expType)) {
+      type = 'experience';
+    } else if ([718, 735].includes(expType)) {
+      type = 'capacity';
+    } else if ([809, 810].includes(expType)) {
+      type = 'exemplar';
+    }
+
+    const user = await users.findOne({ playerId: playerId });
+    let expHistory = user?.expHistory;
+
+    const updateField = `expHistory.${type}`;
+    expHistoryByType = expHistory[type];
+
+    if (expHistoryByType?.length >= 50) {
+      expHistoryByType.shift();
+    }
+    expHistoryByType.push({ points, chain, timestamp });
+
+    const updateData = {
+      [`${updateField}`]: expHistoryByType
+    };
+
+    const result = await users.findOneAndUpdate(
+      { playerId: playerId },
+      {
+        $set
+          : updateData
+      },
+      { upsert: true, new: true }
+    );
+
+    wss.clients.forEach(client => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(JSON.stringify({
+          playerId: playerId,
+          playerName: playerName,
+          expHistory: result.expHistory
+        }));
+      }
+    });
+
+    res.send(`Experience history: OK`);
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('An error occurred while updating the experience history.');
+  }
+
+});
+
 router.post('/set_buffs', async (req, res) => {
   try {
     const data = req.body;
@@ -467,7 +536,7 @@ router.post('/set_buffs', async (req, res) => {
         client.send(JSON.stringify({
           playerId: playerId,
           playerName: playerName,
-          buffs: buffs
+          buffs: buffs,
         }));
       }
     });
@@ -486,7 +555,6 @@ router.post('/set_buffs_json', async (req, res) => {
     const playerId = parseInt(data.playerId);
     const playerName = data.playerName.toLowerCase();
     const buffs = data.buffs;
-    console.log(buffs);
     await users.findOneAndUpdate(
       { playerId: playerId },
       { $set: { buffs: buffs } },
@@ -498,7 +566,7 @@ router.post('/set_buffs_json', async (req, res) => {
         client.send(JSON.stringify({
           playerId: playerId,
           playerName: playerName,
-          buffs: buffs
+          buffs: buffs,
         }));
       }
     });
@@ -510,9 +578,44 @@ router.post('/set_buffs_json', async (req, res) => {
   }
 });
 
+router.post('/refresh_buffs', async (req, res) => {
+  try {
+    const playerId = parseInt(req.body.playerId);
+    const playerName = req.body.playerName.toLowerCase();
+    const user = await users.findOne({ playerId: playerId });
+    const buffs = user.buffs;
+    const currentTime = new Date().getTime();
+
+    for (const [key, buff] of buffs.entries()) {
+      const buffTime = new Date(buff.utc_time).getTime();
+
+      if (currentTime > buffTime) {
+        buffs.delete(key);
+      }
+    }
+
+    await users.findOneAndUpdate({ playerId: playerId }, { $set: { buffs: buffs } });
+    wss.clients.forEach(client => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(JSON.stringify({
+          playerId: playerId,
+          playerName: playerName,
+          buffs: buffs,
+        }));
+      }
+    });
+    res.send("Buffs refreshed");
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('An error occurred while removing buffs.');
+  }
+});
+
 router.post('/set_ability_recasts', async (req, res) => {
   try {
-    const { playerId, playerName, abilities } = req.body;
+    const { playerName, abilities } = req.body;
+    const playerId = parseInt(req.body.playerId);
     const abilitiesParsed = JSON.parse(abilities) || [];
     // Basic validation
     if (typeof playerName !== 'string' || !Array.isArray(abilitiesParsed)) {

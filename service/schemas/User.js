@@ -38,6 +38,35 @@ const userSchema = {
   },
   currentExemplar: Number,
   defense: Number,
+  expHistory: {
+    experience: {
+      type: Array,
+      default: [],
+      of: {
+        points: Number,
+        chain: Number,
+        timestamp: String,
+      }
+    },
+    capacity: {
+      type: Array,
+      default: [],
+      of: {
+        points: Number,
+        chain: Number,
+        timestamp: String,
+      }
+    },
+    exemplar: {
+      type: Array,
+      default: [],
+      of: {
+        points: Number,
+        chain: Number,
+        timestamp: String,
+      }
+    },
+  },
   gil: Number,
   hpp: Number,
   lastOnline: Number,
