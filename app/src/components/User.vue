@@ -45,23 +45,23 @@
                 </div>
               </div>
               <p class="mb-2 text-center">{{ currentExemplar }} / {{ requiredExemplar }}</p>
-              <div v-if="playerBuffs.size">
-                <Buffs :buff-data="playerBuffs" />
-              </div>
             </section>
             <section class="col-3">
               <div class="row">
-                <section class="col-12 d-flex">
-                  <p class="flex-grow-0 m-0"><b>Attack:</b></p>
-                  <p class="flex-grow-1 m-0 text-end">{{ user?.attack }}</p>
+                <section class="col-12 d-flex p-0">
+                  <p class="me-2"><b>Atk:</b></p>
+                  <p>{{ user?.attack }}</p>
                 </section>
-                <section class="col-12 d-flex">
-                  <span class="flex-grow-0 m-0"><b>Defense:</b></span>
-                  <span class="flex-grow-1 m-0 text-end">{{ user?.defense }}</span>
+                <section class="col-12 d-flex p-0">
+                  <p class="me-2"><b>Def:</b></p>
+                  <p>{{ user?.defense }}</p>
                 </section>
               </div>
             </section>
           </section>
+          <div v-if="playerBuffs.size">
+            <Buffs :player="player" :buff-data="playerBuffs" />
+          </div>
         </section>
         <section class="col-3">
           <p class="mb-0"><b>HP</b></p>
@@ -130,6 +130,12 @@ const exemplarProgressRounded = computed(() => Math.floor(exemplarProgress.value
 const playerBuffs: ComputedRef<Map<string, Buff>> = computed(() => {
   const buffs = props?.user?.buffs
   return buffs ? new Map(Object.entries(buffs)) : new Map()
+})
+const player = computed(() => {
+  return {
+    playerId: parseInt(props?.user?.playerId),
+    playerName: props?.user?.playerName
+  }
 })
 const playerName = computed(
   () => props?.user?.playerName.charAt(0).toUpperCase() + props?.user?.playerName.slice(1)

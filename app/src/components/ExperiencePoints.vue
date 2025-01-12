@@ -1,22 +1,23 @@
 <template>
-  <div class="card experience-wrapper" v-if="data">
+  <div class="card experience-wrapper" v-if="experienceGraph">
     <div class="card-header">
       <div class="d-flex">
         <h3 class="mb-0">Experience Points</h3>
-        <section class="flex-grow-1">
-          <span class="float-end">{{ analyzePts.toLocaleString() }} Ex/hr</span>
+        <section class="d-inline-flex flex-grow-1 justify-content-end">
+          <span class="pe-2 experience-points">{{ averageExperiencePts.toLocaleString() }}k XP/hr</span>
+          <span class="ps-2 pe-2 capacity-points">{{ averageCapacityPts.toLocaleString() }}k CP/hr</span>
+          <span class="ps-2 exemplar-points">{{ averageExemplarPts.toLocaleString() }}k EX/hr</span>
         </section>
       </div>
     </div>
     <div class="card-body">
-      <Line :data="data" :options="options" />
+      <Line :data="experienceGraph" :options="options" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
-import { random } from 'mathjs'
+import { computed, ref, watch, type ComputedRef, onMounted } from 'vue'
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -25,26 +26,32 @@ import {
   LineElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  type ChartData
 } from 'chart.js'
 import { Line } from 'vue-chartjs'
 import type { Player } from '@/types/Player'
-
-interface Experience {
-  points: number
-  ts: number
-}
+import type { Experience } from '@/types/Experience'
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend)
 
 const props = defineProps<{
   user: Player | undefined
 }>()
-const previousCurrentExemplar = ref<number>(0)
-const exemplarHistory: Experience[] = []
-const analyzePts = ref(0)
-const experience = ref({
-  // I want to make an array of 50 labels, but I'm not sure how to do that
+const averageExperiencePts = ref(0)
+const averageCapacityPts = ref(0)
+const averageExemplarPts = ref(0)
+const experiencePoints: ComputedRef<number[]> = computed(
+  () => props.user?.expHistory?.experience?.map((exp: Experience) => exp.points) || []
+)
+const capacityPoints: ComputedRef<number[]> = computed(
+  () => props.user?.expHistory?.capacity?.map((exp: Experience) => exp.points) || []
+)
+const exemplarPoints: ComputedRef<number[]> = computed(
+  () => props.user?.expHistory?.exemplar?.map((exp: Experience) => exp.points) || []
+)
+
+const experienceGraph = ref<ChartData<'line', (number | null)[]>>({
   labels: (function () {
     let labels = []
     for (let i = 0; i < 50; i++) {
@@ -54,47 +61,35 @@ const experience = ref({
   })(),
   datasets: [
     {
+      data: experiencePoints.value || [],
       label: 'Experience Points',
-      data: [],
       fill: false,
       borderColor: 'rgb(75, 192, 192)',
+      tension: 0.1
+    },
+    {
+      data: capacityPoints.value || [],
+      label: 'Capacity Points',
+      fill: false,
+      borderColor: 'rgb(255, 99, 132)',
+      tension: 0.1
+    },
+    {
+      data: exemplarPoints.value || [],
+      label: 'Exemplar Points',
+      fill: false,
+      borderColor: 'rgb(255, 205, 86)',
       tension: 0.1
     }
   ]
 })
 const options = {
   responsive: true,
-  maintainAspectRatio: false,
-  legend: {
-    display: false
-  }
+  maintainAspectRatio: false
 }
 
-const data = computed(() => experience.value)
-
-function renderLatestData(debug = false) {
-  let currentExemplarPoints: number
-  if (debug) {
-    const min = 750
-    const max = 1100
-    const randomPoints = Math.floor(random(min, max))
-    exemplarHistory.push({ points: randomPoints, ts: new Date().getTime() / 1000 })
-  } else if (previousCurrentExemplar.value === 0) {
-    exemplarHistory.push({ points: 0, ts: new Date().getTime() / 1000 })
-  } else {
-    currentExemplarPoints =
-      (props.user?.currentExemplar ?? 0) - (previousCurrentExemplar.value ?? 0)
-    if (currentExemplarPoints < 0) {
-      currentExemplarPoints = 0
-    }
-    exemplarHistory.push({ points: currentExemplarPoints, ts: new Date().getTime() / 1000 })
-  }
-
-  if (exemplarHistory.length > 50) {
-    exemplarHistory.shift()
-  }
-
-  experience.value = {
+function renderLatestData() {
+  experienceGraph.value = {
     labels: (function () {
       let labels = []
       for (let i = 0; i < 50; i++) {
@@ -104,50 +99,69 @@ function renderLatestData(debug = false) {
     })(),
     datasets: [
       {
-        label: 'Exemplar Points',
-        data: exemplarHistory.map((points) => points.points) as any,
+        data: experiencePoints.value || [],
+        label: 'Experience Points',
         fill: false,
         borderColor: 'rgb(75, 192, 192)',
+        tension: 0.1
+      },
+      {
+        data: capacityPoints.value || [],
+        label: 'Capacity Points',
+        fill: false,
+        borderColor: 'rgb(255, 99, 132)',
+        tension: 0.1
+      },
+      {
+        data: exemplarPoints.value || [],
+        label: 'Exemplar Points',
+        fill: false,
+        borderColor: 'rgb(255, 205, 86)',
         tension: 0.1
       }
     ]
   }
-  analyzePts.value = analyzePoints(exemplarHistory)
-  previousCurrentExemplar.value = props.user?.currentExemplar || 0
+  averageExperiencePts.value = analyzePoints(props?.user?.expHistory?.experience || [])
+  averageCapacityPts.value = analyzePoints(props?.user?.expHistory?.capacity || [])
+  averageExemplarPts.value = analyzePoints(props?.user?.expHistory?.exemplar || [])
 }
 
-function analyzePoints(experiencePoints: Experience[]) {
-  let t = new Date().getTime() / 1000
-  let running_total = 0
-  let maximum_timestamp = 29
-  experiencePoints.forEach((points: Experience) => {
-    let time_diff = t - points.ts
-    if (t - points.ts > 600) {
-      points.ts = 0
-    } else {
-      running_total += points.points
-      if (time_diff > maximum_timestamp) {
-        maximum_timestamp = time_diff
-      }
-    }
-  })
-
-  let rate
-  if (maximum_timestamp == 29) {
-    rate = 0
-  } else {
-    rate = Math.floor((running_total / maximum_timestamp) * 3600)
+function analyzePoints(experiencePoints: Experience[]): number {
+  if (!experiencePoints || experiencePoints.length === 0) {
+    return 0;
   }
 
-  return rate
+  // Convert timestamps to Date objects and sort by timestamp
+  const points = experiencePoints.map(item => ({
+    points: item.points ?? 0,
+    timestamp: new Date(item.timestamp).getTime()
+  }));
+
+  // Calculate the total time span of the given data points
+  const startTime = points[0].timestamp;
+  const endTime = points[points.length - 1].timestamp;
+  const totalTimeSpan = (endTime - startTime) / 1000; // in seconds
+
+  // Calculate total points accumulated
+  const totalPoints = points.reduce((sum, item) => sum + item.points, 0);
+
+  // Calculate the rate of points per second
+  const ratePerSecond = totalPoints / totalTimeSpan;
+
+  // Extrapolate the rate to an hour
+  const ratePerHour = ratePerSecond * 3600;
+
+
+  // Format the rate to one decimal point
+  return parseFloat((ratePerHour / 1000).toFixed(1)) || 0;
 }
 
-// setInterval(() => {
-//   renderLatestData(true)
-// }, 3000)
+onMounted(() => {
+  renderLatestData()
+})
 
 watch(
-  () => props.user?.currentExemplar,
+  () => props.user?.expHistory?.experience,
   () => renderLatestData()
 )
 </script>
@@ -155,5 +169,17 @@ watch(
 <style scoped lang="scss">
 .experience-wrapper {
   height: 100%;
+}
+
+.experience-points {
+  color: rgb(75, 192, 192);
+}
+
+.capacity-points {
+  color: rgb(255, 99, 132);
+}
+
+.exemplar-points {
+  color: rgb(255, 205, 86);
 }
 </style>
