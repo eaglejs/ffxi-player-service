@@ -50,6 +50,11 @@ let themeToolTip: bootstrap.Tooltip | null = null
 
 function toggleTheme(): void {
   themeStore.setTheme(theme.value === 'dark' ? 'light' : 'dark')
+  if (theme.value === 'dark') {
+    document.querySelector(':root')?.classList.add('dark-theme')
+  } else if (theme.value === '' || theme.value === 'light') {
+    document.querySelector(':root')?.classList.remove('dark-theme')
+  }
 }
 
 function toggleFullscreen(): void {
@@ -73,6 +78,11 @@ onMounted(() => {
   }
   if (themeElement.value) {
     themeToolTip = new bootstrap.Tooltip(themeElement.value)
+  }
+  if (theme.value === 'dark') {
+    document.querySelector(':root')?.classList.add('dark-theme')
+  } else if (theme.value === '' || theme.value === 'light') {
+    document.querySelector(':root')?.classList.remove('dark-theme')
   }
 })
 

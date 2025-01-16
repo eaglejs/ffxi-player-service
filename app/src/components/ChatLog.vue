@@ -40,7 +40,7 @@
               </li>
               <li><a class="dropdown-item" href="#" @click="setChatFilter('Yell')">Yell</a></li>
               <li><a class="dropdown-item" href="#" @click="setChatFilter('Unity')">Unity</a></li>
-              <li><a class="dropdown-item" href="#" @click="setChatFilter('Cutscene')">NPC</a></li>
+              <li><a class="dropdown-item" href="#" @click="setChatFilter('Cutscene')">Cutscene</a></li>
             </ul>
           </div>
         </section>
@@ -65,7 +65,6 @@ import { mdiChevronUp, mdiChevronDown } from '@mdi/js'
 import GenIcon from '@/components/GenIcon.vue'
 import { useUserStore } from '@/stores/user'
 import { isIPhone, isAndroid } from '@/helpers/utils'
-import { auto } from '@popperjs/core'
 
 const userStore = useUserStore()
 const playerId = parseInt(window.location.pathname.split('/').pop() || '')
@@ -87,7 +86,8 @@ const messageTypeMap = {
   yell: 'shout',
   unity: 'unity',
   tell: 'tell',
-  trial: 'trial'
+  trial: 'trial',
+  say: 'say',
 };
 
 const chatLog = computed(() => {
@@ -95,6 +95,7 @@ const chatLog = computed(() => {
     if (chatFilterValue.value === 'None' || chatFilterValue.value === 'Chat Filter') {
       return true
     } else {
+      console.log(item.messageType?.toLowerCase(), chatFilterValue.value?.toLowerCase())
       return item.messageType?.toLowerCase() === chatFilterValue.value?.toLowerCase()
     }
   })
@@ -180,6 +181,7 @@ onUpdated(() => {
 
 </script>
 <style scoped lang="scss">
+
 .arrow-btns {
   max-height: 23px;
   display: inline-flex;
@@ -194,16 +196,19 @@ pre {
 
 code {
   span {
-    color: var(--bs-info-text-emphasis);
+    color: var(--chat-log-white);
   }
 }
 
 .chat-log {
-  background-color: #031633;
+  background-color: var(--chat-log-bg);
   border-bottom-left-radius: 7px;
   border-bottom-right-radius: 7px;
   height: 490px;
   overflow-y: auto;
+  p {
+    color: var(--chat-log-white);
+  }
 }
 
 .party {
@@ -227,10 +232,11 @@ code {
 }
 
 .say {
-  color: var(--chat-log-brown);
+  color: var(--chat-log-white);
 }
 
 .trial {
   color: var(--chat-log-mint);
 }
+
 </style>

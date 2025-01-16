@@ -513,6 +513,42 @@ router.post('/update_exp_history', async (req, res) => {
 
 });
 
+router.post('/reset_exp_history', async (req, res) => {
+  try {
+    const playerId = parseInt(req.body.playerId);
+    const playerName = req.body.playerName.toLowerCase();
+
+    const result = await users.findOneAndUpdate(
+      { playerId: playerId },
+      {
+        $set: {
+          [`expHistory`]: {
+            experience: [],
+            capacity: [],
+            exemplar: []
+          }
+        }
+      },
+      { upsert: true, new: true }
+    );
+
+    wss.clients.forEach(client => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(JSON.stringify({
+          playerId: playerId,
+          playerName: playerName,
+          expHistory: result.expHistory
+        }));
+      }
+    });
+
+    res.send(`Experience history reset: OK`);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('An error occurred while resetting the experience history.');
+  }
+});
+
 router.post('/set_buffs', async (req, res) => {
   try {
     const data = req.body;

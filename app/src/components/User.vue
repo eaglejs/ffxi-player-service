@@ -122,9 +122,13 @@ import type { Ability } from '@/types/Ability'
 import type { Buff } from '@/types/buff'
 
 const props = defineProps({
-  user: Object
+  user: {
+    type: Object,
+    default: () => ({})
+  }
 })
 
+const playerState = ref(props?.user?.status || 0)
 const currentExemplar = computed(() => parseInt(props?.user?.currentExemplar).toLocaleString())
 const exemplarProgressRounded = computed(() => Math.floor(exemplarProgress.value))
 const playerBuffs: ComputedRef<Map<string, Buff>> = computed(() => {
@@ -173,30 +177,24 @@ const filterAbilties = () => {
   return filteredAbilities
 }
 
-const dead = computed(() => {
-  return props?.user?.status == 2
-})
-
-watch(dead, (newVal) => {
-  if (newVal && deadElement.value) {
+function renderDeathAnimation (dead: number) {
+  if (dead == 2) {
     deadElement.value.classList.add('transition')
     setTimeout(() => {
       deadElement.value.classList.add('fade-in')
-    }, 50)
+    }, 100)
   } else {
-    if (!deadElement.value) {
-      return
-    }
+    deadElement.value.classList.remove('fade-in')
     setTimeout(() => {
-      if (!deadElement.value) {
-        return
-      }
       deadElement.value.classList.remove('transition')
-    }, 350)
-    if (deadElement.value) {
-      deadElement.value.classList.remove('fade-in')
-    }
+    }, 100)
   }
+}
+
+const dead = computed(() => props?.user?.status == 2)
+
+watch(props?.user, (newVal) => {
+  renderDeathAnimation(newVal.status)
 })
 
 let tooltip: bootstrap.Tooltip | null = null

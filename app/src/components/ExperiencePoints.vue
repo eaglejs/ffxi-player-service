@@ -64,21 +64,21 @@ const experienceGraph = ref<ChartData<'line', (number | null)[]>>({
       data: experiencePoints.value || [],
       label: 'Experience Points',
       fill: false,
-      borderColor: 'rgb(75, 192, 192)',
+      borderColor: 'rgb(74, 156, 88)',
       tension: 0.1
     },
     {
       data: capacityPoints.value || [],
       label: 'Capacity Points',
       fill: false,
-      borderColor: 'rgb(255, 99, 132)',
+      borderColor: 'rgb(255, 205, 86)',
       tension: 0.1
     },
     {
       data: exemplarPoints.value || [],
       label: 'Exemplar Points',
       fill: false,
-      borderColor: 'rgb(255, 205, 86)',
+      borderColor: 'rgb(255, 99, 132)',
       tension: 0.1
     }
   ]
@@ -102,21 +102,21 @@ function renderLatestData() {
         data: experiencePoints.value || [],
         label: 'Experience Points',
         fill: false,
-        borderColor: 'rgb(75, 192, 192)',
+        borderColor: 'rgb(74, 156, 88)',
         tension: 0.1
       },
       {
         data: capacityPoints.value || [],
         label: 'Capacity Points',
         fill: false,
-        borderColor: 'rgb(255, 99, 132)',
+        borderColor: 'rgb(255, 205, 86)',
         tension: 0.1
       },
       {
         data: exemplarPoints.value || [],
         label: 'Exemplar Points',
         fill: false,
-        borderColor: 'rgb(255, 205, 86)',
+        borderColor: 'rgb(255, 99, 132)',
         tension: 0.1
       }
     ]
@@ -172,14 +172,17 @@ watch(
 }
 
 .experience-points {
-  color: rgb(75, 192, 192);
+  color: rgb(74, 156, 88);
+  // color: rgb(86, 156, 86);
+  // color: rgb(86, 130, 47);
+
 }
 
 .capacity-points {
-  color: rgb(255, 99, 132);
+  color: rgb(255, 205, 86);
 }
 
 .exemplar-points {
-  color: rgb(255, 205, 86);
+  color: rgb(255, 99, 132);
 }
 </style>

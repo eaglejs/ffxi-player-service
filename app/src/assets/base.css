@@ -1,15 +1,31 @@
-
 :root {
   --bs-gray-light: #eee;
-  --chat-log-red: #ff0000;
-  --chat-log-purple: #df02df;
+  --chat-log-bg: #031633;
+  --chat-log-blue: #3984fa;
   --chat-log-green: #01b301;
   --chat-log-mint: #00ff97;
-  --chat-log-blue: #3984fa;
-  --chat-log-yellow: #ffff00;
   --chat-log-orange: #ffa500;
-  --chat-log-white: #fff;
+  --chat-log-purple: #df02df;
+  --chat-log-red: #ff0000;
+  --chat-log-timestamp: #6edff6;
+  --chat-log-white: #ffffff;
+  --chat-log-yellow: #ffff00;
 }
+
+.dark-theme {
+  --bs-gray-light: #eee;
+  --chat-log-bg: #031633;
+  --chat-log-blue: #0d6efd;
+  --chat-log-green: #00dc75;
+  --chat-log-mint: #17a2b8;
+  --chat-log-orange: #fd7e14;
+  --chat-log-purple: #6f42c1;
+  --chat-log-red: #dc3545;
+  --chat-log-timestamp: #6edff6;
+  --chat-log-white: #ffffff;
+  --chat-log-yellow: #ffff00;
+}
+
 *,
 *::before,
 *::after {
