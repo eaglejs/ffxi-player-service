@@ -62,21 +62,21 @@ const experienceGraph = ref<ChartData<'line', (number | null)[]>>({
   datasets: [
     {
       data: experiencePoints.value || [],
-      label: 'Experience Points',
+      label: 'XP',
       fill: false,
       borderColor: 'rgb(74, 156, 88)',
       tension: 0.1
     },
     {
       data: capacityPoints.value || [],
-      label: 'Capacity Points',
+      label: 'CP',
       fill: false,
       borderColor: 'rgb(255, 205, 86)',
       tension: 0.1
     },
     {
       data: exemplarPoints.value || [],
-      label: 'Exemplar Points',
+      label: 'EX',
       fill: false,
       borderColor: 'rgb(255, 99, 132)',
       tension: 0.1
@@ -100,21 +100,21 @@ function renderLatestData() {
     datasets: [
       {
         data: experiencePoints.value || [],
-        label: 'Experience Points',
+        label: 'XP',
         fill: false,
         borderColor: 'rgb(74, 156, 88)',
         tension: 0.1
       },
       {
         data: capacityPoints.value || [],
-        label: 'Capacity Points',
+        label: 'CP',
         fill: false,
         borderColor: 'rgb(255, 205, 86)',
         tension: 0.1
       },
       {
         data: exemplarPoints.value || [],
-        label: 'Exemplar Points',
+        label: 'EX',
         fill: false,
         borderColor: 'rgb(255, 99, 132)',
         tension: 0.1
