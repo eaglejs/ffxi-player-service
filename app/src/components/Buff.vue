@@ -104,7 +104,7 @@ onMounted(() => {
 onBeforeUpdate(() => {
   tooltip = bootstrap.Tooltip.getInstance(buffElement.value)
   if (tooltip) {
-    tooltip.dispose()
+    tooltip?.dispose()
   }
 })
 

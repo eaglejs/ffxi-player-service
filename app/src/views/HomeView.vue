@@ -2,10 +2,10 @@
   <main>
     <div class="container-fluid mb-5">
       <div class="row justify-content-md-center g-3">
-        <div class="col-md-6" v-for="user in players" :key="user.playerName">
-          <User v-if="user" :user="user" />
+        <div class="col-md-6" v-for="(id, $index) in playerIds" :key="id ?? $index">
+          <User v-if="id" :player-id="id" />
         </div>
-        <div v-if="players.length === 0" class="text-center">
+        <div v-if="playerIds.length === 0" class="text-center">
           <h2>No players online</h2>
         </div>
       </div>
@@ -20,10 +20,10 @@ import { useUserStore } from '@/stores/user'
 import type { Player } from '@/types/Player'
 
 const userStore = useUserStore()
-const players = ref(getPlayers())
+const playerIds = ref(getPlayersById())
 
 watch(() => userStore.players, () => {
-  players.value = getPlayers()
+  playerIds.value = getPlayersById()
 }, {deep: true})
 
 onMounted(() => {
@@ -31,7 +31,7 @@ onMounted(() => {
   window.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') {
       userStore.fetchUsers();
-      players.value = getPlayers();
+      playerIds.value = getPlayersById();
     }
   });
 })
@@ -43,8 +43,10 @@ function getOnlinePlayers(user: Player): boolean{
   return diffInMinutes < 5;
 }
 
-function getPlayers() {
-  return Array.from(userStore.players, ([playerId, value]) => (value)).filter((user: Player) => getOnlinePlayers(user)).sort((a: Player, b: Player) => a.playerName.localeCompare(b.playerName));
+function getPlayersById() {
+  return Array.from(userStore.players.values())?.map((user: Player) => {
+    return getOnlinePlayers(user) ? user.playerId : null;
+  });
 }
 
 </script>

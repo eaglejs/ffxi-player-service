@@ -20,7 +20,7 @@
     <div class="container-fluid">
       <div class="row gx-3">
         <div class="col-md-6">
-          <User :user="user" />
+          <User :player-id="playerId" />
         </div>
         <div class="col-md-6 mt-lg-0 mt-md-0 mt-3">
           <ExperiencePoints :user="user" />
@@ -53,15 +53,18 @@ import UserCurrencies from '@/components/UserCurrencies.vue'
 import ExperiencePoints from './ExperiencePoints.vue'
 import User from '@/components/User.vue'
 import ChatLog from './ChatLog.vue'
+import { useUserStore } from '@/stores/user'
 import type { Player } from '@/types/Player'
 
 const themeStore = useThemeStore()
+const userStore = useUserStore()
 const props = defineProps({
-  user: Object as () => Player,
+  playerId: Number,
 })
+const user = computed<Player>(() => userStore.players.get(props.playerId ?? 0));
 
 const theme: ComputedRef<"gray-dark" | "gray-light"> = computed(() => themeStore.theme === 'dark' ? 'gray-dark' : 'gray-light')
-const formattedGil: ComputedRef<string> = computed(() => parseInt(String(props.user?.gil)).toLocaleString() || "0")
+const formattedGil: ComputedRef<string> = computed(() => parseInt(String(user.value?.gil)).toLocaleString() || "0")
 const gilIcon: ComputedRef<string> = computed(() =>`${iconsPath}gil.webp`)
 </script>
 

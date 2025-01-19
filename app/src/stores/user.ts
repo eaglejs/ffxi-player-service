@@ -21,6 +21,10 @@ export const useUserStore = defineStore('user', () => {
     }
   };
 
+  function getPlayerById(playerId: number) {
+    return players.value.get(playerId)
+  }
+
   async function fetchUsers() {
     const response = await axios.get(`${fullUrl}/get_users`)
     response.data.forEach((player: any) => {

@@ -120,51 +120,51 @@ import Buffs from '@/components/Buffs.vue'
 import type { ComputedRef } from 'vue'
 import type { Ability } from '@/types/Ability'
 import type { Buff } from '@/types/buff'
+import { useUserStore } from '@/stores/user'
+import type { Player } from '@/types/Player'
 
 const props = defineProps({
-  user: {
-    type: Object,
-    default: () => ({})
-  }
+  playerId: Number,
 })
 
-const playerState = ref(props?.user?.status || 0)
-const currentExemplar = computed(() => parseInt(props?.user?.currentExemplar).toLocaleString())
+const userStore = useUserStore()
+const user = computed<Player>(() => userStore.players.get(props.playerId ?? 0));
+const currentExemplar = computed(() => user.value?.currentExemplar.toLocaleString())
 const exemplarProgressRounded = computed(() => Math.floor(exemplarProgress.value))
 const playerBuffs: ComputedRef<Map<string, Buff>> = computed(() => {
-  const buffs = props?.user?.buffs
+  const buffs = user?.value?.buffs
   return buffs ? new Map(Object.entries(buffs)) : new Map()
 })
 const player = computed(() => {
   return {
-    playerId: parseInt(props?.user?.playerId),
-    playerName: props?.user?.playerName
+    playerId: user?.value?.playerId,
+    playerName: user?.value?.playerName
   }
 })
 const playerName = computed(
-  () => props?.user?.playerName.charAt(0).toUpperCase() + props?.user?.playerName.slice(1)
+  () => user?.value?.playerName.charAt(0).toUpperCase() + user?.value?.playerName.slice(1)
 )
-const requiredExemplar = computed(() => parseInt(props?.user?.requiredExemplar).toLocaleString())
+const requiredExemplar = computed(() => user?.value?.requiredExemplar.toLocaleString())
 const theme: ComputedRef<string> = computed(() =>
   themeStore.theme === 'dark' ? 'gray-dark' : 'gray-light'
 )
 const themeColor = computed(() => (themeStore.theme === 'dark' ? '#fff' : '#000'))
 const themeStore = useThemeStore()
-const getTP = computed(() => (props?.user?.tp / 3000) * 100 + '%')
+const getTP = computed(() => (user?.value?.tp / 3000) * 100 + '%')
 const playerAbilities = ref([] as Ability[])
 const exemplarProgress = computed(() => {
-  if (props?.user?.requiredExemplar - props?.user?.currentExemplar <= 1) {
+  if (user?.value?.requiredExemplar - user?.value?.currentExemplar <= 1) {
     return 100
   } else {
-    return (props?.user?.currentExemplar / props?.user?.requiredExemplar) * 100
+    return (user?.value?.currentExemplar / user?.value?.requiredExemplar) * 100
   }
 })
 
 const filterAbilties = () => {
   let abilities =
-    typeof props?.user?.abilities === 'string'
-      ? JSON.parse(props?.user?.abilities)
-      : props?.user?.abilities
+    typeof user?.value?.abilities === 'string'
+      ? JSON.parse(user?.value?.abilities)
+      : user?.value?.abilities
   let filteredAbilities: Ability[] = []
 
   for (const ability of abilities) {
@@ -191,21 +191,21 @@ function renderDeathAnimation (dead: number) {
   }
 }
 
-const dead = computed(() => props?.user?.status == 2)
+const dead = computed(() => user?.value?.status == 2)
 
-watch(props?.user, (newVal) => {
+watch(user, (newVal) => {
   renderDeathAnimation(newVal.status)
 })
 
 let tooltip: bootstrap.Tooltip | null = null
 const titleElement = ref()
 const deadElement = ref()
-const isOnline = ref(Date.now() - props?.user?.lastOnline * 1000 < 60000)
+const isOnline = ref(Date.now() - user?.value?.lastOnline * 1000 < 60000)
 const onlineTitleText = ref('Offline')
 const onlineStatusDot = ref('offline-dot')
 
 const checkOnlineState = () => {
-  isOnline.value = Date.now() - props?.user?.lastOnline * 1000 < 60000
+  isOnline.value = Date.now() - user?.value?.lastOnline * 1000 < 60000
   onlineTitleText.value = isOnline.value ? 'Online' : 'Offline'
   onlineStatusDot.value = isOnline.value ? 'online-dot' : 'offline-dot'
 }
@@ -216,7 +216,6 @@ onUpdated(() => {
 
 onMounted(() => {
   tooltip = new bootstrap.Tooltip(titleElement.value)
-  checkOnlineState()
   setInterval(checkOnlineState, 5000)
 })
 
@@ -233,9 +232,10 @@ onUnmounted(() => {
   }
 })
 
-// watch( userStore?.players, () => {
-//   playerAbilities.value = filterAbilties()
-// })
+watch( userStore?.players, () => {
+  checkOnlineState()
+  // playerAbilities.value = filterAbilties()
+})
 
 // watch( onlineStatusDot, (newValue: string) => {
 //   if (newValue == 'offline-dot') {
