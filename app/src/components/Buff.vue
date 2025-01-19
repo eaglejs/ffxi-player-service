@@ -17,7 +17,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, onBeforeUpdate, onUpdated, onUnmounted } from 'vue'
+import { computed, onMounted, ref, onUnmounted } from 'vue'
 import type { ComputedRef } from 'vue'
 import * as bootstrap from 'bootstrap'
 import { iconsPath } from '@/helpers/config'
@@ -79,13 +79,15 @@ function durationReadable(): string {
   }
 }
 
-onUpdated(() => {
-  if (buffElement.value) {
-    tooltip = new bootstrap.Tooltip(buffElement.value)
-  } else {
-    tooltip?.dispose()
-  }
-})
+// onUpdated(() => {
+//   console.log('onUpdated')
+//   if (buffElement.value) {
+//     if (tooltip) {
+//       tooltip?.dispose()
+//     }
+//     tooltip = new bootstrap.Tooltip(buffElement.value)
+//   }
+// })
 
 onMounted(() => {
   intervalId.value = setInterval(() => {
@@ -95,17 +97,11 @@ onMounted(() => {
     }
   }, 1000)
   if (buffElement.value) {
+    if (tooltip) {
+      tooltip?.dispose()
+    }
     tooltip = new bootstrap.Tooltip(buffElement.value)
-  } else {
-    tooltip?.dispose()
-  }
-})
-
-onBeforeUpdate(() => {
-  tooltip = bootstrap.Tooltip.getInstance(buffElement.value)
-  if (tooltip) {
-    tooltip?.dispose()
-  }
+  } 
 })
 
 onUnmounted(() => {
