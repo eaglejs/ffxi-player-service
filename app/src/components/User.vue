@@ -222,13 +222,13 @@ onMounted(() => {
 onBeforeUpdate(() => {
   tooltip = bootstrap.Tooltip.getInstance(titleElement.value)
   if (tooltip) {
-    tooltip.dispose()
+    tooltip?.dispose()
   }
 })
 
 onUnmounted(() => {
   if (tooltip) {
-    tooltip.dispose()
+    tooltip?.dispose()
   }
 })
 
