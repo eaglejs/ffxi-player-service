@@ -10,6 +10,7 @@
   --chat-log-timestamp: #6edff6;
   --chat-log-white: #ffffff;
   --chat-log-yellow: #ffff00;
+  --chat-log-lime: #a9dd00;
 }
 
 .dark-theme {
@@ -24,6 +25,7 @@
   --chat-log-timestamp: #6edff6;
   --chat-log-white: #ffffff;
   --chat-log-yellow: #ffff00;
+  --chat-log-lime: #a9dd00;
 }
 
 *,

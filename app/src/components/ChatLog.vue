@@ -241,4 +241,8 @@ code {
   color: var(--chat-log-mint);
 }
 
+.obtained {
+  color: var(--chat-log-lime);
+}
+
 </style>
