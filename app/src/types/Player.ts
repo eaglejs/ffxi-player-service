@@ -39,6 +39,13 @@ export interface Player {
   lastOnline: number,
   mainJob: string,
   mainJobLevel: number,
+  merits: {
+    total: number,
+    max: number,
+  },
+  capacityPoints: {
+    total: number,
+  },
   masterLevel: number,
   mpp: number,
   nationRank: number,

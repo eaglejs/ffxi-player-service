@@ -5,7 +5,7 @@
         <div class="col-md-6" v-for="(id, $index) in playerIds" :key="id ?? $index">
           <User v-if="id" :player-id="id" />
         </div>
-        <div v-if="playerIds.length === 0" class="text-center">
+        <div v-if="players.length === 0" class="text-center">
           <h2>No players online</h2>
         </div>
       </div>
@@ -14,13 +14,14 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue'
+import { onMounted, ref, watch, computed } from 'vue'
 import User from '@/components/User.vue'
 import { useUserStore } from '@/stores/user'
 import type { Player } from '@/types/Player'
 
 const userStore = useUserStore()
 const playerIds = ref(getPlayersById())
+const players = computed<Player[]>(() => Array.from(userStore.players.values()))
 
 watch(() => userStore.players, () => {
   playerIds.value = getPlayersById()

@@ -73,6 +73,13 @@ const userSchema = {
   mainJob: String,
   mainJobLevel: Number,
   masterLevel: Number,
+  merits: {
+    total: Number,
+    max: Number,
+  },
+  capacityPoints: {
+    total: Number,
+  },
   mpp: Number,
   nationRank: Number,
   playerId: Number,

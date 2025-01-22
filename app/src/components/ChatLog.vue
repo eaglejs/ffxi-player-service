@@ -41,6 +41,7 @@
               <li><a class="dropdown-item" href="#" @click="setChatFilter('Yell')">Yell</a></li>
               <li><a class="dropdown-item" href="#" @click="setChatFilter('Unity')">Unity</a></li>
               <li><a class="dropdown-item" href="#" @click="setChatFilter('Cutscene')">Cutscene</a></li>
+              <li><a class="dropdown-item" href="#" @click="setChatFilter('Obtained')">Obtained</a></li>
             </ul>
           </div>
         </section>
@@ -88,6 +89,7 @@ const messageTypeMap = {
   tell: 'tell',
   trial: 'trial',
   say: 'say',
+  obtained: 'obtained',
 };
 
 const chatLog = computed(() => {

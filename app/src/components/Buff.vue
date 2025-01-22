@@ -79,16 +79,6 @@ function durationReadable(): string {
   }
 }
 
-// onUpdated(() => {
-//   console.log('onUpdated')
-//   if (buffElement.value) {
-//     if (tooltip) {
-//       tooltip?.dispose()
-//     }
-//     tooltip = new bootstrap.Tooltip(buffElement.value)
-//   }
-// })
-
 onMounted(() => {
   intervalId.value = setInterval(() => {
     durationIntTime.value = durationReadable()

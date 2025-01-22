@@ -1,6 +1,6 @@
 <template>
   <div class="buffs-wrapper mt-1">
-    <span v-for="(buff, index) in buffList" :key="index">
+    <span v-for="(buff) in buffList" :key="buff.utc_time+buff.buff_id">
       <Buff :player="player" :buff-id="buff.buff_id" :buff-name="buff.buff_name" :duration="buff.buff_duration" :utc-time="buff.utc_time" />
     </span>
   </div>

@@ -445,6 +445,71 @@ router.post('/set_currency2', async (req, res) => {
 
 });
 
+router.post('/update_merits', async (req, res) => {
+  try {
+    const data = req.body;
+    const playerId = parseInt(data.playerId);
+    const playerName = data.playerName.toLowerCase();
+    const { total, max } = data;
+
+    await users.findOneAndUpdate(
+      { playerId: playerId },
+      { $set: { merits: { total: total, max: max } } },
+      { upsert: true, new: true }
+    );
+
+    wss.clients.forEach(client => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(JSON.stringify({
+          playerId: playerId,
+          playerName: playerName,
+          merits: { total: total, max: max }
+        }));
+      }
+    });
+
+    res.send(`Merits: OK`);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('An error occurred while updating the merits.');
+  }
+});
+
+router.post('/update_capacity_points', async (req, res) => {
+  try {
+    const data = req.body;
+    const playerId = parseInt(data.playerId);
+    const playerName = data.playerName.toLowerCase();
+    const {numberOfJobPoints} = data;
+
+    await users.findOneAndUpdate(
+      { playerId: playerId },
+      { $set: { capacityPoints: {
+        total: parseInt(numberOfJobPoints)
+      } } },
+      { upsert: true, new: true }
+    );
+
+    wss.clients.forEach(client => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(JSON.stringify({
+          playerId: playerId,
+          playerName: playerName,
+          capacityPoints: {
+            total: parseInt(numberOfJobPoints)
+          }
+        }));
+      }
+    });
+
+    res.send(`Capacity points: OK`);
+  }
+  catch (error) {
+    console.error(error);
+    res.status(500).send('An error occurred while updating the capacity points.');
+  }
+});
+
 router.post('/update_exp_history', async (req, res) => {
   try {
     // (8|253) = exp, (371|372) = limit, (718|735) = capacity, (809|810) = exemplar

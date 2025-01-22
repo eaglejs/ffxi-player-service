@@ -8,7 +8,14 @@
               <div class="d-flex justify-content-between">
                 <h2 class="col-8 p-0 m-0">Title: ({{ user?.title }})</h2>
                 <section class="col-4 text-end">
-                  <img class="gil me-2" :src="gilIcon" alt="Gil" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Gil">
+                  <img
+                    class="gil me-2"
+                    :src="gilIcon"
+                    alt="Gil"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="bottom"
+                    title="Gil"
+                  />
                   <span>{{ formattedGil }}</span>
                 </section>
               </div>
@@ -20,25 +27,30 @@
     <div class="container-fluid">
       <div class="row gx-3">
         <div class="col-md-6">
-          <User :player-id="playerId" />
+          <section>
+            <User :player-id="playerId" />
+            <div class="row mt-3 gx-3">
+              <div class="col-lg-6 col-sm-12 mt-lg-0 mt-md-0 mt-sm-0 mt-xs-0 mt-0">
+                <UserCurrencies :currencies="user?.currency1" :type="1" />
+                <UserStats class="mt-3" :stats="user?.stats" />
+              </div>
+              <div class="col-lg-6 col-sm-12 mt-lg-0 mt-md-0 mt-sm-0 mt-xs-0 mt-3">
+                <UserCurrencies class="mt-xs-3 mt-sm-3 mt-md-3 mt-lg-0" :currencies="user?.currency2" :type="2" />
+                <UserResistances class="mt-3" :resistances="user?.stats" />
+              </div>
+            </div>
+          </section>
         </div>
         <div class="col-md-6 mt-lg-0 mt-md-0 mt-3">
-          <ExperiencePoints :user="user" />
+          <section class="mb-3">
+            <ExperiencePoints :user="user" />
+          </section>
+          <div class="col-lg-12 col-sm-12 mt-lg-0 mt-3">
+            <ChatLog />
+          </div>
         </div>
       </div>
-      <div class="row mt-3 gx-3">
-        <div class="col-lg-3 col-sm-6 mt-lg-0 mt-md-0 mt-sm-0 mt-xs-0 mt-0">
-          <UserCurrencies v-if="user?.currency1" :currencies="user?.currency1" :type="1" />
-          <UserStats class="mt-3" :stats="user?.stats" />
-        </div>
-        <div class="col-lg-3 col-sm-6 mt-lg-0 mt-md-0 mt-sm-0 mt-xs-0 mt-3">
-          <UserCurrencies :currencies="user?.currency2" :type="2" />
-          <UserResistances class="mt-3" :resistances="user?.stats" />
-        </div>
-        <div class="col-lg-6 col-sm-12 mt-lg-0 mt-3">
-          <ChatLog />
-        </div>
-      </div>
+      <div class="row mt-3 gx-3"></div>
     </div>
   </div>
 </template>
@@ -59,13 +71,17 @@ import type { Player } from '@/types/Player'
 const themeStore = useThemeStore()
 const userStore = useUserStore()
 const props = defineProps({
-  playerId: Number,
+  playerId: Number
 })
-const user = computed<Player>(() => userStore.players.get(props.playerId ?? 0));
+const user = computed<Player>(() => userStore.players.get(props.playerId ?? 0))
 
-const theme: ComputedRef<"gray-dark" | "gray-light"> = computed(() => themeStore.theme === 'dark' ? 'gray-dark' : 'gray-light')
-const formattedGil: ComputedRef<string> = computed(() => parseInt(String(user.value?.gil)).toLocaleString() || "0")
-const gilIcon: ComputedRef<string> = computed(() =>`${iconsPath}gil.webp`)
+const theme: ComputedRef<'gray-dark' | 'gray-light'> = computed(() =>
+  themeStore.theme === 'dark' ? 'gray-dark' : 'gray-light'
+)
+const formattedGil: ComputedRef<string> = computed(
+  () => parseInt(String(user.value?.gil)).toLocaleString() || '0'
+)
+const gilIcon: ComputedRef<string> = computed(() => `${iconsPath}gil.webp`)
 </script>
 
 <style scoped lang="scss">

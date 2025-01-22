@@ -13,6 +13,14 @@
     <div class="card-body">
       <Line :data="experienceGraph" :options="options" />
     </div>
+    <div class="card-footer">
+      <section>
+        <div class="d-flex justify-content-between">
+          <span>Merits: <span class="experience-points">{{ totalMerits }} / {{ maxMerits }}</span></span>
+          <span>Capacity Points: <span class="capacity-points">{{ totalCapacityPoints }}</span></span>
+        </div>
+      </section>
+    </div>
   </div>
 </template>
 
@@ -41,6 +49,9 @@ const props = defineProps<{
 const averageExperiencePts = ref(0)
 const averageCapacityPts = ref(0)
 const averageExemplarPts = ref(0)
+const totalMerits: ComputedRef<number> = computed(() => props.user?.merits.total || 0)
+const maxMerits: ComputedRef<number> = computed(() => props.user?.merits.max || 0)
+const totalCapacityPoints: ComputedRef<number> = computed(() => props?.user?.capacityPoints?.total || 0)
 const experiencePoints: ComputedRef<number[]> = computed(
   () => props.user?.expHistory?.experience?.map((exp: Experience) => exp.points) || []
 )

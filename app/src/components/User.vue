@@ -193,8 +193,9 @@ function renderDeathAnimation (dead: number) {
 
 const dead = computed(() => user?.value?.status == 2)
 
-watch(user, (newVal) => {
-  renderDeathAnimation(newVal.status)
+watch(userStore.players, (players: any) => {
+  const player = players.get(props.playerId)
+  renderDeathAnimation(player.status)
 })
 
 let tooltip: bootstrap.Tooltip | null = null
@@ -234,14 +235,8 @@ onUnmounted(() => {
 
 watch( userStore?.players, () => {
   checkOnlineState()
-  // playerAbilities.value = filterAbilties()
 })
 
-// watch( onlineStatusDot, (newValue: string) => {
-//   if (newValue == 'offline-dot') {
-//     serverStore.connectWebSocket()
-//   }
-// })
 </script>
 
 <style scoped lang="scss">
