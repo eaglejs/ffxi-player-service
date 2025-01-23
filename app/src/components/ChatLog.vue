@@ -41,6 +41,7 @@
               <li><a class="dropdown-item" href="#" @click="setChatFilter('Yell')">Yell</a></li>
               <li><a class="dropdown-item" href="#" @click="setChatFilter('Unity')">Unity</a></li>
               <li><a class="dropdown-item" href="#" @click="setChatFilter('Cutscene')">Cutscene</a></li>
+              <li><a class="dropdown-item" href="#" @click="setChatFilter('Drops')">Drops</a></li>
               <li><a class="dropdown-item" href="#" @click="setChatFilter('Obtained')">Obtained</a></li>
             </ul>
           </div>
@@ -90,6 +91,7 @@ const messageTypeMap = {
   trial: 'trial',
   say: 'say',
   obtained: 'obtained',
+  drops: 'obtained',
 };
 
 const chatLog = computed(() => {
