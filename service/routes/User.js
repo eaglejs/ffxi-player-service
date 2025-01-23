@@ -808,7 +808,7 @@ router.post('/set_message', async (req, res) => {
         $push: {
           chatLog: {
             $each: [{ messageType, message: decodedMessage, timeStamp }],
-            $slice: -1000 // Keep only the latest 1000 messages
+            $slice: -3000 // Keep only the latest 3000 messages
           }
         }
       },
