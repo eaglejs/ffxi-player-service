@@ -32,10 +32,10 @@
             <div class="row mt-3 gx-3">
               <div class="col-lg-6 col-sm-12 mt-lg-0 mt-md-0 mt-sm-0 mt-xs-0 mt-0">
                 <UserCurrencies :currencies="user?.currency1" :type="1" />
-                <UserStats class="mt-3" :stats="user?.stats" />
+                <UserCurrencies class="mt-3" :currencies="user?.currency2" :type="2" />
               </div>
               <div class="col-lg-6 col-sm-12 mt-lg-0 mt-md-0 mt-sm-0 mt-xs-0 mt-3">
-                <UserCurrencies class="mt-xs-3 mt-sm-3 mt-md-3 mt-lg-0" :currencies="user?.currency2" :type="2" />
+                <UserStats class="mt-xs-3 mt-sm-3 mt-md-3 mt-lg-0" :stats="user?.stats" />
                 <UserResistances class="mt-3" :resistances="user?.stats" />
               </div>
             </div>

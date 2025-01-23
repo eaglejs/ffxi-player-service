@@ -16,8 +16,8 @@
     <div class="card-footer">
       <section>
         <div class="d-flex justify-content-between">
-          <span>Merits: <span class="experience-points">{{ totalMerits }} / {{ maxMerits }}</span></span>
-          <span>Capacity Points: <span class="capacity-points">{{ totalCapacityPoints }}</span></span>
+          <span><b>Merits</b>: <span class="experience-points">{{ totalMerits }} / {{ maxMerits }}</span></span>
+          <span><b>Job Points</b>: <span class="capacity-points">{{ totalCapacityPoints }}</span></span>
         </div>
       </section>
     </div>

@@ -5,7 +5,7 @@
         <div class="col-md-6" v-for="(id, $index) in playerIds" :key="id ?? $index">
           <User v-if="id" :player-id="id" />
         </div>
-        <div v-if="players.length === 0" class="text-center">
+        <div v-if="playerIds.length === 0" class="text-center">
           <h2>No players online</h2>
         </div>
       </div>
@@ -20,11 +20,10 @@ import { useUserStore } from '@/stores/user'
 import type { Player } from '@/types/Player'
 
 const userStore = useUserStore()
-const playerIds = ref(getPlayersById())
-const players = computed<Player[]>(() => Array.from(userStore.players.values()))
+const playerIds = ref(getPlayersId())
 
 watch(() => userStore.players, () => {
-  playerIds.value = getPlayersById()
+  playerIds.value = getPlayersId()
 }, {deep: true})
 
 onMounted(() => {
@@ -32,7 +31,7 @@ onMounted(() => {
   window.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') {
       userStore.fetchUsers();
-      playerIds.value = getPlayersById();
+      playerIds.value = getPlayersId();
     }
   });
 })
@@ -44,9 +43,13 @@ function getOnlinePlayers(user: Player): boolean{
   return diffInMinutes < 5;
 }
 
-function getPlayersById() {
+function getPlayersId() {
   return Array.from(userStore.players.values())?.map((user: Player) => {
     return getOnlinePlayers(user) ? user.playerId : null;
+  }).sort((a, b) => {
+    if (a === null) return 1;
+    if (b === null) return -1;
+    return a - b;
   });
 }
 

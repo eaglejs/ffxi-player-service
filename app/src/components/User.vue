@@ -24,9 +24,9 @@
     </div>
     <div class="card-body" :class="{ 'dead-mask': dead }">
       <div class="row mb-2">
-        <section class="col-9">
+        <section class="col-7">
           <section class="row">
-            <section class="col-9">
+            <section class="col-12">
               <p class="mb-0"><b>Exemplar</b></p>
               <div class="progress mt-1" :data-bs-theme="theme">
                 <div
@@ -46,24 +46,12 @@
               </div>
               <p class="mb-2 text-center">{{ currentExemplar }} / {{ requiredExemplar }}</p>
             </section>
-            <section class="col-3">
-              <div class="row">
-                <section class="col-12 d-flex p-0">
-                  <p class="me-2"><b>Atk:</b></p>
-                  <p>{{ user?.attack }}</p>
-                </section>
-                <section class="col-12 d-flex p-0">
-                  <p class="me-2"><b>Def:</b></p>
-                  <p>{{ user?.defense }}</p>
-                </section>
-              </div>
-            </section>
           </section>
           <div v-if="playerBuffs.size">
             <Buffs :player="player" :buff-data="playerBuffs" />
           </div>
         </section>
-        <section class="col-3">
+        <section class="col-5">
           <p class="mb-0"><b>HP</b></p>
           <div class="progress mb-1 mt-1" :data-bs-theme="theme">
             <div
@@ -106,6 +94,14 @@
         </section>
       </div>
     </div>
+    <div class="card-footer">
+      <section>
+        <div class="d-flex">
+          <span class="me-2"><b>Attack:</b>{{ user?.attack }}</span>
+          <span class="me-2"><b>Defense:</b>{{ user?.defense }}</span>
+        </div>
+      </section>
+    </div>
   </div>
 </template>
 
@@ -124,11 +120,11 @@ import { useUserStore } from '@/stores/user'
 import type { Player } from '@/types/Player'
 
 const props = defineProps({
-  playerId: Number,
+  playerId: Number
 })
 
 const userStore = useUserStore()
-const user = computed<Player>(() => userStore.players.get(props.playerId ?? 0));
+const user = computed<Player>(() => userStore.players.get(props.playerId ?? 0))
 const currentExemplar = computed(() => user.value?.currentExemplar.toLocaleString())
 const exemplarProgressRounded = computed(() => Math.floor(exemplarProgress.value))
 const playerBuffs: ComputedRef<Map<string, Buff>> = computed(() => {
@@ -177,7 +173,7 @@ const filterAbilties = () => {
   return filteredAbilities
 }
 
-function renderDeathAnimation (dead: number) {
+function renderDeathAnimation(dead: number) {
   if (dead == 2) {
     deadElement.value.classList.add('transition')
     setTimeout(() => {
@@ -233,10 +229,9 @@ onUnmounted(() => {
   }
 })
 
-watch( userStore?.players, () => {
+watch(userStore?.players, () => {
   checkOnlineState()
 })
-
 </script>
 
 <style scoped lang="scss">
