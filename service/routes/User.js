@@ -40,6 +40,10 @@ const chats = mongoose.model('chats', chatSchema);
 router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({ extended: true }));
 
+function removeControlCharacters(str) {
+  return str.replace(/[\x00-\x1F\x7F]/g, '');
+}
+
 router.post('/initialize_user', async (req, res) => {
   try {
     const data = req.body;
@@ -782,7 +786,8 @@ router.post('/set_zone', async (req, res) => {
 router.get('/get_chat_log', async (req, res) => {
   try {
     const playerId = parseInt(req.query.playerId);
-    const chat = await chats.findOne({ playerId: playerId });
+    // get the last 1000 messages
+    const chat = await chats.findOne({ playerId: playerId}, { chatLog: { $slice: -1000 } });
 
     res.send(chat.chatLog);
   } catch (error) {
@@ -791,37 +796,37 @@ router.get('/get_chat_log', async (req, res) => {
   }
 });
 
-router.post('/set_message', async (req, res) => {
+router.post('/set_messages', async (req, res) => {
   try {
     const data = req.body;
     const playerId = parseInt(data.playerId);
     const playerName = data.playerName.toLowerCase();
-    const message = data.message;
+    const messages = new Map(Object.entries(data.messages));
     const messageType = data.messageType;
     const timeStamp = new Date().toISOString();
-
-    const decodedMessage = message.replace(/(\x7F1|\n)/g, '');
+    
+    const messagesPackage = [];
+    messages.entries().forEach(([key, value]) => {
+      const decodedMessage = value.replace(/(\x7F1|\n)/g, '')
+      messagesPackage.push({ messageType, message: decodedMessage, timeStamp });
+    });
 
     await chats.findOneAndUpdate(
-      { playerName: playerName, playerId: playerId },
-      {
-        $push: {
-          chatLog: {
-            $each: [{ messageType, message: decodedMessage, timeStamp }],
-            $slice: -3000 // Keep only the latest 3000 messages
-          }
-        }
+      { playerId
       },
+      { $push: { chatLog: { $each: messagesPackage, $slice: -5000 } } },
       { upsert: true, new: true }
     );
 
     wss.clients.forEach(client => {
       if (client.readyState === WebSocket.OPEN) {
+        messagesPackage.forEach(({ messageType, message, timeStamp }) => {
         client.send(JSON.stringify({
           playerName: playerName,
           playerId: playerId,
-          chatLog: { messageType, message: decodedMessage, timeStamp }
+          chatLog: { messageType, message: message, timeStamp }
         }));
+      });
       }
     });
 

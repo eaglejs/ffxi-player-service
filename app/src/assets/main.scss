@@ -1,10 +1,5 @@
 @import './base.css';
 
-$gray-dark: var(--bs-gray-dark);
-$gray-light: var(--bs-gray-light);
-$blue: var(--bs-blue);
-$blue-600: var(--bs-blue-600);
-
 body {
   font-family: 'Roboto', sans-serif;
   font-size: 16px;
@@ -15,7 +10,7 @@ body {
 }
 
 b {
-  color: #bbb;
+  color: #918f8f;
 }
 
 h2 {
@@ -26,33 +21,21 @@ h3 {
   font-size: 1.2rem;
 }
 
+a {
+  color: var(--bs-black);
+  text-decoration: none;
+}
+
 #app {
   max-width: 1920px;
   margin: 0 auto;
 }
 
-[data-bs-theme="gray-dark"] {
-  --bs-body-color: var(--bs-white);
-  --bs-body-color-rgb: #{to-rgb($gray-dark)};
-  --bs-body-bg: var(--bs-gray-dark);
-  --bs-body-bg-rgb: #{to-rgb($blue)};
-  --bs-tertiary-bg: #{$blue-600};
-  --bs-progress-bg: var(--bs-gray-600);
-
+[data-bs-theme="dark"] {
+  b {
+    color: #bbb;
+  }
   a {
     color: var(--bs-white);
-  }
-}
-
-[data-bs-theme="gray-light"] {
-  --bs-body-color: var(--bs-black);
-  --bs-body-color-rgb: #{to-rgb($gray-light)};
-  --bs-body-bg: var(--bs-gray-light);
-  --bs-body-bg-rgb: #{to-rgb($blue)};
-  --bs-tertiary-bg: #{$blue-600};
-  --bs-progress-bg: var(--bs-gray-400);
-
-  a {
-    color: var(--bs-black);
   }
 }

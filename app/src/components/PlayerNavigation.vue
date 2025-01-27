@@ -17,7 +17,7 @@ const props = defineProps({
 })
 
 onMounted( () => {
-  console.log(props.players);
+  // console.log(props.players);
 });
 
 </script>

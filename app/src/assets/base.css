@@ -1,5 +1,9 @@
 :root {
   --bs-gray-light: #eee;
+  --bs-tertiary-bg: var(--blue-600);
+  --bs-progress-bg: var(--bs-gray-400);
+  --body-bg: #ffffff;
+  --buff-bg: var(--bs-secondary-bg); /* #ced4da; */
   --chat-log-bg: #031633;
   --chat-log-blue: #3984fa;
   --chat-log-green: #01b301;
@@ -11,10 +15,17 @@
   --chat-log-white: #ffffff;
   --chat-log-yellow: #ffff00;
   --chat-log-lime: #a9dd00;
+  --menu-color: #000000;
+  --blue: var(--bs-blue);
+  --blue-600: var(--bs-blue-600);
 }
 
-.dark-theme {
+[data-bs-theme="dark"] {
   --bs-gray-light: #eee;
+  --bs-tertiary-bg: var(--blue-600);
+  --bs-progress-bg: var(--bs-secondary-bg);
+  --body-bg: #212529;
+  --buff-bg: var(--bs-progress-bg); /* #495057; */
   --chat-log-bg: #031633;
   --chat-log-blue: #0d6efd;
   --chat-log-green: #00dc75;
@@ -26,6 +37,7 @@
   --chat-log-white: #ffffff;
   --chat-log-yellow: #ffff00;
   --chat-log-lime: #a9dd00;
+  --menu-color: #ffffff;
 }
 
 *,

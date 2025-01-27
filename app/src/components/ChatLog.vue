@@ -50,7 +50,7 @@
     </div>
     <div ref="chatLogEl" v-if="chatLog.length" class="card-body chat-log">
       <section ref="firstChildEl" />
-      <pre v-for="item in chatLog" :key="item.timeStamp">
+      <pre v-for="item in chatLog" :key="item.timeStamp + uuid()">
 <code :class="chatColor(item?.messageType)"><span v-if="timeStampsEnabled">[{{ toLocalTime(item.timeStamp) }}]</span>{{ `${item?.message}` }}</code>
       </pre>
       <section ref="lastChildEl" />
@@ -64,9 +64,9 @@
 <script setup lang="ts">
 import { computed, onMounted, onUpdated, ref } from 'vue'
 import { mdiChevronUp, mdiChevronDown } from '@mdi/js'
-import GenIcon from '@/components/GenIcon.vue'
+import GenIcon from '@/components/gen-components/GenIcon.vue'
 import { useUserStore } from '@/stores/user'
-import { isIPhone, isAndroid } from '@/helpers/utils'
+import { isIPhone, isAndroid, uuid } from '@/helpers/utils'
 
 const userStore = useUserStore()
 const playerId = parseInt(window.location.pathname.split('/').pop() || '')
@@ -75,7 +75,7 @@ const instantFlag = ref(false)
 const chatLogEl = ref<HTMLElement | undefined>()
 const firstChildEl = ref<HTMLElement | undefined>()
 const lastChildEl = ref<HTMLElement | undefined>()
-const chatFilterValue = ref<string>('Chat Filter')
+const chatFilterValue = ref<string>('Filter')
 const timeStampsEnabled = ref<boolean>(
   localStorage.getItem('timeStampsEnabled') === 'true' || false
 )
@@ -96,10 +96,9 @@ const messageTypeMap = {
 
 const chatLog = computed(() => {
   return userStore.chatLog.filter((item: any) => {
-    if (chatFilterValue.value === 'None' || chatFilterValue.value === 'Chat Filter') {
+    if (chatFilterValue.value === 'None' || chatFilterValue.value === 'Filter') {
       return true
     } else {
-      console.log(item.messageType?.toLowerCase(), chatFilterValue.value?.toLowerCase())
       return item.messageType?.toLowerCase() === chatFilterValue.value?.toLowerCase()
     }
   })
@@ -162,9 +161,9 @@ const handleScrollEvent = () => {
 function setChatFilter(filter: string) {
   instantFlag.value = true
   if (filter === 'None') {
-    chatFilterValue.value = 'Chat Filter'
+    chatFilterValue.value = 'Filter'
   } else {
-    chatFilterValue.value = filter ?? 'Chat Filter'
+    chatFilterValue.value = filter ?? 'Filter'
   }
   scrollToLastChild('instant')
   setTimeout(() => {
@@ -208,7 +207,7 @@ code {
   background-color: var(--chat-log-bg);
   border-bottom-left-radius: 7px;
   border-bottom-right-radius: 7px;
-  height: 490px;
+  height: 470px;
   overflow-y: auto;
   p {
     color: var(--chat-log-white);

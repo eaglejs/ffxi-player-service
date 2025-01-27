@@ -4,32 +4,31 @@
     :class="{ buff: isTimerPositive() }"
     :data-duration="durationIntTime"
   >
-    <img
-      :class="{ 'buff-icon': isLowTimer() }"
-      ref="buffElement"
-      :src="buffIcon"
-      :alt="buffName"
-      data-bs-toggle="tooltip"
-      data-bs-placement="bottom"
-      :title="buffName"
-    />
+    <GenTooltip :tip="buffName" placement="bottom">
+      <template #main>
+        <img
+          :class="{ 'buff-icon': isLowTimer() }"
+          ref="buffElement"
+          :src="buffIcon"
+          :alt="buffName"
+        />
+      </template>
+    </GenTooltip>
   </section>
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted, ref, onUnmounted } from 'vue'
 import type { ComputedRef } from 'vue'
-import * as bootstrap from 'bootstrap'
 import { iconsPath } from '@/helpers/config'
 import { useUserStore } from '@/stores/user'
+import GenTooltip from '@/components/gen-components/GenTooltip.vue'
 
 interface Player {
   playerId: number
   playerName: string
 }
 
-let tooltip: bootstrap.Tooltip | null = null
-const buffElement = ref()
 const intervalId = ref()
 const durationIntTime = ref()
 const userStore = useUserStore()
@@ -40,7 +39,10 @@ const props = defineProps({
     required: true
   },
   buffId: Number,
-  buffName: String,
+  buffName: {
+    type: String,
+    default: ''
+  },
   duration: Number,
   utcTime: String
 })
@@ -86,17 +88,10 @@ onMounted(() => {
       userStore.refreshBuffs(props?.player)
     }
   }, 1000)
-  if (buffElement.value) {
-    if (tooltip) {
-      tooltip?.dispose()
-    }
-    tooltip = new bootstrap.Tooltip(buffElement.value)
-  } 
 })
 
 onUnmounted(() => {
   clearInterval(intervalId.value)
-  tooltip?.dispose()
 })
 </script>
 

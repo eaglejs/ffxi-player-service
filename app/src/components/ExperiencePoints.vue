@@ -2,10 +2,18 @@
   <div class="card experience-wrapper" v-if="experienceGraph">
     <div class="card-header">
       <div class="d-flex">
-        <h3 class="mb-0">Experience Points</h3>
+        <h3 v-if="isExperienceDashboard" class="mb-0">
+          <OnlineDot :user="user" />
+          {{ playerName }}
+        </h3>
+        <h3 v-else class="mb-0">Experience Points</h3>
         <section class="d-inline-flex flex-grow-1 justify-content-end">
-          <span class="pe-2 experience-points">{{ averageExperiencePts.toLocaleString() }}k XP/hr</span>
-          <span class="ps-2 pe-2 capacity-points">{{ averageCapacityPts.toLocaleString() }}k CP/hr</span>
+          <span class="pe-2 experience-points"
+            >{{ averageExperiencePts.toLocaleString() }}k XP/hr</span
+          >
+          <span class="ps-2 pe-2 capacity-points"
+            >{{ averageCapacityPts.toLocaleString() }}k CP/hr</span
+          >
           <span class="ps-2 exemplar-points">{{ averageExemplarPts.toLocaleString() }}k EX/hr</span>
         </section>
       </div>
@@ -16,8 +24,13 @@
     <div class="card-footer">
       <section>
         <div class="d-flex justify-content-between">
-          <span><b>Merits</b>: <span class="experience-points">{{ totalMerits }} / {{ maxMerits }}</span></span>
-          <span><b>Job Points</b>: <span class="capacity-points">{{ totalCapacityPoints }}</span></span>
+          <span
+            ><b>Merits</b>:
+            <span class="experience-points">{{ totalMerits }} / {{ maxMerits }}</span></span
+          >
+          <span
+            ><b>Job Points</b>: <span class="capacity-points">{{ totalCapacityPoints }}</span></span
+          >
         </div>
       </section>
     </div>
@@ -40,18 +53,29 @@ import {
 import { Line } from 'vue-chartjs'
 import type { Player } from '@/types/Player'
 import type { Experience } from '@/types/Experience'
+import { useUserStore } from '@/stores/user'
+import OnlineDot from '@/components/OnlineDot.vue'
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend)
 
 const props = defineProps<{
   user: Player | undefined
 }>()
+const userStore = useUserStore()
 const averageExperiencePts = ref(0)
 const averageCapacityPts = ref(0)
 const averageExemplarPts = ref(0)
+const isExperienceDashboard = ref<boolean>(window.location.pathname === '/experience-dashboard')
+const playerName = computed(() =>
+  props.user && props.user.playerName
+    ? props.user.playerName.charAt(0).toUpperCase() + props.user.playerName.slice(1)
+    : ''
+)
 const totalMerits: ComputedRef<number> = computed(() => props.user?.merits.total || 0)
 const maxMerits: ComputedRef<number> = computed(() => props.user?.merits.max || 0)
-const totalCapacityPoints: ComputedRef<number> = computed(() => props?.user?.capacityPoints?.total || 0)
+const totalCapacityPoints: ComputedRef<number> = computed(
+  () => props?.user?.capacityPoints?.total || 0
+)
 const experiencePoints: ComputedRef<number[]> = computed(
   () => props.user?.expHistory?.experience?.map((exp: Experience) => exp.points) || []
 )
@@ -139,32 +163,31 @@ function renderLatestData() {
 
 function analyzePoints(experiencePoints: Experience[]): number {
   if (!experiencePoints || experiencePoints.length === 0) {
-    return 0;
+    return 0
   }
 
   // Convert timestamps to Date objects and sort by timestamp
-  const points = experiencePoints.map(item => ({
+  const points = experiencePoints.map((item) => ({
     points: item.points ?? 0,
     timestamp: new Date(item.timestamp).getTime()
-  }));
+  }))
 
   // Calculate the total time span of the given data points
-  const startTime = points[0].timestamp;
-  const endTime = points[points.length - 1].timestamp;
-  const totalTimeSpan = (endTime - startTime) / 1000; // in seconds
+  const startTime = points[0].timestamp
+  const endTime = points[points.length - 1].timestamp
+  const totalTimeSpan = (endTime - startTime) / 1000 // in seconds
 
   // Calculate total points accumulated
-  const totalPoints = points.reduce((sum, item) => sum + item.points, 0);
+  const totalPoints = points.reduce((sum, item) => sum + item.points, 0)
 
   // Calculate the rate of points per second
-  const ratePerSecond = totalPoints / totalTimeSpan;
+  const ratePerSecond = totalPoints / totalTimeSpan
 
   // Extrapolate the rate to an hour
-  const ratePerHour = ratePerSecond * 3600;
-
+  const ratePerHour = ratePerSecond * 3600
 
   // Format the rate to one decimal point
-  return parseFloat((ratePerHour / 1000).toFixed(1)) || 0;
+  return parseFloat((ratePerHour / 1000).toFixed(1)) || 0
 }
 
 onMounted(() => {
@@ -186,7 +209,6 @@ watch(
   color: rgb(74, 156, 88);
   // color: rgb(86, 156, 86);
   // color: rgb(86, 130, 47);
-
 }
 
 .capacity-points {

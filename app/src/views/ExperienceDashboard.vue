@@ -3,7 +3,7 @@
     <div class="container-fluid mb-5">
       <div class="row justify-content-md-center g-3">
         <div class="col-md-6" v-for="(id, $index) in playerIds" :key="id ?? $index">
-          <User v-if="id" :player-id="id" />
+          <ExperiencePoints v-if="id" :user="userStore.getPlayerById(id)" />
         </div>
         <div v-if="playerIds.length === 0" class="text-center">
           <h2>No players online</h2>
@@ -15,7 +15,7 @@
 
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue'
-import User from '@/components/User.vue'
+import ExperiencePoints from '@/components/ExperiencePoints.vue'
 import { useUserStore } from '@/stores/user'
 import type { Player } from '@/types/Player'
 
@@ -31,13 +31,14 @@ function getOnlinePlayers(user: Player): boolean {
 
 function getPlayersId() {
   return Array.from(userStore.players.values())
-    .reduce((acc: number[], user: Player) => {
-      if (getOnlinePlayers(user)) {
-        acc.push(user.playerId)
-      }
-      return acc
-    }, [])
-    .sort((a: number, b: number) => a - b)
+    ?.map((user: Player) => {
+      return getOnlinePlayers(user) ? user.playerId : null
+    })
+    .sort((a, b) => {
+      if (a === null) return 1
+      if (b === null) return -1
+      return a - b
+    })
 }
 
 watch(

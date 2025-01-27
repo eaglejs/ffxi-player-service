@@ -61,6 +61,6 @@ const formattedCurrency = (value: number) => {
 <style scoped lang="scss">
 .currency-wrapper {
   overflow-y: auto;
-  max-height: 200px;
+  max-height: 185px;
 }
 </style>

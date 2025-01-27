@@ -17,6 +17,12 @@ coverage
 /cypress/videos/
 /cypress/screenshots/
 
+# Java specific
+*.class
+*.war
+*.ear
+**/.gradle/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
