@@ -38,10 +38,11 @@ export const usePlayerStore = defineStore('player', () => {
   function updatePlayer(data: string) {
     const playerId = parseInt(window.location.pathname.split('/').pop() || '0')
     const player: any = JSON.parse(data)
-    const playerToUpdate = players.value.get(parseInt(player.playerId))
+    const playerToUpdate = players.value.get(player.playerId)
     if (playerToUpdate === undefined) {
       return
     }
+
     if ('chatLog' in player) {
       if (playerId === player.playerId) {
         chatLog.value.push(player.chatLog)

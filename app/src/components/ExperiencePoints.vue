@@ -63,7 +63,7 @@ const props = defineProps<{
 const averageExperiencePts = ref(0)
 const averageCapacityPts = ref(0)
 const averageExemplarPts = ref(0)
-const isExperienceDashboard = ref<boolean>(window.location.pathname === '/experience-dashboard')
+const isExperienceDashboard = ref<boolean>(window.location.pathname === '/charts')
 const playerName = computed(() =>
   props.player && props.player.playerName
     ? props.player.playerName.charAt(0).toUpperCase() + props.player.playerName.slice(1)

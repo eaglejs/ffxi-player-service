@@ -40,7 +40,7 @@
               </section>
             </section>
             <div v-if="playerBuffs.size">
-              <Buffs :player="player" :buff-data="playerBuffs" />
+              <BuffList :player="player" :buff-data="playerBuffs" />
             </div>
           </section>
           <section class="col-4">
@@ -105,7 +105,7 @@ import 'bootstrap'
 import { computed, ref, watch } from 'vue'
 import { useThemeStore } from '@/stores/theme'
 import { mdiSkullCrossbones } from '@mdi/js'
-import Buffs from '@/components/Buffs.vue'
+import BuffList from '@/components/BuffList.vue'
 import type { ComputedRef } from 'vue'
 import type { Ability } from '@/types/Ability'
 import type { Buff } from '@/types/buff'
@@ -119,7 +119,8 @@ const props = defineProps({
 
 const playerStore = usePlayerStore()
 const player = computed<Player>(() => playerStore.players.get(props.playerId ?? 0))
-const currentExemplar = computed(() => player.value?.currentExemplar.toLocaleString())
+const currentExemplar = computed(() => parseInt(player.value?.currentExemplar.toString()).toLocaleString())
+const requiredExemplar = computed(() => parseInt(player.value?.requiredExemplar.toString()).toLocaleString())
 const exemplarProgressRounded = computed(() => Math.floor(exemplarProgress.value))
 const playerBuffs: ComputedRef<Map<string, Buff>> = computed(() => {
   const buffs = player?.value?.buffs
@@ -128,7 +129,6 @@ const playerBuffs: ComputedRef<Map<string, Buff>> = computed(() => {
 const playerName = computed(
   () => player?.value?.playerName.charAt(0).toUpperCase() + player?.value?.playerName.slice(1)
 )
-const requiredExemplar = computed(() => player?.value?.requiredExemplar.toLocaleString())
 const themeColor = computed(() => (themeStore.theme === 'dark' ? '#fff' : '#000'))
 const getTP = computed(() => (player?.value?.tp / 3000) * 100 + '%')
 const dead = computed(() => player?.value?.status == 2)

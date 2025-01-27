@@ -329,16 +329,16 @@ router.post('/set_stats', async (req, res) => {
       { playerId: playerId },
       {
         $set: {
-          masterLevel: masterLevel,
-          mainJobLevel: mainJobLevel,
-          subJobLevel: subJobLevel,
-          attack: attack,
-          defense: defense,
+          masterLevel: parseInt(masterLevel),
+          mainJobLevel: parseInt(mainJobLevel),
+          subJobLevel: parseInt(subJobLevel),
+          attack: parseInt(attack),
+          defense: parseInt(defense),
           stats: stats,
           title: title,
-          nationRank: nationRank,
-          currentExemplar: currentExemplar,
-          requiredExemplar: requiredExemplar,
+          nationRank: parseInt(nationRank),
+          currentExemplar: parseInt(currentExemplar),
+          requiredExemplar: parseInt(requiredExemplar),
         }
       },
       { upsert: true, new: true }
@@ -347,18 +347,18 @@ router.post('/set_stats', async (req, res) => {
     wss.clients.forEach(client => {
       if (client.readyState === WebSocket.OPEN) {
         client.send(JSON.stringify({
-          playerId: playerId,
+          playerId: parseInt(playerId),
           playerName: playerName,
-          masterLevel: masterLevel,
-          mainJobLevel: mainJobLevel,
-          subJobLevel: subJobLevel,
-          attack: attack,
-          defense: defense,
+          masterLevel: parseInt(masterLevel),
+          mainJobLevel: parseInt(mainJobLevel),
+          subJobLevel: parseInt(subJobLevel),
+          attack: parseInt(attack),
+          defense: parseInt(defense),
           stats: stats,
           title: title,
-          nationRank: nationRank,
-          currentExemplar: currentExemplar,
-          requiredExemplar: requiredExemplar,
+          nationRank: parseInt(nationRank),
+          currentExemplar: parseInt(currentExemplar),
+          requiredExemplar: parseInt(requiredExemplar),
         }));
       }
     });

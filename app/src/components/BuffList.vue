@@ -2,7 +2,7 @@
   <div class="buffs-wrapper">
     <div class="buffs-section">
       <span v-for="(buff) in buffList" :key="buff.utc_time+buff.buff_id">
-        <Buff :player="player" :buff-id="buff.buff_id" :buff-name="buff.buff_name" :duration="buff.buff_duration" :utc-time="buff.utc_time" />
+        <BuffItem :player="player" :buff-id="buff.buff_id" :buff-name="buff.buff_name" :duration="buff.buff_duration" :utc-time="buff.utc_time" />
       </span>
     </div>
   </div>
@@ -11,8 +11,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { ComputedRef } from 'vue'
-import Buff from '@/components/Buff.vue'
-import type { Buff as BuffData} from '@/types/buff'
+import BuffItem from '@/components/BuffItem.vue'
+import type { Buff} from '@/types/buff'
 
 interface Player {
   playerId: number
@@ -24,10 +24,10 @@ const props = defineProps({
     type: Object as () => Player,
     required: true
   },
-  buffData: Object as () => Map<string, BuffData>
+  buffData: Object as () => Map<string, Buff>
 })
 
-const buffList: ComputedRef<BuffData[]> = computed(() => {
+const buffList: ComputedRef<Buff[]> = computed(() => {
   return Array.from((props.buffData ?? new Map()).values())
 })
 
