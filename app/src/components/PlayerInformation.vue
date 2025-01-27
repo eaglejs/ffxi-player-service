@@ -6,7 +6,7 @@
           <div class="card">
             <div class="card-header">
               <div class="d-flex justify-content-between">
-                <h2 class="col-8 p-0 m-0">Title: ({{ user?.title }})</h2>
+                <h2 class="col-8 p-0 m-0">Title: ({{ player?.title }})</h2>
                 <section class="col-4 text-end">
                   <img
                     class="gil me-2"
@@ -28,15 +28,15 @@
       <div class="row gx-3">
         <div class="col-md-6">
           <section>
-            <User :player-id="playerId" />
+            <Player :player-id="playerId" />
             <div class="row mt-3 gx-3">
               <div class="col-lg-12 mt-lg-0 mt-md-0 mt-sm-0 mt-xs-0 mt-0">
                 <div class="row gx-3">
                   <div class="col-lg-6 col-sm-12 mt-lg-0 mt-md-0 mt-sm-0 mt-xs-0 mt-0">
-                    <UserCurrencies :currencies="user?.currency1" :type="1" />
+                    <PlayerCurrencies :currencies="player?.currency1" :type="1" />
                   </div>
                   <div class="col-lg-6 col-sm-12 mt-lg-0 mt-3">
-                    <UserCurrencies :currencies="user?.currency2" :type="2" />
+                    <PlayerCurrencies :currencies="player?.currency2" :type="2" />
                   </div>
                 </div>
               </div>
@@ -45,10 +45,10 @@
               <div class="col-lg-12 mt-lg-0 mt-md-0 mt-sm-0 mt-xs-0 mt-0">
                 <div class="row gx-3">
                   <div class="col-lg-6 col-sm-12 mt-lg-0 mt-md-0 mt-sm-0 mt-xs-0 mt-0">
-                    <UserStats :stats="user?.stats" />
+                    <PlayerStats :stats="player?.stats" />
                   </div>
                   <div class="col-lg-6 col-sm-12 mt-lg-0 mt-3">
-                    <UserResistances :resistances="user?.stats" />
+                    <PlayerResistances :resistances="player?.stats" />
                   </div>
                 </div>
               </div>
@@ -57,7 +57,7 @@
         </div>
         <div class="col-md-6 mt-lg-0 mt-md-0 mt-3">
           <section class="mb-3">
-            <ExperiencePoints :user="user" />
+            <ExperiencePoints :player="player" />
           </section>
           <div class="col-lg-12 col-sm-12 mt-lg-0 mt-3">
             <ChatLog />
@@ -71,25 +71,24 @@
 
 <script setup lang="ts">
 import { computed, type ComputedRef } from 'vue'
-import { useThemeStore } from '@/stores/theme'
 import { iconsPath } from '@/helpers/config'
-import UserStats from '@/components/UserStats.vue'
-import UserResistances from '@/components/UserResistances.vue'
-import UserCurrencies from '@/components/UserCurrencies.vue'
+import PlayerStats from '@/components/PlayerStats.vue'
+import PlayerResistances from '@/components/PlayerResistances.vue'
+import PlayerCurrencies from '@/components/PlayerCurrencies.vue'
 import ExperiencePoints from './ExperiencePoints.vue'
-import User from '@/components/User.vue'
+import Player from '@/components/PlayerVitals.vue'
 import ChatLog from './ChatLog.vue'
-import { useUserStore } from '@/stores/user'
-import type { Player } from '@/types/Player'
+import { usePlayerStore } from '@/stores/player'
+import type { Player as PlayerType } from '@/types/Player'
 
-const userStore = useUserStore()
+const playerStore = usePlayerStore()
 const props = defineProps({
   playerId: Number
 })
-const user = computed<Player>(() => userStore.players.get(props.playerId ?? 0))
+const player = computed<PlayerType>(() => playerStore.players.get(props.playerId ?? 0))
 
 const formattedGil: ComputedRef<string> = computed(
-  () => parseInt(String(user.value?.gil)).toLocaleString() || '0'
+  () => parseInt(String(player.value?.gil)).toLocaleString() || '0'
 )
 const gilIcon: ComputedRef<string> = computed(() => `${iconsPath}gil.webp`)
 </script>

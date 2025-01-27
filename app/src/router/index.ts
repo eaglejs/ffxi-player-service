@@ -10,28 +10,28 @@ const router = createRouter({
       component: HomeView
     },
     {
-      path: '/experience-dashboard',
-      name: 'experience-dashboard',
-      component: () => import('../views/ExperienceDashboard.vue')
+      path: '/charts',
+      name: 'charts',
+      component: () => import('../views/DataCharts.vue')
     },
     {
-      path: '/users/:id',
-      name: 'user-details',
-      component: () => import('../views/UserDetails.vue')
-    },
+      path: '/players/:id',
+      name: 'player-details',
+      component: () => import('../views/PlayerDetails.vue')
+    }
   ],
   scrollBehavior(to, from, savedPosition) {
     if (savedPosition) {
-      savedPosition.behavior = 'instant';
-      return savedPosition;
+      savedPosition.behavior = 'instant'
+      return savedPosition
     } else {
-      return { 
+      return {
         top: 0,
         left: 0,
         behavior: 'instant'
-      };
+      }
     }
-  },
+  }
 })
 
 router.afterEach((to, from) => {

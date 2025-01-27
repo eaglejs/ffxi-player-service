@@ -21,7 +21,7 @@
 import { computed, onMounted, ref, onUnmounted } from 'vue'
 import type { ComputedRef } from 'vue'
 import { iconsPath } from '@/helpers/config'
-import { useUserStore } from '@/stores/user'
+import { usePlayerStore } from '@/stores/player'
 import GenTooltip from '@/components/gen-components/GenTooltip.vue'
 
 interface Player {
@@ -31,7 +31,7 @@ interface Player {
 
 const intervalId = ref()
 const durationIntTime = ref()
-const userStore = useUserStore()
+const playerStore = usePlayerStore()
 
 const props = defineProps({
   player: {
@@ -85,7 +85,7 @@ onMounted(() => {
   intervalId.value = setInterval(() => {
     durationIntTime.value = durationReadable()
     if (!isTimerPositive()) {
-      userStore.refreshBuffs(props?.player)
+      playerStore.refreshBuffs(props?.player)
     }
   }, 1000)
 })

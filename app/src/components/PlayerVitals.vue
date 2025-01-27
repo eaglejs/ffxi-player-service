@@ -1,16 +1,16 @@
 <template>
-  <RouterLink :to="`/users/${user?.playerId}`">
-    <div class="card user-card" :class="{'user-btn-animations': isNotPlayerDetailsPage}" >
+  <RouterLink :to="`/players/${player?.playerId}`">
+    <div class="card player-card" :class="{'player-btn-animations': isNotPlayerDetailsPage}" >
       <svg ref="deadElement" class="dead" viewBox="0 0 25 25" width="30" height="30">
         <path class="skull-fill" :d="mdiSkullCrossbones"></path>
       </svg>
       <div class="card-header">
         <div class="d-flex justify-content-between">
           <h2 class="mb-0">
-            <OnlineDot :user="user" />
+            <GenOnlineDot :player="player" />
             {{ playerName }} - M. lvl:
-            {{ user?.masterLevel }} ({{ user?.mainJob }}{{ user?.mainJobLevel }}/{{ user?.subJob
-            }}{{ user?.subJobLevel }})
+            {{ player?.masterLevel }} ({{ player?.mainJob }}{{ player?.mainJobLevel }}/{{ player?.subJob
+            }}{{ player?.subJobLevel }})
           </h2>
         </div>
       </div>
@@ -49,12 +49,12 @@
               <div
                 class="progress-bar bg-danger"
                 role="progressbar"
-                :style="{ width: user?.hpp + '%' }"
-                :aria-valuenow="user?.tp"
+                :style="{ width: player?.hpp + '%' }"
+                :aria-valuenow="player?.tp"
                 aria-valuemin="0"
                 aria-valuemax="100"
               >
-                {{ user?.hpp }}%
+                {{ player?.hpp }}%
               </div>
             </div>
             <p class="mb-0"><b>MP</b></p>
@@ -62,12 +62,12 @@
               <div
                 class="progress-bar bg-success"
                 role="progressbar"
-                :style="{ width: user?.mpp + '%' }"
-                :aria-valuenow="user?.tp"
+                :style="{ width: player?.mpp + '%' }"
+                :aria-valuenow="player?.tp"
                 aria-valuemin="0"
                 aria-valuemax="100"
               >
-                {{ user?.mpp }}%
+                {{ player?.mpp }}%
               </div>
             </div>
             <p class="mb-0"><b>TP</b></p>
@@ -76,11 +76,11 @@
                 class="progress-bar bg-purple"
                 role="progressbar"
                 :style="{ width: getTP }"
-                :aria-valuenow="user?.tp"
+                :aria-valuenow="player?.tp"
                 aria-valuemin="0"
                 aria-valuemax="3000"
               >
-                {{ user?.tp }}
+                {{ player?.tp }}
               </div>
             </div>
           </section>
@@ -89,9 +89,9 @@
       <div class="card-footer">
         <section>
           <div class="d-flex">
-            <span class="me-3"><b class="me-1">Attack:</b>{{ user?.attack }}</span>
-            <span class="me-auto"><b class="me-1">Defense:</b>{{ user?.defense }}</span>
-            <span>{{ user?.zone }}</span>
+            <span class="me-3"><b class="me-1">Attack:</b>{{ player?.attack }}</span>
+            <span class="me-auto"><b class="me-1">Defense:</b>{{ player?.defense }}</span>
+            <span>{{ player?.zone }}</span>
           </div>
         </section>
       </div>
@@ -109,41 +109,35 @@ import Buffs from '@/components/Buffs.vue'
 import type { ComputedRef } from 'vue'
 import type { Ability } from '@/types/Ability'
 import type { Buff } from '@/types/buff'
-import { useUserStore } from '@/stores/user'
+import { usePlayerStore } from '@/stores/player'
 import type { Player } from '@/types/Player'
-import OnlineDot from '@/components/OnlineDot.vue'
+import GenOnlineDot from '@/components/gen-components/GenOnlineDot.vue'
 
 const props = defineProps({
   playerId: Number
 })
 
-const userStore = useUserStore()
-const user = computed<Player>(() => userStore.players.get(props.playerId ?? 0))
-const currentExemplar = computed(() => user.value?.currentExemplar.toLocaleString())
+const playerStore = usePlayerStore()
+const player = computed<Player>(() => playerStore.players.get(props.playerId ?? 0))
+const currentExemplar = computed(() => player.value?.currentExemplar.toLocaleString())
 const exemplarProgressRounded = computed(() => Math.floor(exemplarProgress.value))
 const playerBuffs: ComputedRef<Map<string, Buff>> = computed(() => {
-  const buffs = user?.value?.buffs
+  const buffs = player?.value?.buffs
   return buffs ? new Map(Object.entries(buffs)) : new Map()
 })
-const player = computed(() => {
-  return {
-    playerId: user?.value?.playerId,
-    playerName: user?.value?.playerName
-  }
-})
 const playerName = computed(
-  () => user?.value?.playerName.charAt(0).toUpperCase() + user?.value?.playerName.slice(1)
+  () => player?.value?.playerName.charAt(0).toUpperCase() + player?.value?.playerName.slice(1)
 )
-const requiredExemplar = computed(() => user?.value?.requiredExemplar.toLocaleString())
+const requiredExemplar = computed(() => player?.value?.requiredExemplar.toLocaleString())
 const themeColor = computed(() => (themeStore.theme === 'dark' ? '#fff' : '#000'))
-const getTP = computed(() => (user?.value?.tp / 3000) * 100 + '%')
-const dead = computed(() => user?.value?.status == 2)
-const isNotPlayerDetailsPage = computed(() => !window.location.pathname.includes('users'))
+const getTP = computed(() => (player?.value?.tp / 3000) * 100 + '%')
+const dead = computed(() => player?.value?.status == 2)
+const isNotPlayerDetailsPage = computed(() => !window.location.pathname.includes('players'))
 const exemplarProgress = computed(() => {
-  if (user?.value?.requiredExemplar - user?.value?.currentExemplar <= 1) {
+  if (player?.value?.requiredExemplar - player?.value?.currentExemplar <= 1) {
     return 100
   } else {
-    return (user?.value?.currentExemplar / user?.value?.requiredExemplar) * 100
+    return (player?.value?.currentExemplar / player?.value?.requiredExemplar) * 100
   }
 })
 const themeStore = useThemeStore()
@@ -152,9 +146,9 @@ const deadElement = ref()
 
 const filterAbilties = () => {
   let abilities =
-    typeof user?.value?.abilities === 'string'
-      ? JSON.parse(user?.value?.abilities)
-      : user?.value?.abilities
+    typeof player?.value?.abilities === 'string'
+      ? JSON.parse(player?.value?.abilities)
+      : player?.value?.abilities
   let filteredAbilities: Ability[] = []
 
   for (const ability of abilities) {
@@ -181,7 +175,7 @@ function renderDeathAnimation(dead: number) {
   }
 }
 
-watch(userStore.players, (players: any) => {
+watch(playerStore.players, (players: any) => {
   const player = players.get(props.playerId)
   renderDeathAnimation(player.status)
 })
@@ -191,12 +185,12 @@ watch(userStore.players, (players: any) => {
 
 <style scoped lang="scss">
 .card {
-  &.user-card {
+  &.player-card {
     height: 100%;
     cursor: default;
   }
 
-  &.user-btn-animations {
+  &.player-btn-animations {
     box-shadow: 0 0 0 rgba(0, 0, 0, 0.2);
     transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
     cursor: pointer;

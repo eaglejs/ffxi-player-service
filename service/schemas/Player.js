@@ -1,4 +1,4 @@
-const userSchema = {
+const playerSchema = {
   abilities: Array,
   attack: Number,
   buffs: {
@@ -117,4 +117,4 @@ const userSchema = {
   zone: String,
 }
 
-module.exports = userSchema;
+module.exports = playerSchema;

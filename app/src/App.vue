@@ -17,7 +17,7 @@
             </RouterLink>
           </li>
           <li>
-            <RouterLink class="theme-btn btn btn-light me-1" to="/experience-dashboard">
+            <RouterLink class="theme-btn btn btn-light me-1" to="/charts">
               <svg viewBox="0 0 25 25" width="30" height="30">
                 <path class="fill" :d="mdiChartTimelineVariant"></path>
               </svg>

@@ -4,28 +4,26 @@ import axios from 'axios'
 import { useServerStore } from '@/stores/server'
 import { fullUrl } from '@/helpers/config'
 
-export const useUserStore = defineStore('user', () => {
+export const usePlayerStore = defineStore('player', () => {
   const players = ref(new Map<number, any>())
   const chatLog = ref([] as any)
 
   const serverStore = useServerStore()
 
-  // const { connectWebSocket, websocket } = useServerStore()
-
   function getPlayerById(playerId: number) {
     return players.value.get(playerId)
   }
 
-  async function fetchUsers() {
-    const response = await axios.get(`${fullUrl}/get_users`)
+  async function fetchPlayers() {
+    const response = await axios.get(`${fullUrl}/get_players`)
     response.data.forEach((player: any) => {
       players.value.set(player.playerId, player)
     })
     return Promise.resolve(players)
   }
 
-  async function fetchUser(playerId: number) {
-    const response = await axios.get(`${fullUrl}/get_user?playerId=${playerId}`)
+  async function fetchPlayer(playerId: number) {
+    const response = await axios.get(`${fullUrl}/get_player?playerId=${playerId}`)
 
     players.value.set(response.data.playerId, response.data)
     return Promise.resolve(players.value.get(playerId))
@@ -66,10 +64,10 @@ export const useUserStore = defineStore('user', () => {
     return axios.post(`${fullUrl}/refresh_buffs`, player)
   }
 
-  function wsOnMessage (event: MessageEvent) {
+  function wsOnMessage(event: MessageEvent) {
     if (event.data === 'ping') {
       if (serverStore.websocket.readyState === serverStore.websocket.OPEN) {
-        serverStore.websocket.send('pong');
+        serverStore.websocket.send('pong')
       }
     } else {
       updatePlayer(event.data)
@@ -80,19 +78,25 @@ export const useUserStore = defineStore('user', () => {
     window.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') {
         serverStore.connectWebSocket()
-        if (serverStore.websocket.readyState === serverStore.websocket.OPEN && serverStore.websocket.onmessage === null) {
+        if (
+          serverStore.websocket.readyState === serverStore.websocket.OPEN &&
+          serverStore.websocket.onmessage === null
+        ) {
           serverStore.websocket.onmessage = wsOnMessage
         }
       }
     })
     window.addEventListener('online', () => {
       serverStore.connectWebSocket()
-      if (serverStore.websocket.readyState === serverStore.websocket.OPEN && serverStore.websocket.onmessage === null) {
+      if (
+        serverStore.websocket.readyState === serverStore.websocket.OPEN &&
+        serverStore.websocket.onmessage === null
+      ) {
         serverStore.websocket.onmessage = wsOnMessage
       }
     })
     serverStore.websocket.onmessage = wsOnMessage
   })
 
-  return { players, chatLog, fetchUsers, fetchUser, fetchChatLog, refreshBuffs, getPlayerById }
+  return { players, chatLog, fetchPlayers, fetchPlayer, fetchChatLog, refreshBuffs, getPlayerById }
 })

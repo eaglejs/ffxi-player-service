@@ -1,7 +1,7 @@
 let Health = require('./routes/Health.js');
-let User = require('./routes/User.js');
+let Player = require('./routes/Player.js');
 
 module.exports = [
 	Health,
-	User,
+  Player,
 ]

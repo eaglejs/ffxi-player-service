@@ -17,29 +17,30 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue'
 import type { Player } from '@/types/Player';
-import { useUserStore } from '@/stores/user'
+import { usePlayerStore } from '@/stores/player'
 import GenTooltip from '@/components/gen-components/GenTooltip.vue'
 
 const props = defineProps<{
-  user: Player | undefined
+  player: Player | undefined
 }>()
 
-const userStore = useUserStore()
+const playerStore = usePlayerStore()
 const onlineTitleText = ref('Offline')
 const onlineStatusDot = ref('offline-dot')
-const isOnline = ref(Date.now() - (props.user?.lastOnline ?? 0) * 1000 < 60000)
+const isOnline = ref(Date.now() - (props.player?.lastOnline ?? 0) * 1000 < 60000)
 
 const checkOnlineState = () => {
-  isOnline.value = Date.now() - (props.user?.lastOnline ?? 0) * 1000 < 60000
+  isOnline.value = Date.now() - (props.player?.lastOnline ?? 0) * 1000 < 60000
   onlineTitleText.value = isOnline.value ? 'Online' : 'Offline'
   onlineStatusDot.value = isOnline.value ? 'online-dot' : 'offline-dot'
 }
 
 onMounted(() => {
+  checkOnlineState()
   setInterval(checkOnlineState, 5000)
 })
 
-watch(userStore?.players, () => {
+watch(playerStore?.players, () => {
   checkOnlineState()
 })
 </script>

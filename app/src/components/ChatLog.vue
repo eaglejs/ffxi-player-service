@@ -65,10 +65,10 @@
 import { computed, onMounted, onUpdated, ref } from 'vue'
 import { mdiChevronUp, mdiChevronDown } from '@mdi/js'
 import GenIcon from '@/components/gen-components/GenIcon.vue'
-import { useUserStore } from '@/stores/user'
+import { usePlayerStore } from '@/stores/player'
 import { isIPhone, isAndroid, uuid } from '@/helpers/utils'
 
-const userStore = useUserStore()
+const playerStore = usePlayerStore()
 const playerId = parseInt(window.location.pathname.split('/').pop() || '')
 
 const instantFlag = ref(false)
@@ -95,7 +95,7 @@ const messageTypeMap = {
 };
 
 const chatLog = computed(() => {
-  return userStore.chatLog.filter((item: any) => {
+  return playerStore.chatLog.filter((item: any) => {
     if (chatFilterValue.value === 'None' || chatFilterValue.value === 'Filter') {
       return true
     } else {
@@ -137,7 +137,7 @@ const scrollToFirstChild = (behavior: ScrollBehavior) => {
 }
 
 onMounted(() => {
-  userStore.fetchChatLog(playerId)
+  playerStore.fetchChatLog(playerId)
   instantFlag.value = true
   window.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') {

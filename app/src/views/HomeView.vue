@@ -3,7 +3,7 @@
     <div class="container-fluid mb-5">
       <div class="row justify-content-md-center g-3">
         <div class="col-md-6" v-for="(id, $index) in playerIds" :key="id ?? $index">
-          <User v-if="id" :player-id="id" />
+          <PlayerVitals v-if="id" :player-id="id" />
         </div>
         <div v-if="playerIds.length === 0" class="text-center">
           <h2>No players online</h2>
@@ -15,25 +15,25 @@
 
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue'
-import User from '@/components/User.vue'
-import { useUserStore } from '@/stores/user'
+import PlayerVitals from '@/components/PlayerVitals.vue'
+import { usePlayerStore } from '@/stores/player'
 import type { Player } from '@/types/Player'
 
-const userStore = useUserStore()
+const playerStore = usePlayerStore()
 const playerIds = ref(getPlayersId())
 
-function getOnlinePlayers(user: Player): boolean {
+function getOnlinePlayers(player: Player): boolean {
   const now = Date.now()
-  const lastOnline = user?.lastOnline * 1000 // Convert to milliseconds
+  const lastOnline = player?.lastOnline * 1000 // Convert to milliseconds
   const diffInMinutes = (now - lastOnline) / (1000 * 60) // Convert milliseconds to minutes
   return diffInMinutes < 5
 }
 
 function getPlayersId() {
-  return Array.from(userStore.players.values())
-    .reduce((acc: number[], user: Player) => {
-      if (getOnlinePlayers(user)) {
-        acc.push(user.playerId)
+  return Array.from(playerStore.players.values() as Iterable<Player>)
+    .reduce((acc: number[], player: Player) => {
+      if (getOnlinePlayers(player)) {
+        acc.push(player.playerId)
       }
       return acc
     }, [])
@@ -41,7 +41,7 @@ function getPlayersId() {
 }
 
 watch(
-  () => userStore.players,
+  () => playerStore.players,
   () => {
     playerIds.value = getPlayersId()
   },
@@ -49,10 +49,10 @@ watch(
 )
 
 onMounted(() => {
-  userStore.fetchUsers()
+  playerStore.fetchPlayers()
   window.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') {
-      userStore.fetchUsers()
+      playerStore.fetchPlayers()
       playerIds.value = getPlayersId()
     }
   })

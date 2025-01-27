@@ -1,15 +1,15 @@
 <template>
   <nav>
     <ul>
-      <li class="col-md-6" v-for="user in players" :key="user.playerName">
-        <User :user="user" />
+      <li class="col-md-6" v-for="player in players" :key="player.playerName">
+        <Player :player="player" />
       </li>
     </ul>
   </nav>
 </template>
 
 <script setup lang="ts">
-import User from '@/components/User.vue'
+import Player from '@/components/PlayerVitals.vue'
 import { onMounted } from 'vue';
 
 const props = defineProps({

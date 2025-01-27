@@ -3,7 +3,7 @@
     <div class="card-header">
       <div class="d-flex">
         <h3 v-if="isExperienceDashboard" class="mb-0">
-          <OnlineDot :user="user" />
+          <GenOnlineDot :player="player" />
           {{ playerName }}
         </h3>
         <h3 v-else class="mb-0">Experience Points</h3>
@@ -53,37 +53,35 @@ import {
 import { Line } from 'vue-chartjs'
 import type { Player } from '@/types/Player'
 import type { Experience } from '@/types/Experience'
-import { useUserStore } from '@/stores/user'
-import OnlineDot from '@/components/OnlineDot.vue'
+import GenOnlineDot from '@/components/gen-components/GenOnlineDot.vue'
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend)
 
 const props = defineProps<{
-  user: Player | undefined
+  player: Player | undefined
 }>()
-const userStore = useUserStore()
 const averageExperiencePts = ref(0)
 const averageCapacityPts = ref(0)
 const averageExemplarPts = ref(0)
 const isExperienceDashboard = ref<boolean>(window.location.pathname === '/experience-dashboard')
 const playerName = computed(() =>
-  props.user && props.user.playerName
-    ? props.user.playerName.charAt(0).toUpperCase() + props.user.playerName.slice(1)
+  props.player && props.player.playerName
+    ? props.player.playerName.charAt(0).toUpperCase() + props.player.playerName.slice(1)
     : ''
 )
-const totalMerits: ComputedRef<number> = computed(() => props.user?.merits.total || 0)
-const maxMerits: ComputedRef<number> = computed(() => props.user?.merits.max || 0)
+const totalMerits: ComputedRef<number> = computed(() => props.player?.merits.total || 0)
+const maxMerits: ComputedRef<number> = computed(() => props.player?.merits.max || 0)
 const totalCapacityPoints: ComputedRef<number> = computed(
-  () => props?.user?.capacityPoints?.total || 0
+  () => props?.player?.capacityPoints?.total || 0
 )
 const experiencePoints: ComputedRef<number[]> = computed(
-  () => props.user?.expHistory?.experience?.map((exp: Experience) => exp.points) || []
+  () => props.player?.expHistory?.experience?.map((exp: Experience) => exp.points) || []
 )
 const capacityPoints: ComputedRef<number[]> = computed(
-  () => props.user?.expHistory?.capacity?.map((exp: Experience) => exp.points) || []
+  () => props.player?.expHistory?.capacity?.map((exp: Experience) => exp.points) || []
 )
 const exemplarPoints: ComputedRef<number[]> = computed(
-  () => props.user?.expHistory?.exemplar?.map((exp: Experience) => exp.points) || []
+  () => props.player?.expHistory?.exemplar?.map((exp: Experience) => exp.points) || []
 )
 
 const experienceGraph = ref<ChartData<'line', (number | null)[]>>({
@@ -156,9 +154,9 @@ function renderLatestData() {
       }
     ]
   }
-  averageExperiencePts.value = analyzePoints(props?.user?.expHistory?.experience || [])
-  averageCapacityPts.value = analyzePoints(props?.user?.expHistory?.capacity || [])
-  averageExemplarPts.value = analyzePoints(props?.user?.expHistory?.exemplar || [])
+  averageExperiencePts.value = analyzePoints(props?.player?.expHistory?.experience || [])
+  averageCapacityPts.value = analyzePoints(props?.player?.expHistory?.capacity || [])
+  averageExemplarPts.value = analyzePoints(props?.player?.expHistory?.exemplar || [])
 }
 
 function analyzePoints(experiencePoints: Experience[]): number {
@@ -195,7 +193,7 @@ onMounted(() => {
 })
 
 watch(
-  () => props.user?.expHistory?.experience,
+  () => props.player?.expHistory?.experience,
   () => renderLatestData()
 )
 </script>

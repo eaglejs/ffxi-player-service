@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const router = express.Router();
 const iconv = require('iconv-lite');
 const WebSocket = require('ws');
-const userScheme = require('../schemas/User');
+const playerScheme = require('../schemas/Player');
 const chatScheme = require('../schemas/Chat');
 const e = require('express');
 
@@ -31,10 +31,10 @@ wss.on('connection', function connection(ws) {
   });
 });
 
-const userSchema = new mongoose.Schema(userScheme);
+const playerSchema = new mongoose.Schema(playerScheme);
 const chatSchema = new mongoose.Schema(chatScheme);
 
-const users = mongoose.model('users', userSchema);
+const players = mongoose.model('players', playerSchema);
 const chats = mongoose.model('chats', chatSchema);
 
 router.use(bodyParser.json());
@@ -44,14 +44,14 @@ function removeControlCharacters(str) {
   return str.replace(/[\x00-\x1F\x7F]/g, '');
 }
 
-router.post('/initialize_user', async (req, res) => {
+router.post('/initialize_player', async (req, res) => {
   try {
     const data = req.body;
     const playerId = parseInt(data.playerId);
     const playerName = data.playerName.toLowerCase();
     const lastOnline = parseInt(data.lastOnline);
 
-    await users.findOneAndUpdate(
+    await players.findOneAndUpdate(
       { playerName: playerName },
       { $set: { playerId: playerId, playerName: playerName, lastOnline: lastOnline } },
       { upsert: true, new: true }
@@ -60,28 +60,28 @@ router.post('/initialize_user', async (req, res) => {
     res.send(`User ${playerName} initialized`);
   } catch (error) {
     console.error(error);
-    res.status(500).send('An error occurred while initializing the user.');
+    res.status(500).send('An error occurred while initializing the player.');
   }
 });
 
-router.get('/get_user', async (req, res) => {
+router.get('/get_player', async (req, res) => {
   try {
     const playerId = parseInt(req.query.playerId);
-    const user = await users.findOne({ playerId });
-    res.send(user);
+    const player = await players.findOne({ playerId });
+    res.send(player);
   } catch (error) {
     console.error(error);
-    res.status(500).send('An error occurred while retrieving the user.');
+    res.status(500).send('An error occurred while retrieving the player.');
   }
 });
 
-router.get('/get_users', async (req, res) => {
+router.get('/get_players', async (req, res) => {
   try {
-    const allUsers = await users.find({}).sort({ 'playerName': 1 });
+    const allUsers = await players.find({}).sort({ 'playerName': 1 });
     res.send(allUsers);
   } catch (error) {
     console.error(error);
-    res.status(500).send('An error occurred while retrieving the users.');
+    res.status(500).send('An error occurred while retrieving the players.');
   }
 });
 
@@ -92,7 +92,7 @@ router.post('/set_online', async (req, res) => {
     const playerName = data.playerName.toLowerCase();
     const last_online = parseInt(data.lastOnline);
 
-    await users.findOneAndUpdate(
+    await players.findOneAndUpdate(
       { playerId: playerId },
       { $set: { playerId: playerId, playerName: playerName, lastOnline: last_online } },
       { upsert: true, new: true }
@@ -123,7 +123,7 @@ router.post('/set_jobs', async (req, res) => {
     const playerId = parseInt(data.playerId);
     const playerName = data.playerName.toLowerCase();
 
-    await users.findOneAndUpdate(
+    await players.findOneAndUpdate(
       { playerId: playerId },
       { $set: { mainJob: main_job, subJob: sub_job } },
       { upsert: true, new: true }
@@ -154,7 +154,7 @@ router.post('/set_gil', async (req, res) => {
     const playerName = data.playerName.toLowerCase();
     const gil = data.gil;
 
-    await users.findOneAndUpdate
+    await players.findOneAndUpdate
       (
         { playerId: playerId },
         { $set: { gil: gil } },
@@ -185,7 +185,7 @@ router.post('/set_player_status', async (req, res) => {
     const playerName = data.playerName.toLowerCase();
     const status = data.status;
 
-    await users.findOneAndUpdate
+    await players.findOneAndUpdate
       (
         { playerId: playerId },
         { $set: { status: status } },
@@ -217,7 +217,7 @@ router.post('/set_hpp', async (req, res) => {
     const hpp = data.hpp;
     const debug = false;
 
-    await users.findOneAndUpdate(
+    await players.findOneAndUpdate(
       { playerId: playerId },
       { $set: { hpp: hpp } },
       { upsert: true, new: true }
@@ -256,7 +256,7 @@ router.post('/set_mpp', async (req, res) => {
     const playerName = data.playerName.toLowerCase();
     const mpp = data.mpp;
 
-    await users.findOneAndUpdate(
+    await players.findOneAndUpdate(
       { playerId: playerId },
       { $set: { mpp: mpp } },
       { upsert: true, new: true }
@@ -286,7 +286,7 @@ router.post('/set_tp', async (req, res) => {
     const playerName = data.playerName.toLowerCase();
     const tp = data.tp;
 
-    await users.findOneAndUpdate
+    await players.findOneAndUpdate
       (
         { playerId: playerId },
         { $set: { tp: tp } },
@@ -325,7 +325,7 @@ router.post('/set_stats', async (req, res) => {
       fireResistance, iceResistance, windResistance, earthResistance, lightningResistance, waterResistance, lightResistance, darkResistance
     }
 
-    await users.findOneAndUpdate(
+    await players.findOneAndUpdate(
       { playerId: playerId },
       {
         $set: {
@@ -394,7 +394,7 @@ router.post('/set_currency1', async (req, res) => {
       return res.status(400).send('Invalid input');
     }
 
-    await users.findOneAndUpdate(
+    await players.findOneAndUpdate(
       { playerId: playerId },
       { $set: { currency1: currency1 } },
       { upsert: true, new: true }
@@ -427,7 +427,7 @@ router.post('/set_currency2', async (req, res) => {
       return res.status(400).send('Invalid input');
     }
 
-    await users.findOneAndUpdate(
+    await players.findOneAndUpdate(
       { playerId: playerId },
       { $set: { currency2: currency2 } },
       { upsert: true, new: true }
@@ -456,7 +456,7 @@ router.post('/update_merits', async (req, res) => {
     const playerName = data.playerName.toLowerCase();
     const { total, max } = data;
 
-    await users.findOneAndUpdate(
+    await players.findOneAndUpdate(
       { playerId: playerId },
       { $set: { merits: { total: total, max: max } } },
       { upsert: true, new: true }
@@ -484,13 +484,17 @@ router.post('/update_capacity_points', async (req, res) => {
     const data = req.body;
     const playerId = parseInt(data.playerId);
     const playerName = data.playerName.toLowerCase();
-    const {numberOfJobPoints} = data;
+    const { numberOfJobPoints } = data;
 
-    await users.findOneAndUpdate(
+    await players.findOneAndUpdate(
       { playerId: playerId },
-      { $set: { capacityPoints: {
-        total: parseInt(numberOfJobPoints)
-      } } },
+      {
+        $set: {
+          capacityPoints: {
+            total: parseInt(numberOfJobPoints)
+          }
+        }
+      },
       { upsert: true, new: true }
     );
 
@@ -539,8 +543,8 @@ router.post('/update_exp_history', async (req, res) => {
       type = 'exemplar';
     }
 
-    const user = await users.findOne({ playerId: playerId });
-    let expHistory = user?.expHistory;
+    const player = await players.findOne({ playerId: playerId });
+    let expHistory = player?.expHistory;
 
     const updateField = `expHistory.${type}`;
     expHistoryByType = expHistory[type];
@@ -554,7 +558,7 @@ router.post('/update_exp_history', async (req, res) => {
       [`${updateField}`]: expHistoryByType
     };
 
-    const result = await users.findOneAndUpdate(
+    const result = await players.findOneAndUpdate(
       { playerId: playerId },
       {
         $set
@@ -587,7 +591,7 @@ router.post('/reset_exp_history', async (req, res) => {
     const playerId = parseInt(req.body.playerId);
     const playerName = req.body.playerName.toLowerCase();
 
-    const result = await users.findOneAndUpdate(
+    const result = await players.findOneAndUpdate(
       { playerId: playerId },
       {
         $set: {
@@ -630,7 +634,7 @@ router.post('/set_buffs', async (req, res) => {
       buffs = buffs.slice(0, -1);
     }
 
-    await users.findOneAndUpdate(
+    await players.findOneAndUpdate(
       { playerId: playerId },
       { $set: { buffs: buffs } },
       { upsert: true, new: true }
@@ -660,7 +664,7 @@ router.post('/set_buffs_json', async (req, res) => {
     const playerId = parseInt(data.playerId);
     const playerName = data.playerName.toLowerCase();
     const buffs = data.buffs;
-    await users.findOneAndUpdate(
+    await players.findOneAndUpdate(
       { playerId: playerId },
       { $set: { buffs: buffs } },
       { upsert: true, new: true }
@@ -687,8 +691,8 @@ router.post('/refresh_buffs', async (req, res) => {
   try {
     const playerId = parseInt(req.body.playerId);
     const playerName = req.body.playerName.toLowerCase();
-    const user = await users.findOne({ playerId: playerId });
-    const buffs = user.buffs;
+    const player = await players.findOne({ playerId: playerId });
+    const buffs = player.buffs;
     const currentTime = new Date().getTime();
 
     for (const [key, buff] of buffs.entries()) {
@@ -699,7 +703,7 @@ router.post('/refresh_buffs', async (req, res) => {
       }
     }
 
-    await users.findOneAndUpdate({ playerId: playerId }, { $set: { buffs: buffs } });
+    await players.findOneAndUpdate({ playerId: playerId }, { $set: { buffs: buffs } });
     wss.clients.forEach(client => {
       if (client.readyState === WebSocket.OPEN) {
         client.send(JSON.stringify({
@@ -729,7 +733,7 @@ router.post('/set_ability_recasts', async (req, res) => {
 
     const lowerCasePlayerName = playerName.toLowerCase();
 
-    const user = await users.findOneAndUpdate(
+    const player = await players.findOneAndUpdate(
       { playerId: playerId },
       { $set: { abilities: abilitiesParsed } },
       { upsert: true, new: true }
@@ -741,7 +745,7 @@ router.post('/set_ability_recasts', async (req, res) => {
         client.send(JSON.stringify({
           playerId: playerId,
           playerName: lowerCasePlayerName,
-          abilities: user.abilities
+          abilities: player.abilities
         }));
       }
     });
@@ -760,7 +764,7 @@ router.post('/set_zone', async (req, res) => {
     const playerName = data.playerName.toLowerCase();
     const zone = data.zone;
 
-    await users.findOneAndUpdate(
+    await players.findOneAndUpdate(
       { playerId: playerId },
       { $set: { zone: zone } },
       { upsert: true, new: true }
@@ -787,7 +791,7 @@ router.get('/get_chat_log', async (req, res) => {
   try {
     const playerId = parseInt(req.query.playerId);
     // get the last 1000 messages
-    const chat = await chats.findOne({ playerId: playerId}, { chatLog: { $slice: -1000 } });
+    const chat = await chats.findOne({ playerId: playerId }, { chatLog: { $slice: -1000 } });
 
     res.send(chat.chatLog);
   } catch (error) {
@@ -804,7 +808,7 @@ router.post('/set_messages', async (req, res) => {
     const messages = new Map(Object.entries(data.messages));
     const messageType = data.messageType;
     const timeStamp = new Date().toISOString();
-    
+
     const messagesPackage = [];
     messages.entries().forEach(([key, value]) => {
       const decodedMessage = value.replace(/(\x7F1|\n)/g, '')
@@ -812,7 +816,8 @@ router.post('/set_messages', async (req, res) => {
     });
 
     await chats.findOneAndUpdate(
-      { playerId
+      {
+        playerId
       },
       { $push: { chatLog: { $each: messagesPackage, $slice: -5000 } } },
       { upsert: true, new: true }
@@ -821,12 +826,12 @@ router.post('/set_messages', async (req, res) => {
     wss.clients.forEach(client => {
       if (client.readyState === WebSocket.OPEN) {
         messagesPackage.forEach(({ messageType, message, timeStamp }) => {
-        client.send(JSON.stringify({
-          playerName: playerName,
-          playerId: playerId,
-          chatLog: { messageType, message: message, timeStamp }
-        }));
-      });
+          client.send(JSON.stringify({
+            playerName: playerName,
+            playerId: playerId,
+            chatLog: { messageType, message: message, timeStamp }
+          }));
+        });
       }
     });
 
