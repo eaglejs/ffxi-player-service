@@ -1,6 +1,10 @@
 <template>
-  <RouterLink :to="`/players/${player?.playerId}`">
-    <div class="card player-card" :class="{'player-btn-animations': isNotPlayerDetailsPage}" >
+  <RouterLink
+    :to="`/players/${player?.playerId}`"
+    class="player-card"
+    :class="{ 'player-btn-animations': isNotPlayerDetailsPage }"
+  >
+    <div class="card">
       <svg ref="deadElement" class="dead" viewBox="0 0 25 25" width="30" height="30">
         <path class="skull-fill" :d="mdiSkullCrossbones"></path>
       </svg>
@@ -8,9 +12,8 @@
         <div class="d-flex justify-content-between">
           <h2 class="mb-0">
             <GenOnlineDot :player="player" />
-            {{ playerName }} - M. lvl:
-            {{ player?.masterLevel }} ({{ player?.mainJob }}{{ player?.mainJobLevel }}/{{ player?.subJob
-            }}{{ player?.subJobLevel }})
+            {{ playerName }} - M. lvl: {{ player?.masterLevel }} ({{ player?.mainJob
+            }}{{ player?.mainJobLevel }}/{{ player?.subJob }}{{ player?.subJobLevel }})
           </h2>
         </div>
       </div>
@@ -119,8 +122,12 @@ const props = defineProps({
 
 const playerStore = usePlayerStore()
 const player = computed<Player>(() => playerStore.players.get(props.playerId ?? 0))
-const currentExemplar = computed(() => parseInt(player.value?.currentExemplar.toString()).toLocaleString())
-const requiredExemplar = computed(() => parseInt(player.value?.requiredExemplar.toString()).toLocaleString())
+const currentExemplar = computed(() =>
+  parseInt(player.value?.currentExemplar.toString()).toLocaleString()
+)
+const requiredExemplar = computed(() =>
+  parseInt(player.value?.requiredExemplar.toString()).toLocaleString()
+)
 const exemplarProgressRounded = computed(() => Math.floor(exemplarProgress.value))
 const playerBuffs: ComputedRef<Map<string, Buff>> = computed(() => {
   const buffs = player?.value?.buffs
@@ -179,28 +186,30 @@ watch(playerStore.players, (players: any) => {
   const player = players.get(props.playerId)
   renderDeathAnimation(player.status)
 })
-
-
 </script>
 
 <style scoped lang="scss">
-.card {
-  &.player-card {
-    height: 100%;
-    cursor: default;
-  }
-
+.player-card {
+  display: block;
+  height: 100%;
+  cursor: default;
+  
   &.player-btn-animations {
     box-shadow: 0 0 0 rgba(0, 0, 0, 0.2);
-    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    transition:
+      transform 0.3s ease-in-out,
+      box-shadow 0.3s ease-in-out;
     cursor: pointer;
 
-    &:hover {
+    &:hover,
+    &:focus {
       transform: scale(1.02);
       box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2);
     }
   }
+}
 
+.card {
   .dead-mask:before {
     content: '';
     position: absolute;
