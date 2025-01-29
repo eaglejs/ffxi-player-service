@@ -42,9 +42,7 @@
                 <p class="mb-2 text-center">{{ currentExemplar }} / {{ requiredExemplar }}</p>
               </section>
             </section>
-            <div v-if="playerBuffs.size">
-              <BuffList :player="player" :buff-data="playerBuffs" />
-            </div>
+            <BuffList v-if="player" :player="player" :buff-data="playerBuffs" />
           </section>
           <section class="col-4">
             <p class="mb-0"><b>HP</b></p>
@@ -110,7 +108,6 @@ import { useThemeStore } from '@/stores/theme'
 import { mdiSkullCrossbones } from '@mdi/js'
 import BuffList from '@/components/BuffList.vue'
 import type { ComputedRef } from 'vue'
-import type { Ability } from '@/types/Ability'
 import type { Buff } from '@/types/buff'
 import { usePlayerStore } from '@/stores/player'
 import type { Player } from '@/types/Player'
@@ -148,25 +145,7 @@ const exemplarProgress = computed(() => {
   }
 })
 const themeStore = useThemeStore()
-const playerAbilities = ref([] as Ability[])
 const deadElement = ref()
-
-const filterAbilties = () => {
-  let abilities =
-    typeof player?.value?.abilities === 'string'
-      ? JSON.parse(player?.value?.abilities)
-      : player?.value?.abilities
-  let filteredAbilities: Ability[] = []
-
-  for (const ability of abilities) {
-    const recastTime: Date = new Date(ability?.recast * 1000)
-    if (new Date().getTime() - recastTime.getTime() <= 0) {
-      filteredAbilities.push(ability)
-    }
-  }
-
-  return filteredAbilities
-}
 
 function renderDeathAnimation(dead: number) {
   if (dead == 2) {
@@ -193,7 +172,7 @@ watch(playerStore.players, (players: any) => {
   display: block;
   height: 100%;
   cursor: default;
-  
+
   &.player-btn-animations {
     box-shadow: 0 0 0 rgba(0, 0, 0, 0.2);
     transition:
