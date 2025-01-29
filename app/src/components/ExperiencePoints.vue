@@ -57,6 +57,9 @@ import GenOnlineDot from '@/components/gen-components/GenOnlineDot.vue'
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend)
 
+const experiencePointsRGB = 'rgb(74, 156, 88)'
+const capacityPointsRGB = 'rgb(233 164 0)'
+const exemplarPointsRGB = 'rgb(255, 99, 132)'
 const props = defineProps<{
   player: Player | undefined
 }>()
@@ -97,21 +100,21 @@ const experienceGraph = ref<ChartData<'line', (number | null)[]>>({
       data: experiencePoints.value || [],
       label: 'XP',
       fill: false,
-      borderColor: 'rgb(74, 156, 88)',
+      borderColor: experiencePointsRGB,
       tension: 0.1
     },
     {
       data: capacityPoints.value || [],
       label: 'CP',
       fill: false,
-      borderColor: 'rgb(255, 205, 86)',
+      borderColor: capacityPointsRGB,
       tension: 0.1
     },
     {
       data: exemplarPoints.value || [],
       label: 'EX',
       fill: false,
-      borderColor: 'rgb(255, 99, 132)',
+      borderColor: exemplarPointsRGB,
       tension: 0.1
     }
   ]
@@ -135,21 +138,21 @@ function renderLatestData() {
         data: experiencePoints.value || [],
         label: 'XP',
         fill: false,
-        borderColor: 'rgb(74, 156, 88)',
+        borderColor: experiencePointsRGB,
         tension: 0.1
       },
       {
         data: capacityPoints.value || [],
         label: 'CP',
         fill: false,
-        borderColor: 'rgb(255, 205, 86)',
+        borderColor: capacityPointsRGB,
         tension: 0.1
       },
       {
         data: exemplarPoints.value || [],
         label: 'EX',
         fill: false,
-        borderColor: 'rgb(255, 99, 132)',
+        borderColor: exemplarPointsRGB,
         tension: 0.1
       }
     ]
@@ -210,7 +213,7 @@ watch(
 }
 
 .capacity-points {
-  color: rgb(255, 205, 86);
+  color: rgb(233 164 0);
 }
 
 .exemplar-points {
