@@ -3,6 +3,7 @@
     :to="`/players/${player?.playerId}`"
     class="player-card"
     :class="{ 'player-btn-animations': isNotPlayerDetailsPage }"
+    draggable="false"
   >
     <div class="card">
       <svg ref="deadElement" class="dead" viewBox="0 0 25 25" width="30" height="30">
@@ -171,7 +172,11 @@ watch(playerStore.players, (players: any) => {
 .player-card {
   display: block;
   height: 100%;
-  cursor: default;
+  cursor: auto;
+  -webkit-user-select: text;
+  -moz-select: text;
+  -ms-select: text;
+  user-select: text;
 
   &.player-btn-animations {
     box-shadow: 0 0 0 rgba(0, 0, 0, 0.2);
