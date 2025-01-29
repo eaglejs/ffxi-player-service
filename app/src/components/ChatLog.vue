@@ -3,27 +3,10 @@
     <div class="card-header">
       <div class="d-flex">
         <h3 class="p-0 m-0">Chat</h3>
-        <section class="flex-grow-1">
-          <section class="form-check form-switch float-end">
-            <label class="form-check-label" for="flexSwitchCheckChecked">Timestamp</label>
-            <input
-              class="form-check-input"
-              type="checkbox"
-              role="switch"
-              id="flexSwitchCheckChecked"
-              @click="toggleTimeStamp"
-              :checked="timeStampsEnabled"
-            />
-          </section>
-          <button class="btn btn-sm arrow-btns float-end" @click="scrollToFirstChild('smooth')">
-            <GenIcon :icon="mdiChevronUp" size="lg" />
-          </button>
-          <button class="btn btn-sm arrow-btns float-end" @click="scrollToLastChild('smooth')">
-            <GenIcon :icon="mdiChevronDown" size="lg" />
-          </button>
-          <div class="dropdown float-end">
+        <section class="d-flex justify-content-end flex-grow-1">
+          <div class="dropdown">
             <button
-              class="btn btn-secondary btn-sm dropdown-toggle"
+              class="btn btn-outline-secondary btn-sm dropdown-toggle"
               type="button"
               data-bs-toggle="dropdown"
               aria-expanded="false"
@@ -45,6 +28,25 @@
               <li><a class="dropdown-item" href="#" @click="setChatFilter('Obtained')">Obtained</a></li>
             </ul>
           </div>
+          <button class="btn btn-sm arrow-btns mx-1" @click="scrollToLastChild('smooth')">
+            <GenIcon :icon="mdiChevronDown" size="lg" />
+          </button>
+          <button class="btn btn-sm arrow-btns mx-1" @click="scrollToFirstChild('smooth')">
+            <GenIcon :icon="mdiChevronUp" size="lg" />
+          </button>
+          <section class="d-flex align-items-center form-check form-switch">
+            <section>
+              <label class="form-check-label" for="flexSwitchCheckChecked">Timestamp</label>
+              <input
+                class="form-check-input"
+                type="checkbox"
+                role="switch"
+                id="flexSwitchCheckChecked"
+                @click="toggleTimeStamp"
+                :checked="timeStampsEnabled"
+              />
+            </section>
+          </section>
         </section>
       </div>
     </div>
@@ -186,8 +188,7 @@ onUpdated(() => {
 <style scoped lang="scss">
 
 .arrow-btns {
-  max-height: 23px;
-  display: inline-flex;
+  max-height: auto;
   padding: 0 5px;
 }
 
