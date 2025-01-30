@@ -84,9 +84,9 @@ function durationReadable(): string {
 onMounted(() => {
   intervalId.value = setInterval(() => {
     durationIntTime.value = durationReadable()
-    if (!isTimerPositive()) {
-      playerStore.refreshBuffs(props?.player)
-    }
+    // if (!isTimerPositive()) {
+    //   playerStore.refreshBuffs(props?.player)
+    // }
   }, 1000)
 })
 

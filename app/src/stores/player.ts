@@ -5,6 +5,7 @@ import { useServerStore } from '@/stores/server'
 import { fullUrl } from '@/helpers/config'
 
 export const usePlayerStore = defineStore('player', () => {
+  let lastBuffCheck = new Date()
   const players = ref(new Map<number, any>())
   const chatLog = ref([] as any)
 
@@ -62,7 +63,13 @@ export const usePlayerStore = defineStore('player', () => {
     if (serverStore.websocket.readyState !== serverStore.websocket.OPEN) {
       return Promise.reject('WebSocket not connected')
     }
-    return axios.post(`${fullUrl}/refresh_buffs`, player)
+    if (new Date().getTime() - lastBuffCheck.getTime() < 1000) {
+      return Promise.reject('You can only refresh buffs once per second')
+    }
+    return axios.post(`${fullUrl}/refresh_buffs`, player).then((data) => {
+      lastBuffCheck = new Date()
+      return Promise.resolve(data)
+    })
   }
 
   function wsOnMessage(event: MessageEvent) {

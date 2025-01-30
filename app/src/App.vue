@@ -11,16 +11,12 @@
         <ul class="d-flex list-unstyled app-menu m-0">
           <li>
             <RouterLink class="theme-btn btn btn-light me-1" to="/">
-              <svg viewBox="0 0 25 25" width="30" height="30">
-                <path class="fill" :d="mdiHome"></path>
-              </svg>
+              <GenIcon :icon="mdiHome" size="xl" />
             </RouterLink>
           </li>
           <li>
             <RouterLink class="theme-btn btn btn-light me-1" to="/charts">
-              <svg viewBox="0 0 25 25" width="30" height="30">
-                <path class="fill" :d="mdiChartTimelineVariant"></path>
-              </svg>
+              <GenIcon :icon="mdiChartTimelineVariant" size="xl" />
             </RouterLink>
           </li>
         </ul>
@@ -32,9 +28,7 @@
               v-if="isDesktop"
               @click="toggleFullscreen"
             >
-              <svg viewBox="0 0 25 25" width="30" height="30">
-                <path class="fill" :d="getFullScreenIcon"></path>
-              </svg>
+              <GenIcon :icon="getFullScreenIcon" size="xl" />
             </button>
           </template>
         </GenTooltip>
@@ -48,9 +42,7 @@
               data-bs-placement="bottom"
               :title="themeTitleText"
             >
-              <svg viewBox="0 0 25 25" width="30" height="30">
-                <path class="fill" :d="getThemeIcon"></path>
-              </svg>
+            <GenIcon :icon="getThemeIcon" size="xl" />
             </button>
           </template>
         </GenTooltip>
@@ -62,7 +54,7 @@
 
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
-import { watch, onMounted, computed, ref, onUpdated, onBeforeUpdate, onUnmounted } from 'vue'
+import { watch, onMounted, computed, ref } from 'vue'
 import type { ComputedRef, Ref } from 'vue'
 import {
   mdiChartTimelineVariant,
@@ -75,6 +67,7 @@ import {
 import { useThemeStore } from '@/stores/theme'
 import { imagesPath } from '@/helpers/config'
 import GenTooltip from '@/components/gen-components/GenTooltip.vue'
+import GenIcon from '@/components/gen-components/GenIcon.vue'
 
 const themeStore = useThemeStore()
 
