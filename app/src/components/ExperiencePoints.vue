@@ -26,7 +26,7 @@
         <div class="d-flex justify-content-between">
           <span
             ><b>Merits</b>:
-            <span class="experience-points">{{ totalMerits }} / {{ maxMerits }}</span></span
+            <span class="experience-points">{{ totalMerits }}</span></span
           >
           <span
             ><b>Job Points</b>: <span class="capacity-points">{{ totalCapacityPoints }}</span></span
