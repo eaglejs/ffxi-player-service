@@ -59,7 +59,7 @@ router.post('/initialize_player', async (req, res) => {
 
     res.send(`User ${playerName} initialized`);
   } catch (error) {
-    console.error(error);
+    console.error('initialize_player', error);
     res.status(500).send('An error occurred while initializing the player.');
   }
 });
@@ -70,7 +70,7 @@ router.get('/get_player', async (req, res) => {
     const player = await players.findOne({ playerId });
     res.send(player);
   } catch (error) {
-    console.error(error);
+    console.error('get_player', error);
     res.status(500).send('An error occurred while retrieving the player.');
   }
 });
@@ -80,7 +80,7 @@ router.get('/get_players', async (req, res) => {
     const allUsers = await players.find({}).sort({ 'playerName': 1 });
     res.send(allUsers);
   } catch (error) {
-    console.error(error);
+    console.error('get_players', error);
     res.status(500).send('An error occurred while retrieving the players.');
   }
 });
@@ -110,7 +110,7 @@ router.post('/set_online', async (req, res) => {
 
     res.send(`Online: OK`);
   } catch (error) {
-    console.error(error);
+    console.error('set_online', error);
     res.status(500).send('An error occurred while updating the online status.');
   }
 });
@@ -142,7 +142,7 @@ router.post('/set_jobs', async (req, res) => {
 
     res.send(`Jobs: OK`);
   } catch (error) {
-    console.error(error);
+    console.error('set_jobs', error);
     res.status(500).send('An error occurred while updating the main job.');
   }
 });
@@ -173,7 +173,7 @@ router.post('/set_gil', async (req, res) => {
 
     res.send(`Gil: OK`);
   } catch (error) {
-    console.error(error);
+    console.error('set_gil', error);
     res.status(500).send('An error occurred while updating the gil.');
   }
 });
@@ -204,7 +204,7 @@ router.post('/set_player_status', async (req, res) => {
 
     res.send(`Status: OK`);
   } catch (error) {
-    console.error(error);
+    console.error('set_player_status', error);
     res.status(500).send('An error occurred while updating the status.');
   }
 });
@@ -244,7 +244,7 @@ router.post('/set_hpp', async (req, res) => {
 
     res.send(`HP: OK`);
   } catch (error) {
-    console.error(error);
+    console.error('set_hpp', error);
     res.status(500).send('An error occurred while updating the HP.');
   }
 });
@@ -274,7 +274,7 @@ router.post('/set_mpp', async (req, res) => {
 
     res.send(`MP: OK`);
   } catch (error) {
-    console.error(error);
+    console.error('set_mpp', error);
     res.status(500).send('An error occurred while updating the MP.');
   }
 });
@@ -305,7 +305,7 @@ router.post('/set_tp', async (req, res) => {
 
     res.send(`TP: OK`);
   } catch (error) {
-    console.error(error);
+    console.error('set_tp', error);
     res.status(500).send('An error occurred while updating the TP.');
   }
 });
@@ -365,7 +365,7 @@ router.post('/set_stats', async (req, res) => {
 
     res.send(`Stats: OK`);
   } catch (error) {
-    console.error(error);
+    console.error('set_stats', error);
     res.status(500).send('An error occurred while updating the stats.');
   }
 });
@@ -410,7 +410,7 @@ router.post('/set_currency1', async (req, res) => {
       }
     });
   } catch (error) {
-    console.error(error);
+    console.error('set_currency1', error);
     res.status(500).send('An error occurred while updating the currency1.');
   }
 
@@ -443,7 +443,7 @@ router.post('/set_currency2', async (req, res) => {
       }
     });
   } catch (error) {
-    console.error(error);
+    console.error('set_currency2', error);
     res.status(500).send('An error occurred while updating the currency2.');
   }
 
@@ -474,7 +474,7 @@ router.post('/update_merits', async (req, res) => {
 
     res.send(`Merits: OK`);
   } catch (error) {
-    console.error(error);
+    console.error('update_merits', error);
     res.status(500).send('An error occurred while updating the merits.');
   }
 });
@@ -513,7 +513,7 @@ router.post('/update_capacity_points', async (req, res) => {
     res.send(`Capacity points: OK`);
   }
   catch (error) {
-    console.error(error);
+    console.error('update_capacity_points', error);
     res.status(500).send('An error occurred while updating the capacity points.');
   }
 });
@@ -580,7 +580,7 @@ router.post('/update_exp_history', async (req, res) => {
     res.send(`Experience history: OK`);
 
   } catch (error) {
-    console.error(error);
+    console.error('update_exp_history', error);
     res.status(500).send('An error occurred while updating the experience history.');
   }
 
@@ -617,7 +617,7 @@ router.post('/reset_exp_history', async (req, res) => {
 
     res.send(`Experience history reset: OK`);
   } catch (error) {
-    console.error(error);
+    console.error('reset_exp_history', error);
     res.status(500).send('An error occurred while resetting the experience history.');
   }
 });
@@ -652,7 +652,7 @@ router.post('/set_buffs', async (req, res) => {
 
     res.send(`Buffs: OK`);
   } catch (error) {
-    console.error(error);
+    console.error('set_buffs', error);
     res.status(500).send('An error occurred while updating the buffs.');
   }
 
@@ -682,7 +682,7 @@ router.post('/set_buffs_json', async (req, res) => {
 
     res.send(`Buffs: OK`);
   } catch (error) {
-    console.error(error);
+    console.error('set_buffs_json', error);
     res.status(500).send('An error occurred while updating the buffs.');
   }
 });
@@ -716,7 +716,7 @@ router.post('/refresh_buffs', async (req, res) => {
     res.send("Buffs refreshed");
 
   } catch (error) {
-    console.error(error);
+    console.error('refresh_buffs', error);
     res.status(500).send('An error occurred while removing buffs.');
   }
 });
@@ -752,7 +752,7 @@ router.post('/set_ability_recasts', async (req, res) => {
 
     res.send(`Abilities updated for ${playerName}`);
   } catch (error) {
-    console.error(error);
+    console.error('set_ability_recasts', error);
     res.status(500).send('An error occurred while updating abilities.');
   }
 });
@@ -782,7 +782,7 @@ router.post('/set_zone', async (req, res) => {
 
     res.send(`Zone: OK`);
   } catch (error) {
-    console.error(error);
+    console.error('set_zone', error);
     res.status(500).send('An error occurred while updating the zone.');
   }
 });
@@ -795,7 +795,7 @@ router.get('/get_chat_log', async (req, res) => {
 
     res.send(chat.chatLog);
   } catch (error) {
-    console.error(error);
+    console.error('get_chat_log', error);
     res.status(500).send('An error occurred while retrieving the chat log.');
   }
 });
@@ -837,7 +837,7 @@ router.post('/set_messages', async (req, res) => {
 
     res.send(`Message: OK`);
   } catch (error) {
-    console.error(error);
+    console.error('set_messages', error);
     res.status(500).send('An error occurred while updating the message.');
   }
 });
