@@ -128,8 +128,7 @@ onMounted(() => {
   background: none;
   border: none;
   font-size: 1.5rem;
-  height: 50px;
-  width: 50px;
+  height: 45px;
 }
 
 .fill {
