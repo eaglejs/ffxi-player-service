@@ -53,7 +53,7 @@
 </template>
 
 <script setup lang="ts">
-import { RouterView } from 'vue-router'
+import { RouterView, useRouter } from 'vue-router'
 import { watch, onMounted, computed, ref } from 'vue'
 import type { ComputedRef, Ref } from 'vue'
 import {
@@ -70,6 +70,7 @@ import GenTooltip from '@/components/gen-components/GenTooltip.vue'
 import GenIcon from '@/components/gen-components/GenIcon.vue'
 
 const themeStore = useThemeStore()
+const router = useRouter()
 
 const theme: ComputedRef<string> = computed(() => themeStore.theme)
 const themeColor: ComputedRef<string> = computed(() => (theme.value === 'dark' ? '#fff' : '#000'))
@@ -114,6 +115,15 @@ onMounted(() => {
 
   document.addEventListener('fullscreenchange', () => {
     isFullscreen.value = !!document.fullscreenElement
+  })
+
+  // add event listener that listens to 1 key press to toggle home page
+  document.addEventListener('keydown', (e) => {
+    if (e.key === '1') {
+      router.push('/')
+    } else if (e.key === '2') {
+      router.push('/charts')
+    }
   })
 })
 </script>
