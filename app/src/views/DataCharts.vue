@@ -31,14 +31,13 @@ function getOnlinePlayers(player: Player): boolean {
 
 function getPlayersId() {
   return Array.from(playerStore.players.values() as Iterable<Player>)
-    .map((player: Player) => {
-      return getOnlinePlayers(player) ? player.playerId : null
-    })
-    .sort((a, b) => {
-      if (a === null) return 1
-      if (b === null) return -1
-      return a - b
-    })
+    .reduce((acc: number[], player: Player) => {
+      if (getOnlinePlayers(player)) {
+        acc.push(player.playerId)
+      }
+      return acc
+    }, [])
+    .sort((a: number, b: number) => a - b)
 }
 
 watch(
