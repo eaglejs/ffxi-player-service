@@ -1,11 +1,16 @@
 const chatScheme = {
   playerId: Number,
   playerName: String,
-  chatLog: [{
-    messageType: String,
-    message: String,
-    timeStamp: String
-  }],
+  chatLog: {
+    "linkshell": [
+      {
+        messageType: String,
+        message: String,
+        timeStamp: String
+      }
+    ],
+
+  },
 };
 
 module.exports = chatScheme;
