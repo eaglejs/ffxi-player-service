@@ -54,7 +54,7 @@ export const usePlayerStore = defineStore('player', () => {
 
     if ('chatLog' in player) {
       if (playerId === player.playerId) {
-        chatLog.value.push(player.chatLog)
+        chatLog.value = [...chatLog.value, ...player.chatLog]
       }
       return
     }

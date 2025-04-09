@@ -889,13 +889,12 @@ router.post('/set_messages', async (req, res) => {
 
     wss.clients.forEach(client => {
       if (client.readyState === WebSocket.OPEN) {
-        messagesPackage.forEach(({ messageType, message, timeStamp }) => {
-          client.send(JSON.stringify({
-            playerName: playerName,
-            playerId: playerId,
-            chatLog: { messageType, message: message, timeStamp }
-          }));
-        });
+        client.send(JSON.stringify({
+          playerName: playerName,
+          playerId: playerId,
+          chatLog: messagesPackage
+        }));
+
       }
     });
 

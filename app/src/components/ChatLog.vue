@@ -122,11 +122,15 @@ const toLocalTime = (timeStamp: string) => {
 
 const scrollToLastChild = (behavior: ScrollBehavior) => {
   autoScrollIsActive.value = true
+  if (behavior === 'instant') {
+    instantFlag.value = true
+  }
   if (chatLog.value.length) {
     chatLogEl.value?.scrollTo({
       top: chatLogEl.value.scrollHeight,
       behavior
     })
+    instantFlag.value = false
   }
 }
 
@@ -157,25 +161,21 @@ const handleResizeEvent = () => {
   scrollToLastChild('instant')
 }
 
-function setChatFilter(filter: string) {
-  instantFlag.value = true
+async function setChatFilter(filter: string) {
   if (filter === 'None') {
     chatFilterValue.value = 'Filter'
-    playerStore.fetchChatLog(playerId);
+    await playerStore.fetchChatLog(playerId);
   } else {
     chatFilterValue.value = filter ?? 'Filter'
-    playerStore.fetchChatLogByMessageType(playerId, filter.toUpperCase());
+    await playerStore.fetchChatLogByMessageType(playerId, filter.toUpperCase());
   }
   
   scrollToLastChild('instant')
-  setTimeout(() => {
-    instantFlag.value = false
-  }, 300)
 }
 
-onMounted(() => {
-  playerStore.fetchChatLog(playerId)
-  instantFlag.value = true
+onMounted(async () => {
+  await playerStore.fetchChatLog(playerId)
+  scrollToLastChild('instant')
   window.addEventListener('visibilitychange', handleVisibilityChangeEvent);
   chatLogEl.value?.addEventListener('wheel', handleScrollEvent)
   if (isIPhone() || isAndroid()) {
@@ -191,7 +191,6 @@ onUpdated(() => {
   }
   if (autoScrollIsActive.value) {
     scrollToLastChild(instantFlag.value ? 'instant' : 'smooth')
-    instantFlag.value = false
   }
 })
 
