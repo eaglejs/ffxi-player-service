@@ -36,6 +36,14 @@ export const usePlayerStore = defineStore('player', () => {
     return Promise.resolve(chatLog)
   }
 
+  async function fetchChatLogByMessageType(playerId: number, messageType: string) {
+    const response = await axios.get(
+      `${fullUrl}/get_chat_log_by_type?playerId=${playerId}&messageType=${messageType}`
+    )
+    chatLog.value = response.data
+    return Promise.resolve(chatLog)
+  }
+
   function updatePlayer(data: string) {
     const playerId = parseInt(window.location.pathname.split('/').pop() || '0')
     const player: any = JSON.parse(data)
@@ -106,5 +114,14 @@ export const usePlayerStore = defineStore('player', () => {
     serverStore.websocket.onmessage = wsOnMessage
   })
 
-  return { players, chatLog, fetchPlayers, fetchPlayer, fetchChatLog, refreshBuffs, getPlayerById }
+  return {
+    players,
+    chatLog,
+    fetchPlayers,
+    fetchPlayer,
+    fetchChatLog,
+    fetchChatLogByMessageType,
+    refreshBuffs,
+    getPlayerById
+  }
 })

@@ -44,10 +44,10 @@
             <div class="row mt-3 gx-3">
               <div class="col-lg-12 mt-lg-0 mt-md-0 mt-sm-0 mt-xs-0 mt-0">
                 <div class="row gx-3">
-                  <div class="col-xl-6 col-lg-12 col-md-6 col-sm-6 mt-xl-0 mt-lg-0 mt-md-0 mt-sm-0 mt-xs-0 mt-0">
+                  <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mt-xl-0 mt-lg-0 mt-md-0 mt-sm-0 mt-xs-0 mt-0">
                     <PlayerStats :stats="player?.stats" />
                   </div>
-                  <div class="col-xl-6 col-lg-12 col-md-6 col-sm-6 mt-xl-0 mt-lg-3 mt-md-0 mt-sm-0 mt-3">
+                  <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mt-xl-0 mt-lg-0 mt-md-0 mt-sm-0 mt-3">
                     <PlayerResistances :resistances="player?.stats" />
                   </div>
                 </div>

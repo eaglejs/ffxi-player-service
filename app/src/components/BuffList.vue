@@ -42,6 +42,7 @@ const buffList: ComputedRef<Buff[]> = computed(() => {
   height: 68px; // 2 rows
   background-color: var(--buff-bg);
   border-radius: 7px;
+  overflow-y: auto;
 }
 
 @container buffs (width < 237px) {

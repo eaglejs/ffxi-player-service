@@ -1,16 +1,15 @@
+const chatType = {
+  type: Map,
+  of: [{
+    messageType: String,
+    message: String,
+    timeStamp: String
+  }]
+};
+
 const chatScheme = {
   playerId: Number,
-  playerName: String,
-  chatLog: {
-    "linkshell": [
-      {
-        messageType: String,
-        message: String,
-        timeStamp: String
-      }
-    ],
-
-  },
+  chatLog: chatType,
 };
 
 module.exports = chatScheme;

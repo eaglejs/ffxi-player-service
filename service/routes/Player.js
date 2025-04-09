@@ -790,12 +790,74 @@ router.post('/set_zone', async (req, res) => {
 router.get('/get_chat_log', async (req, res) => {
   try {
     const playerId = parseInt(req.query.playerId);
-    // get the last 1000 messages
-    const chat = await chats.findOne({ playerId: playerId }, { chatLog: { $slice: -1000 } });
+    // get the last 5000 messages across all types
+    const player = await chats.findOne({ playerId });
 
-    res.send(chat.chatLog);
+    if (!player || !player.chatLog) {
+      console.error('get_chat_log', 'Player not found or chatLog is empty');
+      return res.send({ chatLog: [] });
+    }
+
+    // Convert the chatLog Map to an array of objects
+    const allMessages = Array.from(player.chatLog ?? []).reduce((acc, [key, value]) => {
+      if (value) {
+        value.forEach((message) => {
+          acc.push({
+            messageType: key,
+            message: removeControlCharacters(message.message),
+            timeStamp: message.timeStamp
+          });
+        });
+      }
+      return acc;
+    }, []);
+
+    // Sort all messages by timestamp in ascending order
+    allMessages.sort((a, b) => {
+      return new Date(a.timeStamp) - new Date(b.timeStamp);
+    });
+
+    // Limit to the latest 5000 messages
+    const limitedMessages = allMessages.slice(-5000);
+
+    res.send(limitedMessages);
   } catch (error) {
     console.error('get_chat_log', error);
+    res.status(500).send('An error occurred while retrieving the chat log.');
+  }
+});
+
+router.get('/get_chat_log_by_type', async (req, res) => {
+  try {
+    const playerId = parseInt(req.query.playerId);
+    const messageType = req.query.messageType.trim().toUpperCase();
+
+    // get the last 5000 messages across all types
+    const player = await chats.findOne({ playerId });
+
+    if (!player || !player.chatLog) {
+      console.error('get_chat_log', 'Player not found or chatLog is empty');
+      return res.send({ chatLog: [] });
+    }
+
+    // Convert the chatLog Map to an array of objects
+    const allMessages = Array.from(player.chatLog.get(messageType) ?? []).reduce((acc, value) => {
+      if (value) {
+        acc.push({
+          messageType: messageType,
+          message: removeControlCharacters(value.message),
+          timeStamp: value.timeStamp
+        });
+      }
+      return acc;
+    }, []);
+
+    // Limit to the latest 5000 messages
+    const limitedMessages = allMessages.slice(-5000);
+
+    res.send(limitedMessages);
+  } catch (error) {
+    console.error('get_chat_log_by_type', error);
     res.status(500).send('An error occurred while retrieving the chat log.');
   }
 });
@@ -815,13 +877,15 @@ router.post('/set_messages', async (req, res) => {
       messagesPackage.push({ messageType, message: decodedMessage, timeStamp });
     });
 
+    // it needs to find the playerId and the messageType inside of the chatLog and update it.
+    // mesageType may not exist on the schema, so it needs to be created
+    // I want to limit the number of messages to 5000
     await chats.findOneAndUpdate(
-      {
-        playerId
-      },
-      { $push: { chatLog: { $each: messagesPackage, $slice: -5000 } } },
+      { playerId },
+      { $push: { [`chatLog.${messageType}`]: { $each: messagesPackage, $slice: -5000 } } },
       { upsert: true, new: true }
     );
+
 
     wss.clients.forEach(client => {
       if (client.readyState === WebSocket.OPEN) {
