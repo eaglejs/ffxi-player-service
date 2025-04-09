@@ -43,7 +43,7 @@
                 <p class="mb-2 text-center">{{ currentExemplar }} / {{ requiredExemplar }}</p>
               </section>
             </section>
-            <BuffList :player="player" :buff-data="playerBuffs" />
+            <BuffList v-if="player" :player="player" :buff-data="playerBuffs" />
           </section>
           <section class="col-4">
             <p class="mb-0"><b>HP</b></p>

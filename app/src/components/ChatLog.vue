@@ -57,6 +57,11 @@
       </pre>
       <section ref="lastChildEl" ></section>
     </div>
+    <div v-else-if="isLoading" class="card-body chat-log d-flex align-items-center justify-content-center">
+      <div class="spinner-grow text-light text-center" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
     <div v-else class="card-body chat-log">
       <p class="text-center mt-3">No {{ chatFilterValue }} messages found.</p>
     </div>
@@ -74,6 +79,7 @@ const playerStore = usePlayerStore()
 const playerId = parseInt(window.location.pathname.split('/').pop() || '')
 
 const instantFlag = ref(false)
+const isLoading = ref(true)
 const chatLogEl = ref<HTMLElement | undefined>()
 const firstChildEl = ref<HTMLElement | undefined>()
 const lastChildEl = ref<HTMLElement | undefined>()
@@ -162,6 +168,11 @@ const handleResizeEvent = () => {
 }
 
 async function setChatFilter(filter: string) {
+  if (filter === chatFilterValue.value || (filter === 'None' && chatFilterValue.value === 'Filter')) {
+    return
+  }
+  isLoading.value = true;
+  playerStore.chatLog.value = [];
   if (filter === 'None') {
     chatFilterValue.value = 'Filter'
     await playerStore.fetchChatLog(playerId);
@@ -169,12 +180,15 @@ async function setChatFilter(filter: string) {
     chatFilterValue.value = filter ?? 'Filter'
     await playerStore.fetchChatLogByMessageType(playerId, filter.toUpperCase());
   }
-  
-  scrollToLastChild('instant')
+  isLoading.value = false;
+  setTimeout(() => scrollToLastChild('instant'), 100)
 }
 
 onMounted(async () => {
+  playerStore.chatLog.value = [];
+  isLoading.value = true;
   await playerStore.fetchChatLog(playerId)
+  isLoading.value = false;
   scrollToLastChild('instant')
   window.addEventListener('visibilitychange', handleVisibilityChangeEvent);
   chatLogEl.value?.addEventListener('wheel', handleScrollEvent)
@@ -216,6 +230,7 @@ pre {
   text-wrap: wrap;
   margin: -15px;
   padding: 3px 5px;
+  height: auto;
 }
 
 code {
