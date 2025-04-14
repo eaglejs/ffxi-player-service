@@ -1,7 +1,7 @@
 <template>
   <div class="card" v-if="stats">
     <div class="card-header">
-      <h3 class="mb-0">Offensive Stats</h3>
+      <h2 class="mb-0">Offensive Stats</h2>
     </div>
     <div class="card-body">
       <section class="container-fluid">

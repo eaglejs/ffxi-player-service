@@ -2,11 +2,10 @@
   <div class="card">
     <div class="card-header">
       <div class="d-flex">
-        <h3 class="p-0 m-0">Chat</h3>
-        <section class="d-flex justify-content-end flex-grow-1">
-          <div class="dropdown">
+        <div class="dropdown">
+          <h2 class="p-0 m-0">
             <button
-              class="btn btn-outline-secondary btn-sm dropdown-toggle"
+              class="btn btn-secondary btn-sm dropdown-toggle"
               type="button"
               data-bs-toggle="dropdown"
               aria-expanded="false"
@@ -27,7 +26,9 @@
               <li><a class="dropdown-item" href="#" @click.prevent="setChatFilter('Drops')">Drops</a></li>
               <li><a class="dropdown-item" href="#" @click.prevent="setChatFilter('Obtained')">Obtained</a></li>
             </ul>
-          </div>
+          </h2>
+        </div>
+        <section class="d-flex justify-content-end flex-grow-1">
           <button class="btn btn-sm arrow-btns mx-1" @click="scrollToLastChild('smooth')">
             <GenIcon :icon="mdiChevronDown" size="lg" />
           </button>
@@ -83,7 +84,7 @@ const isLoading = ref(true)
 const chatLogEl = ref<HTMLElement | undefined>()
 const firstChildEl = ref<HTMLElement | undefined>()
 const lastChildEl = ref<HTMLElement | undefined>()
-const chatFilterValue = ref<string>('Filter')
+const chatFilterValue = ref<string>('Chat')
 const timeStampsEnabled = ref<boolean>(
   localStorage.getItem('timeStampsEnabled') === 'true' || false
 )
@@ -104,7 +105,7 @@ const messageTypeMap = {
 
 const chatLog = computed(() => {
   return playerStore.chatLog.filter((item: any) => {
-    if (chatFilterValue.value === 'None' || chatFilterValue.value === 'Filter') {
+    if (chatFilterValue.value === 'None' || chatFilterValue.value === 'Chat') {
       return true
     } else {
       return item.messageType?.toLowerCase() === chatFilterValue.value?.toLowerCase()
@@ -168,16 +169,16 @@ const handleResizeEvent = () => {
 }
 
 async function setChatFilter(filter: string) {
-  if (filter === chatFilterValue.value || (filter === 'None' && chatFilterValue.value === 'Filter')) {
+  if (filter === chatFilterValue.value || (filter === 'None' && chatFilterValue.value === 'Chat')) {
     return
   }
   isLoading.value = true;
   playerStore.chatLog.value = [];
   if (filter === 'None') {
-    chatFilterValue.value = 'Filter'
+    chatFilterValue.value = 'Chat'
     await playerStore.fetchChatLog(playerId);
   } else {
-    chatFilterValue.value = filter ?? 'Filter'
+    chatFilterValue.value = filter ?? 'Chat'
     await playerStore.fetchChatLogByMessageType(playerId, filter.toUpperCase());
   }
   isLoading.value = false;

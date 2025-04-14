@@ -1,7 +1,7 @@
 <template>
   <div class="card">
     <div class="card-header">
-      <h3 class="p-0 m-0">Currency {{ type }}</h3>
+      <h2 class="p-0 m-0">Currency {{ type }}</h2>
     </div>
     <div class="card-body">
       <section class="container-fluid currency-wrapper" v-if="currencies">

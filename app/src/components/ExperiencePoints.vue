@@ -2,11 +2,11 @@
   <div class="card experience-wrapper" v-if="experienceGraph">
     <div class="card-header">
       <div class="d-flex">
-        <h3 v-if="isExperienceDashboard" class="mb-0">
+        <h2 v-if="isExperienceDashboard" class="mb-0">
           <GenOnlineDot :player="player" />
           {{ playerName }}
-        </h3>
-        <h3 v-else class="mb-0">Experience Points</h3>
+        </h2>
+        <h2 v-else class="mb-0">Experience Points</h2>
         <section class="d-inline-flex flex-grow-1 justify-content-end">
           <span class="pe-2 experience-points"
             >{{ averageExperiencePts.toLocaleString() }}k XP/hr</span

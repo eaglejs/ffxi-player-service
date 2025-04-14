@@ -54,7 +54,7 @@ const iconSize = computed(() => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: v-bind(iconSize);
+  height: 100%;
   width: 100%;
 }
 .fill {
