@@ -111,6 +111,12 @@ export const usePlayerStore = defineStore('player', () => {
         serverStore.websocket.onmessage = wsOnMessage
       }
     })
+    setInterval(() => {
+      console.log('PlayerStore: Checking WebSocket connection...')
+      if (serverStore.websocket.readyState !== serverStore.websocket.OPEN) {
+        serverStore.connectWebSocket()
+      }
+    }, 5000)
     serverStore.websocket.onmessage = wsOnMessage
   })
 

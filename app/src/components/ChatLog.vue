@@ -75,6 +75,7 @@ import { mdiChevronUp, mdiChevronDown } from '@mdi/js'
 import GenIcon from '@/components/gen-components/GenIcon.vue'
 import { usePlayerStore } from '@/stores/player'
 import { isIPhone, isAndroid, uuid } from '@/helpers/utils'
+import type { PlayerSettings } from '@/types/PlayerSettings'
 
 const playerStore = usePlayerStore()
 const playerId = parseInt(window.location.pathname.split('/').pop() || '')
@@ -84,7 +85,7 @@ const isLoading = ref(true)
 const chatLogEl = ref<HTMLElement | undefined>()
 const firstChildEl = ref<HTMLElement | undefined>()
 const lastChildEl = ref<HTMLElement | undefined>()
-const chatFilterValue = ref<string>('Chat')
+const chatFilterValue = ref<string>(JSON.parse(localStorage.getItem(playerId.toString()) || '{}')?.chatFilter ?? 'Chat')
 const timeStampsEnabled = ref<boolean>(
   localStorage.getItem('timeStampsEnabled') === 'true' || false
 )
@@ -169,19 +170,23 @@ const handleResizeEvent = () => {
 }
 
 async function setChatFilter(filter: string) {
+  const playerSettings: PlayerSettings = JSON.parse(localStorage.getItem(playerId.toString()) || '{}')
   if (filter === chatFilterValue.value || (filter === 'None' && chatFilterValue.value === 'Chat')) {
     return
   }
-  isLoading.value = true;
-  playerStore.chatLog.value = [];
+  isLoading.value = true
+  playerStore.chatLog.value = []
   if (filter === 'None') {
     chatFilterValue.value = 'Chat'
+    playerSettings.chatFilter = 'Chat'
     await playerStore.fetchChatLog(playerId);
   } else {
+    playerSettings.chatFilter = filter ?? 'Chat'
     chatFilterValue.value = filter ?? 'Chat'
-    await playerStore.fetchChatLogByMessageType(playerId, filter.toUpperCase());
+    await playerStore.fetchChatLogByMessageType(playerId, filter.toUpperCase())
   }
   isLoading.value = false;
+  localStorage.setItem(playerId.toString(), JSON.stringify(playerSettings))
   setTimeout(() => scrollToLastChild('instant'), 100)
 }
 
