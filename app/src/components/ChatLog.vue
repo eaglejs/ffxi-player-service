@@ -18,7 +18,10 @@
               <li><a class="dropdown-item" href="#" @click.prevent="setChatFilter('Tell')">Tell</a></li>
               <li><a class="dropdown-item" href="#" @click.prevent="setChatFilter('Party')">Party</a></li>
               <li>
-                <a class="dropdown-item" href="#" @click.prevent="setChatFilter('Linkshell')">Linkshell</a>
+                <a class="dropdown-item" href="#" @click.prevent="setChatFilter('Linkshell1')">Linkshell1</a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="#" @click.prevent="setChatFilter('Linkshell2')">Linkshell2</a>
               </li>
               <li><a class="dropdown-item" href="#" @click.prevent="setChatFilter('Yell')">Yell</a></li>
               <li><a class="dropdown-item" href="#" @click.prevent="setChatFilter('Unity')">Unity</a></li>
@@ -93,7 +96,8 @@ const autoScrollIsActive = ref<boolean>(true)
 
 const messageTypeMap = {
   party: 'party',
-  linkshell: 'linkshell',
+  linkshell1: 'linkshell1',
+  linkshell2: 'linkshell2',
   shout: 'shout',
   yell: 'shout',
   unity: 'unity',
@@ -264,7 +268,11 @@ code {
   color: var(--chat-log-purple);
 }
 
-.linkshell {
+.linkshell1 {
+  color: var(--chat-log-lt-green);
+}
+
+.linkshell2 {
   color: var(--chat-log-green);
 }
 
