@@ -100,24 +100,29 @@ function PlayerServiceInterface.get_buffs(playerName)
 end
 
 function PlayerServiceInterface.toJSON(data)
-    local json = "{"
-    for key, value in pairs(data) do
-        if type(value) == "table" then
-            json = json ..
-                       string.format("\"%s\":%s,", key,
-                                     PlayerServiceInterface.toJSON(value))
-        elseif type(value) == "string" then
-            json = json .. string.format("\"%s\":\"%s\",", key, value)
-        elseif type(value) == "number" or type(value) == "boolean" then
-            json = json .. string.format("\"%s\":%s,", key, tostring(value))
-        else
-            -- Handle unsupported data types
-            json = json .. string.format("\"%s\":null,", key)
-        end
+  local json = "{"
+  for key, value in pairs(data) do
+    if type(value) == "table" then
+      json = json ..
+          string.format("\"%s\":%s,", key,
+            PlayerServiceInterface.toJSON(value))
+    elseif type(value) == "string" then
+      -- Escape backslashes first, then quotes and other control characters
+      local escaped_value = value:gsub('\\', '\\\\'):gsub('"', '\\"')
+          :gsub('\n', '\\n'):gsub('\r', '\\r')
+          :gsub('\t', '\\t'):gsub('\b', '\\b')
+          :gsub('\f', '\\f')
+      json = json .. string.format("\"%s\":\"%s\",", key, escaped_value)
+    elseif type(value) == "number" or type(value) == "boolean" then
+      json = json .. string.format("\"%s\":%s,", key, tostring(value))
+    else
+      -- Handle unsupported data types
+      json = json .. string.format("\"%s\":null,", key)
     end
-    if json:sub(-1) == "," then json = json:sub(1, -2) end
-    json = json .. "}"
-    return json
+  end
+  if json:sub(-1) == "," then json = json:sub(1, -2) end
+  json = json .. "}"
+  return json
 end
 
 getHearBeat:loop(10)
