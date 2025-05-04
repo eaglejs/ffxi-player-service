@@ -6,8 +6,10 @@ const playerSchema = {
     of: {
       buff_id: Number,
       buff_name: String,
+      buff_type: String,
       buff_duration: Number,
       utc_time: String,
+      timestamp: Number,
     }
   },
   currency1: {

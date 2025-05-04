@@ -18,6 +18,10 @@ const router = createRouter({
       path: '/players/:id',
       name: 'player-details',
       component: () => import('../views/PlayerDetails.vue')
+    },
+    {
+      path: '/:pathMatch(.*)*',
+      redirect: '/'
     }
   ],
   scrollBehavior(to, from, savedPosition) {

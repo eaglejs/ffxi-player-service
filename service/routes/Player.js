@@ -622,40 +622,38 @@ router.post('/reset_exp_history', async (req, res) => {
   }
 });
 
-router.post('/set_buffs', async (req, res) => {
+router.get('/get_buffs', async (req, res) => {
   try {
-    const data = req.body;
-    const playerId = parseInt(data.playerId);
-    const playerName = data.playerName.toLowerCase();
-    let buffs = data.buffs;
-
-    // Remove the last character if it is a comma
-    if (buffs[buffs.length - 1] === ',') {
-      buffs = buffs.slice(0, -1);
+    const playerId = parseInt(req.query.playerId);
+    const player = await players.findOne({ playerId: parseInt(playerId) });
+    if (!player || !player.buffs) {
+      console.error('get_buffs', 'Player not found or buffs are empty');
+      return res.send({ playerName: player.playerName, playerId, buffs: [] });
     }
-
-    await players.findOneAndUpdate(
-      { playerId: playerId },
-      { $set: { buffs: buffs } },
-      { upsert: true, new: true }
-    );
-
-    wss.clients.forEach(client => {
-      if (client.readyState === WebSocket.OPEN) {
-        client.send(JSON.stringify({
-          playerId: playerId,
-          playerName: playerName,
-          buffs: buffs,
-        }));
+    // Convert the buffs Map to an array of objects
+    console.log([...player.buffs.values()]);
+    const allBuffs = Array.from([...player.buffs.values()] ?? []).reduce((acc, buff) => {
+      if (buff) {
+        acc.push({
+          buff_id: buff.buff_id,
+          buff_name: buff.buff_name,
+          buff_type: buff.buff_type,
+          buff_duration: buff.buff_duration,
+          utc_time: buff.utc_time,
+          timestamp: buff.timestamp
+        });
       }
+      return acc;
+    }, []);
+    // Sort all buffs by timestamp in ascending order by utc_time
+    allBuffs.sort((a, b) => {
+      return new Date(a.utc_time) - new Date(b.utc_time);
     });
-
-    res.send(`Buffs: OK`);
+    res.send({ playerName: player.playerName, playerId, allBuffs });
   } catch (error) {
-    console.error('set_buffs', error);
-    res.status(500).send('An error occurred while updating the buffs.');
+    console.error('get_buffs', error);
+    res.status(500).send('An error occurred while retrieving the buffs.');
   }
-
 });
 
 router.post('/set_buffs_json', async (req, res) => {
@@ -664,6 +662,9 @@ router.post('/set_buffs_json', async (req, res) => {
     const playerId = parseInt(data.playerId);
     const playerName = data.playerName.toLowerCase();
     const buffs = data.buffs;
+
+    console.log('set_buffs_json', buffs);
+
     await players.findOneAndUpdate(
       { playerId: playerId },
       { $set: { buffs: buffs } },

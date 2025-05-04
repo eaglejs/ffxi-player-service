@@ -25,7 +25,6 @@
               </li>
               <li><a class="dropdown-item" href="#" @click.prevent="setChatFilter('Yell')">Yell</a></li>
               <li><a class="dropdown-item" href="#" @click.prevent="setChatFilter('Unity')">Unity</a></li>
-              <li><a class="dropdown-item" href="#" @click.prevent="setChatFilter('Cutscene')">Cutscene</a></li>
               <li><a class="dropdown-item" href="#" @click.prevent="setChatFilter('Drops')">Drops</a></li>
               <li><a class="dropdown-item" href="#" @click.prevent="setChatFilter('Obtained')">Obtained</a></li>
             </ul>
@@ -197,7 +196,11 @@ async function setChatFilter(filter: string) {
 onMounted(async () => {
   playerStore.chatLog.value = [];
   isLoading.value = true;
-  await playerStore.fetchChatLog(playerId)
+  if (chatFilterValue.value !== 'Chat') {
+    await playerStore.fetchChatLogByMessageType(playerId, chatFilterValue.value.toUpperCase())
+  } else {
+    await playerStore.fetchChatLog(playerId)
+  }
   isLoading.value = false;
   scrollToLastChild('instant')
   window.addEventListener('visibilitychange', handleVisibilityChangeEvent);

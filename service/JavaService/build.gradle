@@ -6,7 +6,7 @@ plugins {
 repositories {
     mavenCentral()
     maven {
-        url 'https://your-nexus-repo-url'
+        url 'https://eaglejs-mac-mini.local:8091'
     }
 }
 
@@ -22,7 +22,7 @@ dependencies {
 }
 
 application {
-    mainClassName = 'com.example.Main'
+    mainClassName = 'io.eaglejs.ffxi.Main'
 }
 
 jar {
@@ -30,7 +30,7 @@ jar {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
     manifest {
-        attributes 'Main-Class': 'com.example.Main'
+        attributes 'Main-Class': 'io.eaglejs.ffxi.Main'
     }
 }
 
