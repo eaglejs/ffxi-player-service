@@ -6,7 +6,7 @@ plugins {
 repositories {
     mavenCentral()
     maven {
-        url 'https://eaglejs-mac-mini.local:8091'
+        url 'https://eaglejs-mac-mini.local:8091/'
     }
 }
 

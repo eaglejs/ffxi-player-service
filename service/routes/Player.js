@@ -631,7 +631,6 @@ router.get('/get_buffs', async (req, res) => {
       return res.send({ playerName: player.playerName, playerId, buffs: [] });
     }
     // Convert the buffs Map to an array of objects
-    console.log([...player.buffs.values()]);
     const allBuffs = Array.from([...player.buffs.values()] ?? []).reduce((acc, buff) => {
       if (buff) {
         acc.push({
@@ -662,8 +661,6 @@ router.post('/set_buffs_json', async (req, res) => {
     const playerId = parseInt(data.playerId);
     const playerName = data.playerName.toLowerCase();
     const buffs = data.buffs;
-
-    console.log('set_buffs_json', buffs);
 
     await players.findOneAndUpdate(
       { playerId: playerId },
@@ -866,36 +863,52 @@ router.get('/get_chat_log_by_type', async (req, res) => {
 router.post('/set_messages', async (req, res) => {
   try {
     const data = req.body;
+
+    if (!data.playerId || !data.playerName || typeof data.messages !== 'object' || data.messages === null || !data.messageType) {
+      return res.status(400).send('Missing or invalid required fields: playerId, playerName, messages (must be an object), messageType.');
+    }
+
     const playerId = parseInt(data.playerId);
-    const playerName = data.playerName.toLowerCase();
-    const messages = new Map(Object.entries(data.messages));
-    const messageType = data.messageType;
+    if (isNaN(playerId)) {
+      return res.status(400).send('Invalid playerId.');
+    }
+
+    const playerName = String(data.playerName).toLowerCase();
+    const messageType = String(data.messageType); // Ensure messageType is a string for use as a dynamic key
     const timeStamp = new Date().toISOString();
 
-    const messagesPackage = [];
-    messages.entries().forEach(([key, value]) => {
-      const decodedMessage = value.replace(/(\x7F1|\n)/g, '')
-      messagesPackage.push({ messageType, message: decodedMessage, timeStamp });
+    const inputMessageValues = Object.values(data.messages);
+
+    if (inputMessageValues.length === 0) {
+      return res.send('Message: OK (No messages to process)');
+    }
+
+    const messagesPackage = inputMessageValues.map(value => {
+      const messageString = typeof value === 'string' ? value : String(value); // Ensure value is a string
+      // const decodedMessage = messageString.replace(/(\x7F1|\n)/g, '');
+      return { messageType, message: messageString, timeStamp };
     });
 
-    // it needs to find the playerId and the messageType inside of the chatLog and update it.
-    // mesageType may not exist on the schema, so it needs to be created
-    // I want to limit the number of messages to 5000
+    if (messagesPackage.length === 0) {
+      // This case might occur if all messages were empty strings or non-string coercible after processing
+      return res.send('Message: OK (No valid messages to process after decoding)');
+    }
+
     await chats.findOneAndUpdate(
       { playerId },
       { $push: { [`chatLog.${messageType}`]: { $each: messagesPackage, $slice: -5000 } } },
-      { upsert: true, new: true }
+      { upsert: true } // Removed `new: true` as the updated document is not used here
     );
 
+    const wsPayload = JSON.stringify({
+      playerName: playerName,
+      playerId: playerId,
+      chatLog: messagesPackage
+    });
 
     wss.clients.forEach(client => {
       if (client.readyState === WebSocket.OPEN) {
-        client.send(JSON.stringify({
-          playerName: playerName,
-          playerId: playerId,
-          chatLog: messagesPackage
-        }));
-
+        client.send(wsPayload);
       }
     });
 

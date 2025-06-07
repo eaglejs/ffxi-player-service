@@ -1,7 +1,7 @@
 <template>
   <div class="buffs-wrapper">
     <div class="buffs-section">
-      <span v-for="(buff) in buffList" :key="buff.utc_time+buff.buff_id">
+      <span v-for="(buff) in buffList" :key="buff.buff_id">
         <BuffItem :player="player" :buff-id="buff.buff_id" :buff-name="buff.buff_name" :duration="buff.buff_duration" :utc-time="buff.utc_time" />
       </span>
     </div>
@@ -39,7 +39,7 @@ const buffList: ComputedRef<Buff[]> = computed(() => {
 }
 
 .buffs-section {
-  height: 70px; // 2 rows
+  height: 72px; // 2 rows
   background-color: var(--buff-bg);
   border-radius: 7px;
   overflow-y: auto;
