@@ -80,6 +80,7 @@ function durationReadable(): string {
 }
 
 onMounted(() => {
+  durationIntTime.value = durationReadable()
   intervalId.value = setInterval(() => {
     durationIntTime.value = durationReadable()
     // if (!isTimerPositive()) {

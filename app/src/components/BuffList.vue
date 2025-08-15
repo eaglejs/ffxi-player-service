@@ -1,7 +1,7 @@
 <template>
   <div class="buffs-wrapper">
     <div class="buffs-section">
-      <span v-for="(buff) in buffList" :key="buff.buff_id">
+      <span v-for="(buff) in buffList" :key="buff.buff_id+buff.utc_time+uuid()">
         <BuffItem :player="player" :buff-id="buff.buff_id" :buff-name="buff.buff_name" :duration="buff.buff_duration" :utc-time="buff.utc_time" />
       </span>
     </div>
@@ -13,6 +13,7 @@ import { computed } from 'vue'
 import type { ComputedRef } from 'vue'
 import BuffItem from '@/components/BuffItem.vue'
 import type { Buff} from '@/types/buff'
+import { uuid } from '@/helpers/utils'
 
 interface Player {
   playerId: number
