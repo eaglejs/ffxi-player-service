@@ -44,6 +44,10 @@ export const usePlayerStore = defineStore('player', () => {
     return Promise.resolve(chatLog)
   }
 
+  function clearChatLog() {
+    chatLog.value = []
+  }
+
   function updatePlayer(data: string) {
     const playerId = parseInt(window.location.pathname.split('/').pop() || '0')
     const player: any = JSON.parse(data)
@@ -127,6 +131,7 @@ export const usePlayerStore = defineStore('player', () => {
     fetchPlayer,
     fetchChatLog,
     fetchChatLogByMessageType,
+    clearChatLog,
     refreshBuffs,
     getPlayerById
   }

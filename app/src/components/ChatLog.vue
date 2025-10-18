@@ -178,7 +178,7 @@ async function setChatFilter(filter: string) {
     return
   }
   isLoading.value = true
-  playerStore.chatLog.value = []
+  playerStore.clearChatLog();
   if (filter === 'None') {
     chatFilterValue.value = 'Chat'
     playerSettings.chatFilter = 'Chat'
@@ -194,7 +194,7 @@ async function setChatFilter(filter: string) {
 }
 
 onMounted(async () => {
-  playerStore.chatLog.value = [];
+  playerStore.clearChatLog();
   isLoading.value = true;
   if (chatFilterValue.value !== 'Chat') {
     await playerStore.fetchChatLogByMessageType(playerId, chatFilterValue.value.toUpperCase())
