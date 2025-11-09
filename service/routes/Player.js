@@ -77,8 +77,11 @@ router.get('/get_player', async (req, res) => {
 
 router.get('/get_players', async (req, res) => {
   try {
-    const allUsers = await players.find({}).sort({ 'playerName': 1 });
-    res.send(allUsers);
+    // get all online players that lastOnline is within the last 60 seconds
+    const currentTime = Math.floor(Date.now() / 1000);
+    const thresholdTime = currentTime - 60; // 60 seconds ago
+    const allOnlinePlayers = await players.find({ lastOnline: { $gte: thresholdTime } }).sort({ 'playerName': 1 });
+    res.send(allOnlinePlayers);
   } catch (error) {
     console.error('get_players', error);
     res.status(500).send('An error occurred while retrieving the players.');
