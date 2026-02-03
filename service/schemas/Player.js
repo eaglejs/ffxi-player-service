@@ -37,6 +37,8 @@ const playerSchema = {
     mogSegments: Number,
     mweyaPlasmCorpuscles: Number,
     potpourri: Number,
+    temenosUnits: Number,
+    apollyonUnits: Number,
   },
   currentExemplar: Number,
   defense: Number,

@@ -44,6 +44,8 @@ const currencyData2 = [
   { id: 'mogSegments', name: 'Mog Segments' },
   { id: 'mweyaPlasmCorpuscles', name: 'Mweya Plasm' },
   { id: 'potpourri', name: 'Potpourri' },
+  { id: 'temenosUnits', name: 'Temenos Units' },
+  { id: 'apollyonUnits', name: 'Apollyon Units' },
 ];
 
 const props = defineProps({

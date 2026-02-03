@@ -424,8 +424,9 @@ router.post('/set_currency2', async (req, res) => {
     const data = req.body;
     const playerId = parseInt(data.playerId);
     const playerName = data.playerName.toLowerCase();
-    const currency2 = { domainPoints, eschaBeads, eschaSilt, gallantry, gallimaufry, hallmarks, mogSegments, mweyaPlasmCorpuscles, potpourri, coalitionImprimaturs } = data;
+    const currency2 = { domainPoints, eschaBeads, eschaSilt, gallantry, gallimaufry, hallmarks, mogSegments, mweyaPlasmCorpuscles, potpourri, coalitionImprimaturs, temenosUnits, apollyonUnits } = data;
 
+    console.log('set_currency2 called', currency2);
     if (playerId === '') {
       return res.status(400).send('Invalid input');
     }

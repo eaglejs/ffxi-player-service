@@ -56,7 +56,7 @@
     <div ref="chatLogEl" v-if="chatLog.length" class="card-body chat-log">
       <section ref="firstChildEl" ></section>
       <pre v-for="item in chatLog" :key="item.timeStamp + uuid()">
-<code :class="chatColor(item?.messageType)"><span v-if="timeStampsEnabled">[{{ toLocalTime(item.timeStamp) }}]</span>{{ `${item?.message}` }}</code>
+<code :class="chatColor(item?.messageType)"><span v-if="timeStampsEnabled">[{{ toLocalTime(item.timeStamp) }}]</span><template v-for="(part, idx) in formatMessage(item?.message)" :key="idx"><span v-if="part.style" :class="part.style">{{ part.text }}</span><template v-else>{{ part.text }}</template></template></code>
       </pre>
       <section ref="lastChildEl" ></section>
     </div>
@@ -119,6 +119,49 @@ const chatLog = computed(() => {
 
 function chatColor(messageType: string) {
   return messageTypeMap[messageType.toLowerCase() as keyof typeof messageTypeMap] || 'say';
+}
+
+function formatMessage(message: string) {
+  if (!message) return [{ text: '', style: '' }];
+  
+  // Count the number of ・ characters
+  const dotCount = (message.match(/・/g) || []).length;
+  
+  // Only convert if there's an even number of dots
+  if (dotCount === 0 || dotCount % 2 !== 0) {
+    return [{ text: message, style: '' }];
+  }
+  
+  const parts: Array<{ text: string; style: string }> = [];
+  let currentText = '';
+  let isOpening = true;
+  
+  for (let i = 0; i < message.length; i++) {
+    if (message[i] === '・') {
+      // Push any accumulated text
+      if (currentText) {
+        parts.push({ text: currentText, style: '' });
+        currentText = '';
+      }
+      // Add colored ornamental brackets (unique Unicode that won't conflict with actual parentheses)
+      if (isOpening) {
+        parts.push({ text: '❴', style: 'open-translation' });
+        isOpening = false;
+      } else {
+        parts.push({ text: '❵', style: 'closed-translation' });
+        isOpening = true;
+      }
+    } else {
+      currentText += message[i];
+    }
+  }
+  
+  // Push any remaining text
+  if (currentText) {
+    parts.push({ text: currentText, style: '' });
+  }
+  
+  return parts.length > 0 ? parts : [{ text: message, style: '' }];
 }
 
 const toggleTimeStamp = () => {
@@ -261,6 +304,14 @@ code {
   p {
     color: var(--chat-log-white);
   }
+}
+
+.open-translation {
+  color: #00ff00;
+}
+
+.closed-translation {
+  color: #ff0000;
 }
 
 .party {
