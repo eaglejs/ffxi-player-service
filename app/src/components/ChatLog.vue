@@ -56,7 +56,7 @@
     <div ref="chatLogEl" v-if="chatLog.length" class="card-body chat-log">
       <section ref="firstChildEl" ></section>
       <pre v-for="item in chatLog" :key="item.timeStamp + uuid()">
-<code :class="chatColor(item?.messageType)"><span v-if="timeStampsEnabled">[{{ toLocalTime(item.timeStamp) }}]</span><template v-for="(part, idx) in formatMessage(item?.message)" :key="idx"><span v-if="part.style" :class="part.style">{{ part.text }}</span><template v-else>{{ part.text }}</template></template></code>
+<code :class="chatColor(item?.messageType)"><span v-if="timeStampsEnabled">[{{ toLocalTime(item.timeStamp) }}]&nbsp;</span><template v-for="(part, idx) in formatMessage(item?.message)" :key="idx"><span v-if="part.style" :class="part.style">{{ part.text }}</span><template v-else>{{ part.text }}</template></template></code>
       </pre>
       <section ref="lastChildEl" ></section>
     </div>
