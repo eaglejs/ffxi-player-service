@@ -8,7 +8,7 @@
     <key>ProgramArguments</key>
     <array>
       <string>/opt/homebrew/bin/node</string>
-      <string>/Users/eaglejs/repos/ffxi-player-service/service/app.js</string>
+      <string>/Users/eaglejs/repos/ffxi-player-service/service/NodeService/app.js</string>
     </array>
 
     <key>Environment</key>
@@ -18,7 +18,7 @@
     </dict>
 
     <key>WorkingDirectory</key>
-    <string>/Users/eaglejs/repos/ffxi-player-service/service</string>
+    <string>/Users/eaglejs/repos/ffxi-player-service/service/NodeService</string>
 
     <key>StandardErrorPath</key>
     <string>/tmp/com.eaglejs.ffxi.node.err</string>
