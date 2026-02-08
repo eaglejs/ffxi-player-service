@@ -31,10 +31,10 @@
           </h2>
         </div>
         <section class="d-flex justify-content-end flex-grow-1">
-          <button class="btn btn-sm arrow-btns mx-1" @click="scrollToLastChild('smooth')">
+          <button class="btn btn-secondary btn-sm arrow-btns mx-1" @click="scrollToLastChild('smooth')">
             <GenIcon :icon="mdiChevronDown" size="lg" />
           </button>
-          <button class="btn btn-sm arrow-btns mx-1" @click="scrollToFirstChild('smooth')">
+          <button class="btn btn-secondary btn-sm arrow-btns mx-1" @click="scrollToFirstChild('smooth')">
             <GenIcon :icon="mdiChevronUp" size="lg" />
           </button>
           <section class="d-flex align-items-center form-check form-switch">
