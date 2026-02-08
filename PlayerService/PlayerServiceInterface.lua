@@ -11,118 +11,140 @@ local PlayerServiceInterface = {
 local players = {}
 
 local function printHTTPError(status_code, status_text, endpoint)
-    print("HTTP Response Status Code: ", status_code or "TIMEOUT")
-    print("HTTP Response Status Text: ",
-          (status_text or "TIMEOUT") .. " " .. endpoint)
-    PlayerServiceInterface.online = false
+  print("HTTP Response Status Code: ", status_code or "TIMEOUT")
+  print("HTTP Response Status Text: ",
+    (status_text or "TIMEOUT") .. " " .. endpoint)
+  PlayerServiceInterface.online = false
   PlayerServiceInterface.freezeOnlineCheck = false
 end
 
 local function getHearBeat()
-    local response_body = {}
   if (PlayerServiceInterface.freezeOnlineCheck) then return end
+  coroutine.schedule(function()
+    local response_body = {}
     local _, status_code, headers, status_text = http.request({
-        url = ("%s/health"):format(host),
-        method = "GET",
-        sink = ltn12.sink.table(response_body)
+      url = ("%s/health"):format(host),
+      method = "GET",
+      sink = ltn12.sink.table(response_body)
     })
     if status_code ~= 200 then
-        printHTTPError(status_code, status_text, "/health")
+      printHTTPError(status_code, status_text, "/health")
     else
-        if not PlayerServiceInterface.online then print("Heartbeat Online") end
-        PlayerServiceInterface.online = true
+      if not PlayerServiceInterface.online then print("Heartbeat Online") end
+      PlayerServiceInterface.online = true
     end
+  end, math.random(0, 1))
 end
 
 function PlayerServiceInterface.post(endpoint, data)
-    if not PlayerServiceInterface.online then return nil end
+  if not PlayerServiceInterface.online then return nil end
 
+  coroutine.schedule(function()
     local response_body = {}
     local _, status_code, headers, status_text = http.request({
-        url = ("%s/%s"):format(host, endpoint),
-        method = "POST",
-        headers = {
-            ["Content-Type"] = "application/x-www-form-urlencoded",
-            ["Content-Length"] = tostring(#data)
-        },
-        source = ltn12.source.string(data),
-        sink = ltn12.sink.table(response_body)
+      url = ("%s/%s"):format(host, endpoint),
+      method = "POST",
+      headers = {
+        ["Content-Type"] = "application/x-www-form-urlencoded",
+        ["Content-Length"] = tostring(#data)
+      },
+      source = ltn12.source.string(data),
+      sink = ltn12.sink.table(response_body)
     })
 
     if status_code ~= 200 then
-        printHTTPError(status_code, status_text, endpoint)
+      printHTTPError(status_code, status_text, endpoint)
     end
+  end, math.random(0, 1))
 end
 
 function PlayerServiceInterface.post_json(endpoint, data)
-    if not PlayerServiceInterface.online then return nil end
+  if not PlayerServiceInterface.online then return nil end
 
+  coroutine.schedule(function()
     local response_body = {}
     local _, status_code, headers, status_text = http.request({
-        url = ("%s/%s"):format(host, endpoint),
-        method = "POST",
-        headers = {
-            ["Content-Type"] = "application/json",
-            ["Content-Length"] = tostring(#data)
-        },
-        source = ltn12.source.string(data),
-        sink = ltn12.sink.table(response_body)
+      url = ("%s/%s"):format(host, endpoint),
+      method = "POST",
+      headers = {
+        ["Content-Type"] = "application/json",
+        ["Content-Length"] = tostring(#data)
+      },
+      source = ltn12.source.string(data),
+      sink = ltn12.sink.table(response_body)
     })
 
     if status_code ~= 200 and status_text then
-        printHTTPError(status_code, status_text, endpoint)
+      printHTTPError(status_code, status_text, endpoint)
     end
+  end, math.random(0, 1))
 end
 
 function PlayerServiceInterface.get(endpoint)
-    if not PlayerServiceInterface.online then return nil end
+  if not PlayerServiceInterface.online then return nil end
 
-    local response_body = {}
-    local _, status_code, headers, status_text = http.request({
-        url = ("%s/%s"):format(host, endpoint),
-        method = "GET",
-        sink = ltn12.sink.table(response_body)
-    })
+  local response_body = {}
+  local _, status_code, headers, status_text = http.request({
+    url = ("%s/%s"):format(host, endpoint),
+    method = "GET",
+    sink = ltn12.sink.table(response_body)
+  })
 
-    if status_code ~= 200 and status_text then
-        printHTTPError(status_code, status_text, endpoint)
-    end
+  if status_code ~= 200 and status_text then
+    printHTTPError(status_code, status_text, endpoint)
+  end
 
-    return response_body
+  return response_body
 end
 
 function PlayerServiceInterface.get_main_job(playerName)
-    return players[playerName:lower()].mainJob
+  return players[playerName:lower()].mainJob
 end
 
 function PlayerServiceInterface.get_buffs(playerName)
-    return players[playerName:lower()].buffs
+  return players[playerName:lower()].buffs
 end
 
 function PlayerServiceInterface.toJSON(data)
-  local json = "{"
+  local parts = { "{" }
+  local comma = false
+
   for key, value in pairs(data) do
+    if comma then
+      parts[#parts + 1] = ","
+    else
+      comma = true
+    end
+
+    parts[#parts + 1] = '"' .. key .. '":'
+
     if type(value) == "table" then
-      json = json ..
-          string.format("\"%s\":%s,", key,
-            PlayerServiceInterface.toJSON(value))
+      parts[#parts + 1] = PlayerServiceInterface.toJSON(value)
     elseif type(value) == "string" then
       -- Escape backslashes first, then quotes and other control characters
-      local escaped_value = value:gsub('\\', '\\\\'):gsub('"', '\\"')
-          :gsub('\n', '\\n'):gsub('\r', '\\r')
-          :gsub('\t', '\\t'):gsub('\b', '\\b')
-          :gsub('\f', '\\f')
-      json = json .. string.format("\"%s\":\"%s\",", key, escaped_value)
+      local escaped_value = value:gsub('[\\"\n\r\t\b\f]', function(c)
+        local replacement = {
+          ['\\'] = '\\\\',
+          ['"'] = '\\"',
+          ['\n'] = '\\n',
+          ['\r'] = '\\r',
+          ['\t'] = '\\t',
+          ['\b'] = '\\b',
+          ['\f'] = '\\f'
+        }
+        return replacement[c]
+      end)
+      parts[#parts + 1] = '"' .. escaped_value .. '"'
     elseif type(value) == "number" or type(value) == "boolean" then
-      json = json .. string.format("\"%s\":%s,", key, tostring(value))
+      parts[#parts + 1] = tostring(value)
     else
       -- Handle unsupported data types
-      json = json .. string.format("\"%s\":null,", key)
+      parts[#parts + 1] = "null"
     end
   end
-  if json:sub(-1) == "," then json = json:sub(1, -2) end
-  json = json .. "}"
-  return json
+
+  parts[#parts + 1] = "}"
+  return table.concat(parts)
 end
 
 getHearBeat:loop(10)

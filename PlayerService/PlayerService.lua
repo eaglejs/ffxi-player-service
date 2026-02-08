@@ -1,7 +1,7 @@
 _addon.name = 'PlayerService'
 _addon.author = 'eaglejs'
 _addon.version = "1.2024.5.19"
-_addon.commands = {'playerservice', 'ps', 'pserv'}
+_addon.commands = { 'playerservice', 'ps', 'pserv' }
 
 require('strings')
 local packets = require('packets')
@@ -12,8 +12,6 @@ local PSUI = require('./PlayerServiceInterface')
 local chars = require('chat.chars')
 
 local pingClock = os.time()
-local lastMessage = ''
-local lastMessageTime = os.time()
 local chat_purple = string.char(0x1F, 200)
 local chat_grey = string.char(0x1F, 160)
 local chat_red = string.char(0x1F, 167)
@@ -23,16 +21,18 @@ local chat_yellow = string.char(0x1F, 036)
 local chat_drk_blue = string.char(0x1F, 207)
 local chat_pink = string.char(0x1E, 5)
 local chat_lt_blue = string.char(0x1E, 6)
-local partySlots = L {'p1', 'p2', 'p3', 'p4', 'p5'}
+local partySlots = L { 'p1', 'p2', 'p3', 'p4', 'p5' }
 local chatDropAccumulator = S {}
-local chatDropAccumulatorTimer = os.time()
+local chatCoroutine = nil
 local keeperOfBuffs = S {}
 
 math.randomseed(os.time())
 local PlayerService = {
   name = 'PlayerService',
   active = true,
-  debugger = true
+  debugger = false,
+  currentDetailedBuffs = {},
+  lastStatusFetch = os.time(),
 }
 
 function PlayerService.initialize_player()
@@ -43,7 +43,6 @@ function PlayerService.initialize_player()
   local data = ("playerId=%s&playerName=%s&lastOnline=%s"):format(player.id, player.name, os.time())
 
   PSUI.post('initialize_player', data)
-
 end
 
 function PlayerService.set_online()
@@ -54,7 +53,6 @@ function PlayerService.set_online()
   local data = ("playerId=%s&playerName=%s&lastOnline=%s"):format(player.id, player.name, os.time())
 
   PSUI.post('set_online', data)
-
 end
 
 function PlayerService.set_jobs()
@@ -65,10 +63,9 @@ function PlayerService.set_jobs()
   end
 
   local data = ("playerId=%s&playerName=%s&mainJob=%s&subJob=%s"):format(player.id, player.name, player.main_job or "",
-   player.sub_job or "")
+    player.sub_job or "")
 
   PSUI.post('set_jobs', data)
-
 end
 
 function PlayerService.set_player_status(new, old)
@@ -81,6 +78,14 @@ function PlayerService.set_player_status(new, old)
   local status_data = ("playerId=%s&playerName=%s&status=%s"):format(player.id, player.name, new)
 
   PSUI.post('set_player_status', status_data)
+
+  if (new == 0 and old == 1) then
+    if (os.time() - PlayerService.lastStatusFetch) < math.random(300, 600) then
+      return
+    end
+    PlayerService.fetchPlayerStats();
+    PlayerService.lastStatusFetch = os.time()
+  end
 end
 
 function PlayerService.set_hpp()
@@ -93,7 +98,6 @@ function PlayerService.set_hpp()
   local data = ("playerId=%s&playerName=%s&hpp=%s"):format(player.id, player.name, player.vitals.hpp)
 
   PSUI.post('set_hpp', data)
-
 end
 
 function PlayerService.set_mpp()
@@ -103,10 +107,13 @@ function PlayerService.set_mpp()
     return
   end
 
+  if PlayerService.debugger then
+    PlayerService.log('Setting MPP: ' .. player.vitals.mpp, 'DEBUG')
+  end
+
   local data = ("playerId=%s&playerName=%s&mpp=%s"):format(player.id, player.name, player.vitals.mpp)
 
   PSUI.post('set_mpp', data)
-
 end
 
 function PlayerService.set_tp(newTP, oldTP)
@@ -119,7 +126,6 @@ function PlayerService.set_tp(newTP, oldTP)
   local data = ("playerId=%s&playerName=%s&tp=%s"):format(player.id, player.name, newTP)
 
   PSUI.post('set_tp', data)
-
 end
 
 function PlayerService.set_stats(original)
@@ -194,18 +200,75 @@ function PlayerService.set_stats(original)
     ['currentExemplar'] = packet_stats.currentExemplar,
     ['requiredExemplar'] = packet_stats.requiredExemplar
   }
-  local data =
-   ('playerId=%s&playerName=%s&mainJobLevel=%s&subJobLevel=%s&masterLevel=%s&attack=%s&defense=%s&currentExemplar=%s&requiredExemplar=%s&baseSTR=%s&baseDEX=%s&baseVIT=%s&baseAGI=%s&baseINT=%s&baseMND=%s&baseCHR=%s&addedSTR=%s&addedDEX=%s&addedVIT=%s&addedAGI=%s&addedINT=%s&addedMND=%s&addedCHR=%s&fireResistance=%s&iceResistance=%s&windResistance=%s&earthResistance=%s&lightningResistance=%s&waterResistance=%s&lightResistance=%s&darkResistance=%s&title=%s&nationRank=%s'):format(
-    player.id, player.name, stats.mainJobLevel or 0, stats.subJobLevel or 0, stats.masterLevel or 0, stats.attack or 0,
-    stats.defense or 0, stats.currentExemplar or 0, stats.requiredExemplar or 0, stats.baseSTR or 0, stats.baseDEX or 0,
-    stats.baseVIT or 0, stats.baseAGI or 0, stats.baseINT or 0, stats.baseMND or 0, stats.baseCHR or 0,
-    stats.addedSTR or 0, stats.addedDEX or 0, stats.addedVIT or 0, stats.addedAGI or 0, stats.addedINT or 0,
-    stats.addedMND or 0, stats.addedCHR or 0, stats.fireResistance or 0, stats.iceResistance or 0,
-    stats.windResistance or 0, stats.earthResistance or 0, stats.lightningResistance or 0, stats.waterResistance or 0,
-    stats.lightResistance or 0, stats.darkResistance or 0, res.titles[stats.title].en or '', stats.nationRank or 0)
+  local data = ('playerId=%s&playerName=%s' ..
+    '&mainJobLevel=%s' ..
+    '&subJobLevel=%s' ..
+    '&masterLevel=%s' ..
+    '&attack=%s' ..
+    '&defense=%s' ..
+    '&currentExemplar=%s' ..
+    '&requiredExemplar=%s' ..
+    '&baseSTR=%s' ..
+    '&baseDEX=%s' ..
+    '&baseVIT=%s' ..
+    '&baseAGI=%s' ..
+    '&baseINT=%s' ..
+    '&baseMND=%s' ..
+    '&baseCHR=%s' ..
+    '&addedSTR=%s' ..
+    '&addedDEX=%s' ..
+    '&addedVIT=%s' ..
+    '&addedAGI=%s' ..
+    '&addedINT=%s' ..
+    '&addedMND=%s' ..
+    '&addedCHR=%s' ..
+    '&fireResistance=%s' ..
+    '&iceResistance=%s' ..
+    '&windResistance=%s' ..
+    '&earthResistance=%s' ..
+    '&lightningResistance=%s' ..
+    '&waterResistance=%s' ..
+    '&lightResistance=%s' ..
+    '&darkResistance=%s' ..
+    '&title=%s' ..
+    '&nationRank=%s')
+    :format(
+      player.id,
+      player.name,
+      stats.mainJobLevel or 0,
+      stats.subJobLevel or 0,
+      stats.masterLevel or 0,
+      stats.attack or 0,
+      stats.defense or 0,
+      stats.currentExemplar or 0,
+      stats.requiredExemplar or 0,
+      stats.baseSTR or 0,
+      stats.baseDEX or 0,
+      stats.baseVIT or 0,
+      stats.baseAGI or 0,
+      stats.baseINT or 0,
+      stats.baseMND or 0,
+      stats.baseCHR or 0,
+      stats.addedSTR or 0,
+      stats.addedDEX or 0,
+      stats.addedVIT or 0,
+      stats.addedAGI or 0,
+      stats.addedINT or 0,
+      stats.addedMND or 0,
+      stats.addedCHR or 0,
+      stats.fireResistance or 0,
+      stats.iceResistance or 0,
+      stats.windResistance or 0,
+      stats.earthResistance or 0,
+      stats.lightningResistance or 0,
+      stats.waterResistance or 0,
+      stats.lightResistance or 0,
+      stats.darkResistance or 0,
+      res.titles[stats.title].en or '',
+      stats.nationRank or 0
+    )
 
   PSUI.post('set_stats', data)
-
 end
 
 function PlayerService.set_currency1(original)
@@ -231,16 +294,37 @@ function PlayerService.set_currency1(original)
     ['voidstones'] = packet['Voidstones'] or 0
   }
 
-  local data =
-   ('playerId=%s&playerName=%s&conquestPointsBastok=%s&conquestPointsSandoria=%s&conquestPointsWindurst=%s&deeds=%s&dominionNotes=%s&imperialStanding=%s&loginPoints=%s&nyzulTokens=%s&sparksOfEminence=%s&therionIchor=%s&unityAccolades=%s&voidstones=%s'):format(
-    player.id, player.name, packet_currency.conquestPointsBastok or 0, packet_currency.conquestPointsSandoria or 0,
-    packet_currency.conquestPointsWindurst or 0, packet_currency.deeds or 0, packet_currency.dominionNotes or 0,
-    packet_currency.imperialStanding or 0, packet_currency.loginPoints or packet_currency.nyzulTokens,
-    packet_currency.nyzulTokens or 0, packet_currency.sparksOfEminence or 0, packet_currency.therionIchor or 0,
-    packet_currency.unityAccolades or 0, packet_currency.voidstones or 0)
+  local data = ('playerId=%s&playerName=%s' ..
+    '&conquestPointsBastok=%s' ..
+    '&conquestPointsSandoria=%s' ..
+    '&conquestPointsWindurst=%s' ..
+    '&deeds=%s' ..
+    '&dominionNotes=%s' ..
+    '&imperialStanding=%s' ..
+    '&loginPoints=%s' ..
+    '&nyzulTokens=%s' ..
+    '&sparksOfEminence=%s' ..
+    '&therionIchor=%s' ..
+    '&unityAccolades=%s' ..
+    '&voidstones=%s')
+    :format(
+      player.id,
+      player.name,
+      packet_currency.conquestPointsBastok or 0,
+      packet_currency.conquestPointsSandoria or 0,
+      packet_currency.conquestPointsWindurst or 0,
+      packet_currency.deeds or 0,
+      packet_currency.dominionNotes or 0,
+      packet_currency.imperialStanding or 0,
+      packet_currency.loginPoints or packet_currency.nyzulTokens,
+      packet_currency.nyzulTokens or 0,
+      packet_currency.sparksOfEminence or 0,
+      packet_currency.therionIchor or 0,
+      packet_currency.unityAccolades or 0,
+      packet_currency.voidstones or 0
+    )
 
   PSUI.post('set_currency1', data)
-
 end
 
 function PlayerService.set_currency2(original)
@@ -261,46 +345,45 @@ function PlayerService.set_currency2(original)
     ['hallmarks'] = packet['Hallmarks'],
     ['mogSegments'] = packet['Mog Segments'],
     ['mweyaPlasmCorpuscles'] = packet['Mweya Plasm Corpuscles'],
-    ['potpourri'] = packet['Potpourri']
+    ['potpourri'] = packet['Potpourri'],
+    ['temenosUnits'] = packet['Temenos Units'],
+    ['apollyonUnits'] = packet['Apollyon Units'],
   }
 
-  local data =
-   ('playerId=%s&playerName=%s&coalitionImprimaturs=%s&domainPoints=%s&eschaBeads=%s&eschaSilt=%s&gallantry=%s&gallimaufry=%s&hallmarks=%s&mogSegments=%s&mweyaPlasmCorpuscles=%s&potpourri=%s'):format(
-    player.id, player.name, packet_currency.coalitionImprimaturs or 0, packet_currency.domainPoints or 0,
-    packet_currency.eschaBeads or 0, packet_currency.eschaSilt or 0, packet_currency.gallantry or 0,
-    packet_currency.gallimaufry or 0, packet_currency.hallmarks or 0, packet_currency.mogSegments or 0,
-    packet_currency.mweyaPlasmCorpuscles or 0, packet_currency.potpourri or 0)
+  local data = ('playerId=%s&playerName=%s' ..
+    '&coalitionImprimaturs=%s' ..
+    '&domainPoints=%s' ..
+    '&eschaBeads=%s' ..
+    '&eschaSilt=%s' ..
+    '&gallantry=%s' ..
+    '&gallimaufry=%s' ..
+    '&hallmarks=%s' ..
+    '&mogSegments=%s' ..
+    '&mweyaPlasmCorpuscles=%s' ..
+    '&potpourri=%s' ..
+    '&temenosUnits=%s' ..
+    '&apollyonUnits=%s')
+    :format(
+      player.id,
+      player.name,
+      packet_currency.coalitionImprimaturs or 0,
+      packet_currency.domainPoints or 0,
+      packet_currency.eschaBeads or 0,
+      packet_currency.eschaSilt or 0,
+      packet_currency.gallantry or 0,
+      packet_currency.gallimaufry or 0,
+      packet_currency.hallmarks or 0,
+      packet_currency.mogSegments or 0,
+      packet_currency.mweyaPlasmCorpuscles or 0,
+      packet_currency.potpourri or 0,
+      packet_currency.temenosUnits or 0,
+      packet_currency.apollyonUnits or 0
+    )
 
   PSUI.post('set_currency2', data)
-
 end
 
-function PlayerService.set_buffs(id)
-  local player = windower.ffxi.get_player()
-
-  if not player or not PlayerService.active then
-    return
-  end
-
-  local buffs = helpers.calculateBuffs(player['buffs'])
-  local buffString = ''
-  for buff, amount in pairs(buffs) do
-    if amount > 1 then
-      for i = 1, amount do
-        buffString = buffString .. buff .. ','
-      end
-    else
-      buffString = buffString .. buff .. ','
-    end
-  end
-
-  local data = ("playerId=%s&playerName=%s&buffs=%s"):format(player.id, player.name, buffString)
-
-  PSUI.post('set_buffs', data)
-
-end
-
-function PlayerService.set_buff_with_timers()
+function PlayerService.set_buffs_with_timers()
   local player = windower.ffxi.get_player()
 
   if not player or not PlayerService.active then
@@ -316,7 +399,6 @@ function PlayerService.set_buff_with_timers()
   pkg = PSUI.toJSON(pkg)
 
   PSUI.post_json('set_buffs_json', pkg)
-
 end
 
 function PlayerService.set_zone()
@@ -333,16 +415,9 @@ function PlayerService.set_zone()
 
   local data = ("playerId=%s&playerName=%s&zone=%s"):format(player.id, player.name, res.zones[gameInfo.zone].en)
 
-  coroutine.schedule(function()
-    PSUI.post('set_zone', data)
-  end, math.random(0, 3))
-  coroutine.schedule(function()
-    PSUI.post('reset_exp_history', ("playerId=%s&playerName=%s"):format(player.id, player.name))
-  end, math.random(0, 5))
-  coroutine.schedule(function()
-    PlayerService.updateGil()
-  end, math.random(0, 5))
-
+  PSUI.post('set_zone', data)
+  PSUI.post('reset_exp_history', ("playerId=%s&playerName=%s"):format(player.id, player.name))
+  PlayerService.updateGil()
 end
 
 function PlayerService.updateGil()
@@ -362,7 +437,7 @@ function PlayerService.incoming_chunk_handler(id, original, modified, injected, 
     PlayerService.set_currency2(original)
   elseif id == 0x113 then
     PlayerService.set_currency1(original)
-  elseif id == 0x063 then -- the packet character data is in
+  elseif id == 0x063 then           -- the packet character data is in
     local packet = packets.parse('incoming', modified)
     if packet['Order'] == 0x09 then -- the sub packet buff data is in
       local buffs = S {}
@@ -378,19 +453,34 @@ function PlayerService.incoming_chunk_handler(id, original, modified, injected, 
           if buff_id == 0 then
             deadCounter = deadCounter + 1
           end
-          -- print('Buff ID: ' .. buff_id .. ' | Buff Name: ' .. buff_name .. ' | Buff Duration: ' .. buff_duration ..
-          --        ' | UTC Time: ' .. formatted_utc_time)
-          table.insert(buffs, {
-            ["buff_id"] = buff_id,
-            ["buff_name"] = buff_name,
-            ["buff_duration"] = buff_duration,
-            ["utc_time"] = formatted_utc_time
-          })
+          local fullSpellName = nil
+          for buff, detailedBuff in pairs(PlayerService.currentDetailedBuffs) do
+            if (detailedBuff.spell:contains(buff_name)) then
+              fullSpellName = detailedBuff.spell
+            end
+          end
+
+          if (buff_id) then
+            local buff = {
+              ["buff_id"] = buff_id,
+              ["buff_name"] = fullSpellName or buff_name,
+              ["buff_type"] = buff_name,
+              ["buff_duration"] = buff_duration,
+              ["utc_time"] = formatted_utc_time,
+              ["timestamp"] = os.time()
+            }
+            table.insert(buffs, buff)
+            if buff_name:lower() == 'march' then
+              -- print(buff_duration)
+              -- helpers.printTable(buff)
+            end
+          end
         end
       end
       if (deadCounter <= 1) then
         keeperOfBuffs = buffs
       end
+      PlayerService.set_buffs_with_timers()
     elseif packet['Order'] == 2 then
       local meritPackage = {
         playerId = windower.ffxi.get_player().id,
@@ -398,10 +488,7 @@ function PlayerService.incoming_chunk_handler(id, original, modified, injected, 
         total = packet['Merit Points'],
         max = packet['Max Merit Points']
       }
-      coroutine.schedule(function()
-        PSUI.post_json('update_merits', PSUI.toJSON(meritPackage))
-      end, math.random(0, 5))
-
+      coroutine.schedule(function() PSUI.post_json('update_merits', PSUI.toJSON(meritPackage)) end, .5)
     elseif packet['Order'] == 5 then
       local player = windower.ffxi.get_player()
       if player then
@@ -412,15 +499,13 @@ function PlayerService.incoming_chunk_handler(id, original, modified, injected, 
           numberOfJobPoints = packet[job .. ' Job Points']
         }
 
-        coroutine.schedule(function()
-          PSUI.post_json('update_capacity_points', PSUI.toJSON(cpPackage))
-        end, math.random(0, 5))
+        coroutine.schedule(function() PSUI.post_json('update_capacity_points', PSUI.toJSON(cpPackage)) end, 1)
       end
     end
   elseif id == 0x02D then
     -- (8|253) = exp, (371|372) = limit, (718|735) = capacity, (809|810) = exemplar
     -- Param 1 = EXP, Param 2 = Chain #
-    local expMessageTypes = S {8, 253, 371, 372, 718, 735, 809, 810}
+    local expMessageTypes = S { 8, 253, 371, 372, 718, 735, 809, 810 }
     local packet = packets.parse('incoming', original)
     -- print('Message: ' .. packet['Message'] .. ' ' .. packet['Param 1'] .. ' ' .. packet['Param 2'])
     if expMessageTypes:contains(packet['Message']) then
@@ -433,10 +518,7 @@ function PlayerService.incoming_chunk_handler(id, original, modified, injected, 
         ["chain"] = packet['Param 2'],
         ["timestamp"] = formatted_utc_time
       }
-      coroutine.schedule(function()
-        PSUI.post_json('update_exp_history', PSUI.toJSON(expPackage))
-      end, math.random(0, 5))
-
+      coroutine.schedule(function() PSUI.post_json('update_exp_history', PSUI.toJSON(expPackage)) end, 2)
     end
   end
 
@@ -457,12 +539,15 @@ end
 
 function PlayerService.fetchPlayerStats()
   local player = windower.ffxi.get_player()
+
   if not player or not PlayerService.active then
     return
   end
-  coroutine.schedule(PlayerService.send_stats_request, math.random(0, 2))
-  coroutine.schedule(PlayerService.send_currency1_request, math.random(0, 5))
-  coroutine.schedule(PlayerService.send_currency2_request, math.random(0, 5))
+  coroutine.schedule(PlayerService.send_stats_request, math.random(0, 1) / 10)
+  coroutine.sleep(1.1)
+  coroutine.schedule(PlayerService.send_currency1_request, math.random(0, 1) / 10)
+  coroutine.sleep(1.1)
+  coroutine.schedule(PlayerService.send_currency2_request, math.random(0, 1) / 10)
 end
 
 function PlayerService.send_stats_request()
@@ -479,137 +564,157 @@ function PlayerService.send_currency2_request()
   packets.inject(packets.new('outgoing', 0x115))
 end
 
-function PlayerService.handle_incoming_text(original, modified, original_mode, modified_mode, blocked)
-  local newMessage
-  local matchResult
-  local messageType
-  local safeMessageTypes = S {'OBTAINED', 'DROPS'}
+function PlayerService.handle_outgoing_text(original, modified, original_mode, modified_mode, blocked)
+  local newMessage = Utils.strip_colors(original)
+  local match = string.match(newMessage, '^/ma "(.*)"')
+  if match then
+    newMessage = match
+    local timestamp = os.time()
+    PlayerService.currentDetailedBuffs[newMessage] = {
+      ['spell'] = newMessage,
+      ['timestamp'] = timestamp
+    }
+    local ipc_message = ('PlayerService:spell="%s"&timestamp="%s"'):format(newMessage, timestamp)
+    windower.send_ipc_message(ipc_message)
+  end
+end
+
+function PlayerService.handle_ipc_message(message)
+  if message:startswith('PlayerService:Spell') then
+    local spell = string.match(message, 'spell="(.-)"')
+    local timestamp = string.match(message, 'timestamp="(.-)"')
+    if spell and spell ~= '' then
+      PlayerService.currentSpells[spell] = {
+        ['spell'] = spell,
+        ['timestamp'] = timestamp
+      }
+    end
+  end
+end
+
+function PlayerService.handle_incoming_text(original, original_mode, blocked)
   local player = windower.ffxi.get_player()
+  local messageType = nil
 
-  if blocked or not player or not PlayerService.active then
+  if not player or not PlayerService.active then
     return
   end
 
-  -- newMessage = original
-  newMessage = Utils.strip_colors(original)
+  local newMessage = Utils.strip_colors(original)
 
-  matchResult = string.match(newMessage, '^%(%a+%)') -- Party
-  if matchResult then
-    messageType = "PARTY"
-  end
-  if not matchResult then
-    matchResult = string.match(newMessage, '^%a+>>') -- Tell (From Person (Them))
-    if matchResult then
-      messageType = "TELL"
-    end
-  end
-  if not matchResult then
-    matchResult = string.match(newMessage, '^>>%a+') -- Tell (To Person (You))
-    if matchResult then
-      messageType = "TELL"
-    end
-  end
-  if not matchResult then
-    matchResult = string.match(newMessage, '^%[1]<[%u][%a]+>') -- Linkshell[1]
-    if matchResult then
-      messageType = "LINKSHELL1"
-    end
-  end
-  if not matchResult then
-    matchResult = string.match(newMessage, '^%[2]<[%u][%a]+>') -- Linkshell[2]
-    if matchResult then
-      messageType = "LINKSHELL2"
-    end
-  end
-  if not matchResult then
-    matchResult = string.match(newMessage, '^[%a+] :') -- Shout
-    if matchResult then
-      messageType = "SHOUT"
-    end
-  end
-  if not matchResult then
-    matchResult = string.match(newMessage, '^%a+%[%a+%]:') -- Yell
-    if matchResult then
-      messageType = "YELL"
-    end
-  end
-  if not matchResult then
-    matchResult = string.match(newMessage, '^{%a+') -- Unity
-    if matchResult then
-      messageType = "UNITY"
-    end
-  end
-  if not matchResult then
-    matchResult = string.match(newMessage, '^%a+\'?%a*%a+ :') -- NPC/say
-    if matchResult then
-      if original_mode <= 10 then
-        messageType = "SAY"
-      else
-        messageType = "CUTSCENE"
-      end
-    end
-  end
-  if not matchResult then
-    -- matches on text: "<Person> Obtains a" and "Obtained key item:""
-    matchResult = string.match(newMessage, ('^%s obtains a'):format(player.name)) or
-                   string.match(newMessage, '^Obtained key item:') -- Obtained
-    if matchResult then
-      messageType = "OBTAINED"
-    end
-  end
-  if not matchResult then
-    matchResult = string.match(newMessage, ('^You find a'):format(player.name)) -- Drops
-    if matchResult then
-      messageType = "DROPS"
-    end
-  end
-  if not matchResult then
-    matchResult = string.match(newMessage, '^%a+ %d+:') -- Moogle Trial Weapons
-    if matchResult then
-      messageType = "TRIAL"
+  local patterns = {
+    { '^%(%a+%)',                            "PARTY" },
+    { '^%a+>>',                              "TELL" },
+    { '^>>%a+',                              "TELL" },
+    { '^%[1]<[%u][%a]+>',                    "LINKSHELL1" },
+    { '^%[2]<[%u][%a]+>',                    "LINKSHELL2" },
+    { '^[%a+] :',                            "SHOUT" },
+    { '^%a+%[%a+%]:',                        "YELL" },
+    { '^{%a+',                               "UNITY" },
+    { '^%a+\'?%a*%a+ :',                     "SAY" },
+    { ('^You find a'),                       "DROPS" },
+    { ('^%s obtains a'):format(player.name), "OBTAINED" },
+    { '^Obtained key item:',                 "OBTAINED" },
+    { '^%a+ %d+:',                           "TRIAL" }
+  }
+
+  for _, pattern in ipairs(patterns) do
+    local match = string.match(newMessage, pattern[1])
+    if match then
+      messageType = pattern[2]
+      break
     end
   end
 
-  if not matchResult then
+  if not messageType then
     return
   end
 
-  if newMessage == lastMessage and os.clock() - 1 < lastMessageTime and not safeMessageTypes:contains(messageType) then
-    return
-  end
   newMessage = Utils.convert_to_utf8(newMessage)
-  lastMessage = newMessage
-  lastMessageTime = os.clock()
 
-  if (messageType == 'DROPS') then
+  if messageType:contains('DROPS') or messageType:contains('OBTAINED') then
     table.insert(chatDropAccumulator, newMessage)
-  end
-  local data = {}
-  if (messageType == 'DROPS') then
-    coroutine.schedule(function()
-      if (#chatDropAccumulator == 0) then
-        return
+    if (chatCoroutine) then return end
+    chatCoroutine = coroutine.schedule(function()
+      if #chatDropAccumulator > 0 then
+        PlayerService.write_chat_to_file(
+          player.id,
+          player.name,
+          messageType,
+          chatDropAccumulator
+        )
+        chatDropAccumulator = S {}
+        chatCoroutine = nil
       end
-      data = PSUI.toJSON({
-        playerId = player.id,
-        playerName = player.name,
-        messageType = messageType,
-        messages = chatDropAccumulator
-      })
-      PSUI.post_json('set_messages', data)
-      chatDropAccumulator = S {}
-    end, 3)
+    end, 2)
   else
     local messageAsTable = S {}
     table.insert(messageAsTable, newMessage)
-    data = {
-      playerId = player.id,
-      playerName = player.name,
-      messageType = messageType,
-      messages = messageAsTable
-    }
-    PSUI.post_json('set_messages', PSUI.toJSON(data))
+    PlayerService.write_chat_to_file(
+      player.id,
+      player.name,
+      messageType,
+      messageAsTable
+    )
   end
+end
+
+function PlayerService.get_chat_log_path(playerName)
+  local addon_path = windower.addon_path
+  local chat_logs_dir = addon_path .. 'chat_logs/'
+  
+  -- Create directory if it doesn't exist
+  windower.create_dir(chat_logs_dir)
+  
+  return chat_logs_dir .. playerName .. '_chat.jsonl'
+end
+
+function PlayerService.clear_chat_logs()
+  local addon_path = windower.addon_path
+  local chat_logs_dir = addon_path .. 'chat_logs/'
+  
+  -- Create directory if it doesn't exist
+  windower.create_dir(chat_logs_dir)
+  
+  -- Get all files in the directory
+  local files = windower.get_dir(chat_logs_dir)
+  
+  if files then
+    for _, filename in ipairs(files) do
+      -- Only clear .jsonl files
+      if filename:match('%.jsonl$') then
+        local file_path = chat_logs_dir .. filename
+        local file = io.open(file_path, 'w')
+        if file then
+          file:close()
+          PlayerService.log('Cleared chat log: ' .. filename, 'DEBUG')
+        end
+      end
+    end
+  end
+end
+
+function PlayerService.write_chat_to_file(playerId, playerName, messageType, messages)
+  local file_path = PlayerService.get_chat_log_path(playerName)
+  local file = io.open(file_path, 'a')
+  
+  if not file then
+    PlayerService.log('Failed to open chat log file: ' .. file_path, 'ERROR')
+    return
+  end
+  
+  local chat_entry = {
+    playerId = playerId,
+    playerName = playerName,
+    messageType = messageType,
+    messages = messages,
+    timestamp = os.time(),
+    utc_timestamp = Utils.get_formatted_local_time(Utils.get_current_time())
+  }
+  
+  local json_line = PSUI.toJSON(chat_entry)
+  file:write(json_line .. '\n')
+  file:close()
 end
 
 function PlayerService.log(message, messageType)
@@ -624,28 +729,28 @@ function PlayerService.log(message, messageType)
   windower.add_to_chat(207, 'PlayerService: ' .. delieveredMessage)
 end
 
-windower.register_event('load', PlayerService.set_jobs)
+windower.register_event('load', function()
+  PlayerService.clear_chat_logs()
+  PlayerService.set_jobs()
+end)
 windower.register_event('incoming text', PlayerService.handle_incoming_text)
+windower.register_event('outgoing text', PlayerService.handle_outgoing_text)
 windower.register_event('incoming chunk', PlayerService.incoming_chunk_handler)
+windower.register_event('ipc message', PlayerService.handle_ipc_message)
 windower.register_event('outgoing chunk', PlayerService.outgoing_chunk_handler)
--- windower.register_event('action', PlayerService.handle_action)
-windower.register_event('gain experience', PlayerService.fetchPlayerStats)
-windower.register_event('lose experience', PlayerService.fetchPlayerStats)
 windower.register_event('hpp change', PlayerService.set_hpp)
 windower.register_event('mpp change', PlayerService.set_mpp)
 windower.register_event('tp change', PlayerService.set_tp)
-windower.register_event('gain buff', PlayerService.set_buff_with_timers)
-windower.register_event('lose buff', PlayerService.set_buff_with_timers)
+windower.register_event('lose buff', PlayerService.set_buffs_with_timers)
 windower.register_event('job change', PlayerService.set_jobs)
 windower.register_event('zone change', PlayerService.set_zone)
 windower.register_event('status change', PlayerService.set_player_status)
--- windower.register_event('time change', PlayerService.set_ability_recasts)
 
 windower.register_event('addon command', function(...)
-  local args = T {...}
+  local args = T { ... }
   if args[1] == 'debug' then
     PlayerService.debugger = not PlayerService.debugger
-    PlayerService.log(tostring(PlayerService.debugger))
+    PlayerService.log('Debugger - ' .. tostring(PlayerService.debugger))
   elseif args[1] == 'init' then
     PlayerService.initialize_player()
   elseif args[1] == 'refresh' then
