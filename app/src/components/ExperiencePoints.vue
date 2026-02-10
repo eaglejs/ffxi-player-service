@@ -174,8 +174,8 @@ function analyzePoints(experiencePoints: Experience[]): number {
   }))
 
   // Calculate the total time span of the given data points
-  const startTime = points[0].timestamp
-  const endTime = points[points.length - 1].timestamp
+  const startTime = points[0]?.timestamp ?? 0
+  const endTime = points[points.length - 1]?.timestamp ?? 0
   const totalTimeSpan = (endTime - startTime) / 1000 // in seconds
 
   // Calculate total points accumulated

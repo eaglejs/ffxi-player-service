@@ -10,7 +10,7 @@
           <div class="col-5 ms-auto p-0 text-end">
             <b
               >{{ stats[stat.id] }} +
-              <span class="text-success">{{ stats[addedStats[index].id] }}</span></b
+              <span class="text-success">{{ stats[`added${stat.name}`] }}</span></b
             >
           </div>
         </section>
@@ -20,6 +20,8 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
+
 const baseStats = [
   { id: 'baseSTR', name: 'STR' },
   { id: 'baseDEX', name: 'DEX' },
@@ -42,5 +44,15 @@ const addedStats = [
 
 const props = defineProps({
   stats: Object
+})
+
+const totalStats = computed(() => {
+  if (!props.stats) return null
+  const stats = props.stats
+  const totals: Record<string, number> = {}
+  baseStats.forEach((stat) => {
+    totals[stat.id] = stats[stat.id] + stats[`added${stat.name}`]
+  })
+  return totals
 })
 </script>

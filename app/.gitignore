@@ -1,3 +1,6 @@
+# Packages
+*.tgz
+
 # Logs
 logs
 *.log
