@@ -25,6 +25,7 @@ local partySlots = L { 'p1', 'p2', 'p3', 'p4', 'p5' }
 local chatDropAccumulator = S {}
 local chatCoroutine = nil
 local keeperOfBuffs = S {}
+local lastMessage = nil
 
 math.randomseed(os.time())
 local PlayerService = {
@@ -600,7 +601,14 @@ function PlayerService.handle_incoming_text(original, original_mode, blocked)
     return
   end
 
+  -- Prevent duplicate messages (Windower fires this event multiple times for the same message)
+  
   local newMessage = Utils.strip_colors(original)
+  
+  if lastMessage ~= nil and newMessage == lastMessage then
+    return
+  end
+  lastMessage = newMessage
 
   local patterns = {
     { '^%(%a+%)',                            "PARTY" },
@@ -611,7 +619,7 @@ function PlayerService.handle_incoming_text(original, original_mode, blocked)
     { '^[%a+] :',                            "SHOUT" },
     { '^%a+%[%a+%]:',                        "YELL" },
     { '^{%a+',                               "UNITY" },
-    { '^%a+\'?%a*%a+ :',                     "SAY" },
+    { '^%a+[%a%s%-\']*%a+ :',                "SAY" },
     { ('^You find a'),                       "DROPS" },
     { ('^%s obtains a'):format(player.name), "OBTAINED" },
     { '^Obtained key item:',                 "OBTAINED" },

@@ -6,7 +6,6 @@ const iconv = require('iconv-lite');
 const WebSocket = require('ws');
 const playerScheme = require('../schemas/Player');
 const chatScheme = require('../schemas/Chat');
-const e = require('express');
 
 mongoose.connect('mongodb://localhost:27017/ffxi');
 
