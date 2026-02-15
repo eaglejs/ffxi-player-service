@@ -1,7 +1,28 @@
-# Java specific
+# Gradle
+.gradle/
+build/
+bin/
+out/
+
+# Java compiled classes
 *.class
+*.jar
+!gradle/wrapper/gradle-wrapper.jar
 *.war
 *.ear
-**/.gradle
-**/build
-**/bin
+
+# IDE files
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
+
+# Logs
+*.log
+*.log.*
+
+# OS files
+.DS_Store
+Thumbs.db
