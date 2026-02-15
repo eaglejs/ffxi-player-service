@@ -1,0 +1,9 @@
+2026-02-15: Implemented Health Check API (Restful API)
+- Set up Dropwizard application structure: Main.java, FFXIConfiguration.java, config.yml
+- Created /health REST endpoint (HealthResource) returning JSON with service status and dependency checks
+- Implemented MongoHealthCheck to verify MongoDB connectivity via ping command
+- Returns { "status": "ok", "checks": {...} } with HTTP 200 when healthy, HTTP 503 when unhealthy
+- Added Swagger/OpenAPI annotations and SwaggerConfig for API documentation (available at /openapi.json)
+- Added unit tests: MongoHealthCheckTest (2 tests), HealthResourceTest (4 tests) - all 6 passing
+- Fixed build.gradle: added test dependencies, Swagger deps, allowInsecureProtocol, duplicatesStrategy
+- PRD "Restful API" feature marked as passes: true

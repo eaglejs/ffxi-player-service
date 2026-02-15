@@ -7,6 +7,7 @@ repositories {
     mavenCentral()
     maven {
         url 'http://eaglejs-mac-mini.local:8091/'
+        allowInsecureProtocol = true
     }
 }
 
@@ -19,6 +20,16 @@ dependencies {
     implementation 'org.glassfish.jersey.core:jersey-client:2.32'
     implementation 'org.glassfish.jersey.inject:jersey-hk2:2.32'
     implementation 'org.glassfish.jersey.media:jersey-media-json-jackson:2.32'
+    implementation 'io.swagger.core.v3:swagger-jaxrs2:2.1.11'
+    implementation 'io.swagger.core.v3:swagger-annotations:2.1.11'
+
+    testImplementation 'io.dropwizard:dropwizard-testing:2.0.24'
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.mockito:mockito-core:4.0.0'
+}
+
+test {
+    useJUnit()
 }
 
 application {
@@ -26,6 +37,7 @@ application {
 }
 
 jar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     from {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
