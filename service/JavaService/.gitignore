@@ -1,0 +1,6 @@
+# Java specific
+*.class
+*.war
+*.ear
+**/.gradle
+**/build
