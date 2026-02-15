@@ -6,6 +6,8 @@ import io.dropwizard.setup.Environment;
 import io.eaglejs.ffxi.config.SwaggerConfig;
 import io.eaglejs.ffxi.health.MongoHealthCheck;
 import io.eaglejs.ffxi.resources.HealthResource;
+import io.eaglejs.ffxi.websocket.WebSocketManager;
+import org.eclipse.jetty.servlet.ServletContextHandler;
 
 public class Main extends Application<FFXIConfiguration> {
 
@@ -28,5 +30,9 @@ public class Main extends Application<FFXIConfiguration> {
         environment.healthChecks().register("mongodb", new MongoHealthCheck(configuration.getMongoUri()));
         environment.jersey().register(new HealthResource(environment.healthChecks()));
         environment.jersey().register(new SwaggerConfig());
+
+        // Register WebSocket endpoint
+        ServletContextHandler contextHandler = environment.getApplicationContext();
+        environment.lifecycle().manage(new WebSocketManager(contextHandler));
     }
 }

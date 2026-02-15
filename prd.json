@@ -22,6 +22,6 @@
             "Ensure the WebSocket connection is secure and handles reconnections gracefully.",
             "Write unit tests for the WebSocket API to ensure it correctly broadcasts updates and handles client connections."
         ],
-        "passes": false
+        "passes": true
     }
 ]

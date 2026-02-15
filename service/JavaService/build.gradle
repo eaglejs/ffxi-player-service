@@ -14,6 +14,8 @@ repositories {
 dependencies {
     implementation 'io.dropwizard:dropwizard-core:2.0.24'
     implementation 'io.dropwizard:dropwizard-client:2.0.24'
+    implementation 'javax.websocket:javax.websocket-api:1.1'
+    implementation 'org.eclipse.jetty.websocket:javax-websocket-server-impl:9.4.43.v20210629'
     implementation 'org.mongodb:mongodb-driver-sync:4.3.4'
     implementation 'org.mongodb:mongodb-driver-core:4.3.4'
     implementation 'org.mongodb:mongodb-driver-legacy:4.3.4'

@@ -7,3 +7,19 @@
 - Added unit tests: MongoHealthCheckTest (2 tests), HealthResourceTest (4 tests) - all 6 passing
 - Fixed build.gradle: added test dependencies, Swagger deps, allowInsecureProtocol, duplicatesStrategy
 - PRD "Restful API" feature marked as passes: true
+
+2026-02-15: Implemented WebSocket API for real-time player stats
+- Created PlayerWebSocket endpoint at /ws/players using JSR-356 (javax.websocket) on Jetty
+- Sends welcome message {"msg": "Hello! I am the server!"} on client connect
+- Broadcasts player stats updates to all connected clients via PlayerWebSocket.broadcast()
+- Implemented subscription system: clients send {"action":"subscribe","playerId":123} to filter updates
+- Supports unsubscribe per player and unsubscribe_all to return to broadcast mode
+- Clients with no subscriptions receive all updates (matching Node reference behavior)
+- Heartbeat ping/pong every 30 seconds to keep connections alive and detect stale clients
+- Created WebSocketManager (Dropwizard Managed lifecycle) to register endpoint with Jetty
+- Updated Main.java to register WebSocket endpoint via ServletContextHandler
+- Added javax.websocket-api and jetty-websocket dependencies to build.gradle
+- Unit tests: PlayerWebSocketTest (10 tests) covering connect, disconnect, error, broadcast,
+  subscription filtering, unsubscribe, unsubscribe_all, closed session skip, empty broadcast
+- All 16 tests passing (2 health + 4 resource + 10 websocket)
+- PRD "Websocket API" feature marked as passes: true
