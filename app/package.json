@@ -6,6 +6,9 @@
   "publishConfig": {
     "registry": "http://eaglejs-mac-mini.local:8091/repository/npm-hosted/"
   },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "dev": "vite --host 0.0.0.0",
     "build": "run-p type-check \"build-only {@}\" --",
