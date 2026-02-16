@@ -8,7 +8,7 @@ fi
 for ((i=1; i<=$1; i++)); do
     echo "Iteration $i"
     echo "-------------------------"
-    result=$(copilot --allow-all --resume --model "claude-opus-4.6" -p "@plans/prd.json @progress.txt \
+    result=$(copilot --allow-all --resume --model "claude-sonnet-4.5" -p "@plans/prd.json @progress.txt \
 1. Find the highest priority feature to work on and only work on that feature. \
 This should be the one YOU decide has the highest priority - not necessarily what is first in the list. \
 2. Implement the feature within the JavaService codebase using Dropwizard as our Framework. \
