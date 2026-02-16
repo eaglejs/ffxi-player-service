@@ -3,4 +3,14 @@ server:
   applicationConnectors:
     - type: http
       port: 80
+
+# CORS configuration
+cors:
+  enabled: true
+  allowedOrigins: "*"  # Use "*" for dev, specific origins for production (e.g., "https://yourdomain.com")
+  allowedHeaders: "*"
+  allowedMethods: "GET,POST,PUT,DELETE,OPTIONS,HEAD"
+  allowCredentials: true
+  exposedHeaders: "Content-Type,Authorization,X-Requested-With"
+
 mongoUri: mongodb://localhost:27017

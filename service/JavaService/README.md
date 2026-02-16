@@ -144,29 +144,67 @@ java -jar build/libs/JavaService.jar server src/main/resources/config.yml
 Edit `src/main/resources/config.yml` to configure:
 
 - **Server ports:**
-  - Application: 8080 (default)
+  - Application: 80 (configured)
   - Admin: 8081 (default)
+  - API Root Path: `/api/*` (API endpoints accessible at `/api/...`)
 - **MongoDB URI:** `mongodb://localhost:27017` (default)
+- **CORS Settings:**
+  - `enabled`: Enable/disable CORS support
+  - `allowedOrigins`: Comma-separated list of allowed origins (use `"*"` for dev, specific origins for production)
+  - `allowedHeaders`: Allowed request headers
+  - `allowedMethods`: Allowed HTTP methods
+  - `allowCredentials`: Allow credentials in CORS requests
+  - `exposedHeaders`: Headers exposed to the client
 
-Example configuration:
+### Example Development Configuration
 ```yaml
 server:
+  rootPath: /api/*
   applicationConnectors:
     - type: http
-      port: 8080
-  adminConnectors:
-    - type: http
-      port: 8081
+      port: 80
+
+cors:
+  enabled: true
+  allowedOrigins: "*"  # Allow all origins for local development
+  allowedHeaders: "*"
+  allowedMethods: "GET,POST,PUT,DELETE,OPTIONS,HEAD"
+  allowCredentials: true
+  exposedHeaders: "Content-Type,Authorization,X-Requested-With"
 
 mongoUri: mongodb://localhost:27017
 ```
+
+### Example Production Configuration
+```yaml
+server:
+  rootPath: /api/*
+  applicationConnectors:
+    - type: http
+      port: 8080
+
+cors:
+  enabled: true
+  allowedOrigins: "https://yourdomain.com,https://www.yourdomain.com"  # Specific origins only
+  allowedHeaders: "Content-Type,Authorization,X-Requested-With"
+  allowedMethods: "GET,POST,PUT,DELETE,OPTIONS"
+  allowCredentials: true
+  exposedHeaders: "Content-Type,Authorization,X-Requested-With"
+
+mongoUri: mongodb://production-host:27017/ffxi
+```
+
+To disable CORS entirely, set `cors.enabled: false`.
 
 ## Endpoints
 
 Once running, the following endpoints are available:
 
-- **Application:** http://localhost:8080
-- **Health Check:** http://localhost:8081/healthcheck
+- **UI (Root):** http://localhost/
+- **API Health Check:** http://localhost/api/health
+- **API OpenAPI Spec:** http://localhost/api/openapi.json
+- **WebSocket:** ws://localhost/ws/players
+- **Admin Health Check:** http://localhost:8081/healthcheck
 - **Admin UI:** http://localhost:8081
 
 ## Development Tips

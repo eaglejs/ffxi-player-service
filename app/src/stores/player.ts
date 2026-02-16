@@ -16,7 +16,7 @@ export const usePlayerStore = defineStore('player', () => {
   }
 
   async function fetchPlayers() {
-    const response = await axios.get(`${fullUrl}/get_players`)
+    const response = await axios.get(`${fullUrl}/players/get_players`)
     response.data.forEach((player: any) => {
       players.value.set(player.playerId, player)
     })
@@ -24,21 +24,21 @@ export const usePlayerStore = defineStore('player', () => {
   }
 
   async function fetchPlayer(playerId: number) {
-    const response = await axios.get(`${fullUrl}/get_player?playerId=${playerId}`)
+    const response = await axios.get(`${fullUrl}/players/get_player?playerId=${playerId}`)
 
     players.value.set(response.data.playerId, response.data)
     return Promise.resolve(players.value.get(playerId))
   }
 
   async function fetchChatLog(playerId: number) {
-    const response = await axios.get(`${fullUrl}/get_chat_log?playerId=${playerId}`)
+    const response = await axios.get(`${fullUrl}/players/get_chat_log?playerId=${playerId}`)
     chatLog.value = response.data
     return Promise.resolve(chatLog)
   }
 
   async function fetchChatLogByMessageType(playerId: number, messageType: string) {
     const response = await axios.get(
-      `${fullUrl}/get_chat_log_by_type?playerId=${playerId}&messageType=${messageType}`
+      `${fullUrl}/players/get_chat_log_by_type?playerId=${playerId}&messageType=${messageType}`
     )
     chatLog.value = response.data
     return Promise.resolve(chatLog)
@@ -78,7 +78,7 @@ export const usePlayerStore = defineStore('player', () => {
     if (new Date().getTime() - lastBuffCheck.getTime() < 1000) {
       return Promise.reject('You can only refresh buffs once per second')
     }
-    return axios.post(`${fullUrl}/refresh_buffs`, player).then((data) => {
+    return axios.post(`${fullUrl}/players/refresh_buffs`, player).then((data) => {
       lastBuffCheck = new Date()
       return Promise.resolve(data)
     })

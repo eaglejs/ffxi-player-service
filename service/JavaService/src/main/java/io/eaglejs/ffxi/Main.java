@@ -6,10 +6,16 @@ import io.dropwizard.setup.Environment;
 import io.eaglejs.ffxi.config.SwaggerConfig;
 import io.eaglejs.ffxi.health.MongoHealthCheck;
 import io.eaglejs.ffxi.resources.HealthResource;
+import io.eaglejs.ffxi.resources.PlayerResource;
 import io.eaglejs.ffxi.websocket.WebSocketManager;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.servlets.CrossOriginFilter;
+
+import javax.servlet.DispatcherType;
+import javax.servlet.FilterRegistration;
+import java.util.EnumSet;
 
 public class Main extends Application<FFXIConfiguration> {
 
@@ -29,8 +35,14 @@ public class Main extends Application<FFXIConfiguration> {
 
     @Override
     public void run(FFXIConfiguration configuration, Environment environment) {
+        // Configure CORS if enabled
+        if (configuration.getCors().isEnabled()) {
+            configureCors(environment, configuration.getCors());
+        }
+        
         environment.healthChecks().register("mongodb", new MongoHealthCheck(configuration.getMongoUri()));
         environment.jersey().register(new HealthResource(environment.healthChecks()));
+        environment.jersey().register(new PlayerResource());
         environment.jersey().register(new SwaggerConfig());
 
         // Register WebSocket endpoint
@@ -46,5 +58,20 @@ public class Main extends Application<FFXIConfiguration> {
         staticServlet.setInitParameter("dirAllowed", "false");  // Disable directory listing for security
         staticServlet.setInitParameter("pathInfoOnly", "true");
         contextHandler.addServlet(staticServlet, "/*");
+    }
+    
+    private void configureCors(Environment environment, io.eaglejs.ffxi.config.CorsConfiguration corsConfig) {
+        final FilterRegistration.Dynamic cors = 
+            environment.servlets().addFilter("CORS", CrossOriginFilter.class);
+        
+        // Configure CORS parameters from configuration
+        cors.setInitParameter(CrossOriginFilter.ALLOWED_ORIGINS_PARAM, corsConfig.getAllowedOrigins());
+        cors.setInitParameter(CrossOriginFilter.ALLOWED_HEADERS_PARAM, corsConfig.getAllowedHeaders());
+        cors.setInitParameter(CrossOriginFilter.ALLOWED_METHODS_PARAM, corsConfig.getAllowedMethods());
+        cors.setInitParameter(CrossOriginFilter.ALLOW_CREDENTIALS_PARAM, String.valueOf(corsConfig.isAllowCredentials()));
+        cors.setInitParameter(CrossOriginFilter.EXPOSED_HEADERS_PARAM, corsConfig.getExposedHeaders());
+        
+        // Add URL mapping for CORS filter
+        cors.addMappingForUrlPatterns(EnumSet.allOf(DispatcherType.class), true, "/*");
     }
 }

@@ -1,0 +1,16 @@
+server:
+  rootPath: /api/*
+  applicationConnectors:
+    - type: http
+      port: 80
+
+# CORS configuration for PRODUCTION
+cors:
+  enabled: true
+  allowedOrigins: "https://yourdomain.com,https://www.yourdomain.com"  # Specific origins only
+  allowedHeaders: "Content-Type,Authorization,X-Requested-With"
+  allowedMethods: "GET,POST,PUT,DELETE,OPTIONS"
+  allowCredentials: true
+  exposedHeaders: "Content-Type,Authorization,X-Requested-With"
+
+mongoUri: mongodb://production-host:27017/ffxi

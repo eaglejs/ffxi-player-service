@@ -94,6 +94,12 @@ public class PlayerWebSocket {
             }
 
             switch (action) {
+                case "ping": {
+                    // Client heartbeat - respond with pong
+                    session.getBasicRemote().sendText(MAPPER.writeValueAsString(
+                            Collections.singletonMap("action", "pong")));
+                    break;
+                }
                 case "subscribe": {
                     Object playerIdObj = msg.get("playerId");
                     if (playerIdObj instanceof Number) {
@@ -107,7 +113,7 @@ public class PlayerWebSocket {
                     }
                     break;
                 }
-                case "unsubscribe": {
+                case "close": {
                     Object playerIdObj = msg.get("playerId");
                     if (playerIdObj instanceof Number) {
                         int playerId = ((Number) playerIdObj).intValue();

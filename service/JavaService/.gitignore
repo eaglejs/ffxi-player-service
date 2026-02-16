@@ -26,3 +26,8 @@ out/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Configuration files
+**/config-production.yml
+**/config-staging.yml
+**/config-development.yml
