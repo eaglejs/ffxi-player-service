@@ -6,13 +6,24 @@ plugins {
 repositories {
     mavenCentral()
     maven {
-        url 'http://eaglejs-mac-mini.local:8091/'
+        url 'http://192.168.5.30:8091/'
         allowInsecureProtocol = true
     }
 }
 
+// UI Package Configuration
+// Note: For production, publish a built version containing the 'dist' folder to Nexus.
+// If the package contains a 'dist' folder, only those built assets will be used.
+// Otherwise, index.html and public/ folder will be extracted from source.
+ext {
+    uiPackageName = 'ffxi-stats'
+    uiPackageVersion = '1.0.0'
+    nexusNpmUrl = 'http://192.168.5.30:8091/repository/npm-hosted'  // Use IP address to avoid IPv6 issues
+}
+
 dependencies {
     implementation 'io.dropwizard:dropwizard-core:2.0.24'
+    implementation "io.dropwizard:dropwizard-jetty:2.0.24"
     implementation 'io.dropwizard:dropwizard-client:2.0.24'
     implementation 'javax.websocket:javax.websocket-api:1.1'
     implementation 'org.eclipse.jetty.websocket:javax-websocket-server-impl:9.4.43.v20210629'
@@ -39,12 +50,164 @@ application {
 }
 
 jar {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    // Merge service descriptor files properly for Dropwizard
     from {
-        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+        configurations.runtimeClasspath.collect { 
+            it.isDirectory() ? it : zipTree(it).matching {
+                exclude 'META-INF/*.SF'
+                exclude 'META-INF/*.DSA'
+                exclude 'META-INF/*.RSA'
+                exclude 'META-INF/services/*'  // Exclude for now, will be merged separately
+            }
+        }
     }
+    
+    // Handle duplicate files - exclude duplicates for regular files
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    
+    // Merge all META-INF/services files
+    doFirst {
+        def serviceDir = file("${buildDir}/tmp/jar/META-INF/services")
+        serviceDir.deleteDir()
+        serviceDir.mkdirs()
+        
+        // Collect and merge all service descriptor files
+        def services = [:].withDefault { [] }
+        configurations.runtimeClasspath.each { dep ->
+            if (dep.isFile() && dep.name.endsWith('.jar')) {
+                try {
+                    zipTree(dep).matching {
+                        include 'META-INF/services/*'
+                    }.each { serviceFile ->
+                        def serviceName = serviceFile.name
+                        serviceFile.text.trim().split('\n').each { line ->
+                            def trimmed = line.trim()
+                            if (trimmed && !trimmed.startsWith('#')) {
+                                services[serviceName] << trimmed
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    // Ignore files that can't be processed
+                }
+            }
+        }
+        
+        // Write merged service files
+        services.each { serviceName, implementations ->
+            def mergedFile = new File(serviceDir, serviceName)
+            mergedFile.text = implementations.unique().join('\n') + '\n'
+        }
+    }
+    
+    // Include the merged service files
+    from("${buildDir}/tmp/jar")
+    
     manifest {
         attributes 'Main-Class': 'io.eaglejs.ffxi.Main'
+    }
+}
+
+// Task to download UI package from Nexus npm repository
+task downloadUI(type: Exec) {
+    description = 'Download UI package from Nexus npm repository'
+    def nexusUrl = "${project.ext.nexusNpmUrl}/${project.ext.uiPackageName}/-/${project.ext.uiPackageName}-${project.ext.uiPackageVersion}.tgz"
+    def downloadDir = file("${project.buildDir}/ui-download")
+    def tarFile = file("${downloadDir}/${project.ext.uiPackageName}-${project.ext.uiPackageVersion}.tgz")
+    
+    outputs.file(tarFile)
+    outputs.upToDateWhen { tarFile.exists() }
+    
+    doFirst {
+        downloadDir.mkdirs()
+        logger.lifecycle("Downloading UI package from ${nexusUrl}")
+    }
+    
+    // Use curl which we know works on your system
+    commandLine 'curl', '-f', '-L', '-o', tarFile.absolutePath, '--create-dirs', nexusUrl
+    
+    // Ignore errors - let the task succeed but log the failure
+    ignoreExitValue = true
+    
+    doLast {
+        if (executionResult.get().exitValue != 0) {
+            logger.warn("Failed to download UI from Nexus (curl exit code: ${executionResult.get().exitValue})")
+            logger.warn("Will use placeholder UI instead")
+            // Create a marker file to prevent re-attempting
+            if (tarFile.exists()) {
+                tarFile.delete()
+            }
+            new File(downloadDir, "download-failed.marker").text = "curl failed with exit code ${executionResult.get().exitValue}"
+        } else {
+            logger.lifecycle("Downloaded UI package to ${tarFile} (${tarFile.length()} bytes)")
+        }
+    }
+}
+downloadUI.onlyIf { 
+    def downloadDir = file("${project.buildDir}/ui-download")
+    def markerFile = new File(downloadDir, "download-failed.marker")
+    !markerFile.exists()
+}
+
+// Task to extract UI package
+task extractUI {
+    description = 'Extract UI package from tar.gz'
+    dependsOn downloadUI
+    
+    def downloadDir = file("${project.buildDir}/ui-download")
+    def tarFile = file("${downloadDir}/${project.ext.uiPackageName}-${project.ext.uiPackageVersion}.tgz")
+    def assetsDir = file("${project.buildDir}/resources/main/assets")
+    def extractTempDir = file("${downloadDir}/extracted")
+    
+    inputs.file(tarFile)
+    outputs.dir(assetsDir)
+    
+    onlyIf { tarFile.exists() }
+    
+    doLast {
+        // Extract to temporary location first
+        project.copy {
+            from(tarTree(resources.gzip(tarFile))) {
+                eachFile { file ->
+                    file.path = file.path.replaceFirst('package/', '')
+                }
+            }
+            into extractTempDir
+            includeEmptyDirs = false
+        }
+        
+        // Check if there's a dist folder (built assets)
+        def distDir = new File(extractTempDir, 'dist')
+        def sourceDir = distDir.exists() ? distDir : extractTempDir
+        
+        logger.lifecycle("Using UI files from: ${sourceDir}")
+        
+        // Copy to final location, excluding dev files
+        project.copy {
+            from sourceDir
+            into assetsDir
+            exclude '**/*.tgz'
+            exclude '**/node_modules/**'
+            exclude '**/.git/**'
+            exclude '**/.vscode/**'
+            exclude '**/src/**'  // Exclude source if we have dist
+            exclude '**/package.json'
+            exclude '**/tsconfig*.json'
+            exclude '**/*.config.*'
+            exclude '**/.*'  // Exclude dotfiles like .env, .eslintrc, etc.
+            
+            // If using source (no dist), include necessary files
+            if (!distDir.exists()) {
+                include 'index.html'
+                include 'assets/**'
+                include 'public/**'
+            }
+        }
+        
+        // Clean up temp directory
+        extractTempDir.deleteDir()
+        
+        logger.lifecycle("Extracted UI to ${assetsDir} (${assetsDir.listFiles()?.size() ?: 0} items)")
     }
 }
 
@@ -53,11 +216,15 @@ task createPlaceholderUI {
     description = 'Create placeholder UI files if ffxi-stats package is not available'
     def assetsDir = file("${project.buildDir}/resources/main/assets")
     
+    // Only create placeholder if extractUI didn't successfully create files
+    onlyIf {
+        !assetsDir.exists() || assetsDir.listFiles().length == 0
+    }
+    
     doLast {
         assetsDir.mkdirs()
         def indexHtml = new File(assetsDir, "index.html")
-        if (!indexHtml.exists()) {
-            indexHtml.text = """<!DOCTYPE html>
+        indexHtml.text = """<!DOCTYPE html>
 <html>
 <head>
     <title>FFXI Player Stats</title>
@@ -80,8 +247,7 @@ task createPlaceholderUI {
     </ul>
 </body>
 </html>"""
-            logger.lifecycle("Created placeholder UI at ${indexHtml}")
-        }
+        logger.lifecycle("Created placeholder UI at ${indexHtml}")
     }
 }
 
@@ -90,4 +256,6 @@ task copyWebApp(type: Copy) {
     into "$buildDir/resources/main/webapp"
 }
 
-processResources.dependsOn copyWebApp, createPlaceholderUI
+// Try to fetch and extract UI from Nexus first, then fall back to placeholder
+processResources.dependsOn copyWebApp, extractUI
+processResources.finalizedBy createPlaceholderUI

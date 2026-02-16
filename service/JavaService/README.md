@@ -48,6 +48,52 @@ JavaService/
 
 The JAR file will be created at: `build/libs/JavaService.jar`
 
+## UI Integration
+
+The build process automatically attempts to fetch and integrate the UI from a Nexus npm repository.
+
+### Configuration
+
+UI package settings can be configured in `build.gradle`:
+
+```gradle
+ext {
+    uiPackageName = 'ffxi-stats'
+    uiPackageVersion = '1.0.0'
+    nexusNpmUrl = 'http://eaglejs-mac-mini.local:8091/repository/npm-hosted'
+}
+```
+
+### Build Process
+
+During the build:
+
+1. **Download Task** (`downloadUI`): Attempts to download `ffxi-stats` npm package (.tgz) from the Nexus repository
+2. **Extract Task** (`extractUI`): Extracts the npm package and copies UI files to `build/resources/main/assets/`
+3. **Fallback** (`createPlaceholderUI`): Creates a placeholder UI if the download fails
+
+### Manual Testing
+
+To manually test UI integration when Nexus is available:
+
+```bash
+# Clean build with UI download attempt
+./gradlew clean build
+
+# Check extracted UI files
+ls -la build/resources/main/assets/
+
+# Run just the UI tasks
+./gradlew downloadUI extractUI
+```
+
+### Accessing the UI
+
+Once the application is running, access the UI at:
+- http://localhost:8080/
+
+The UI will either be the downloaded package from Nexus or a placeholder page showing service status and available endpoints.
+
 ## Running the Application
 
 ### Development Mode

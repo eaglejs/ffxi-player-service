@@ -37,12 +37,14 @@ public class Main extends Application<FFXIConfiguration> {
         ServletContextHandler contextHandler = environment.getApplicationContext();
         environment.lifecycle().manage(new WebSocketManager(contextHandler));
 
-        // Configure static assets serving
+        // Configure static assets serving for UI
+        // Note: API endpoints are served at /api/* (configured in config.yml)
+        // Static UI files are served at the root /*
         ServletHolder staticServlet = new ServletHolder("static", DefaultServlet.class);
         staticServlet.setInitParameter("resourceBase", 
             Main.class.getClassLoader().getResource("assets").toExternalForm());
-        staticServlet.setInitParameter("dirAllowed", "true");
+        staticServlet.setInitParameter("dirAllowed", "false");  // Disable directory listing for security
         staticServlet.setInitParameter("pathInfoOnly", "true");
-        contextHandler.addServlet(staticServlet, "/api/*");
+        contextHandler.addServlet(staticServlet, "/*");
     }
 }

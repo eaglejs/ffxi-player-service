@@ -1,9 +1,6 @@
 server:
+  rootPath: /api/*
   applicationConnectors:
     - type: http
       port: 80
-  adminConnectors:
-    - type: http
-      port: 8081
-
 mongoUri: mongodb://localhost:27017
