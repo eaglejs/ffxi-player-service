@@ -14,6 +14,7 @@ repositories {
 dependencies {
     implementation 'io.dropwizard:dropwizard-core:2.0.24'
     implementation 'io.dropwizard:dropwizard-client:2.0.24'
+    implementation 'io.dropwizard:dropwizard-assets:2.0.24'
     implementation 'javax.websocket:javax.websocket-api:1.1'
     implementation 'org.eclipse.jetty.websocket:javax-websocket-server-impl:9.4.43.v20210629'
     implementation 'org.mongodb:mongodb-driver-sync:4.3.4'
@@ -48,9 +49,43 @@ jar {
     }
 }
 
+task npmInstallStats(type: Exec) {
+    description = 'Install ffxi-stats package from custom npm registry'
+    workingDir 'src/main/webapp'
+    commandLine 'npm', 'install', 'http://eaglejs-mac-mini.local:8091/repository/npm-hosted/ffxi-stats/-/ffxi-stats-1.0.0.tgz'
+    onlyIf { !file("src/main/webapp/node_modules/ffxi-stats").exists() }
+}
+
+task npmInstallStatsDeps(type: Exec) {
+    description = 'Install ffxi-stats build dependencies'
+    dependsOn npmInstallStats
+    workingDir 'src/main/webapp/node_modules/ffxi-stats'
+    commandLine 'npm', 'install'
+    onlyIf { !file("src/main/webapp/node_modules/ffxi-stats/node_modules").exists() }
+}
+
+task buildStats(type: Exec) {
+    description = 'Build the ffxi-stats Vue application'
+    dependsOn npmInstallStatsDeps
+    workingDir 'src/main/webapp/node_modules/ffxi-stats'
+    commandLine 'npm', 'run', 'build'
+    onlyIf { !file("src/main/webapp/node_modules/ffxi-stats/dist").exists() }
+}
+
+task copyNpmAssets(type: Copy) {
+    description = 'Copy ffxi-stats built output into webapp static directory'
+    dependsOn buildStats
+    from 'src/main/webapp/node_modules/ffxi-stats/dist'
+    into 'src/main/webapp/assets'
+}
+
 task copyWebApp(type: Copy) {
+    dependsOn copyNpmAssets
     from 'src/main/webapp'
     into "$buildDir/resources/main/webapp"
+    exclude 'node_modules'
+    exclude 'package.json'
+    exclude 'package-lock.json'
 }
 
 processResources.dependsOn copyWebApp

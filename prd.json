@@ -23,5 +23,15 @@
             "Write unit tests for the WebSocket API to ensure it correctly broadcasts updates and handles client connections."
         ],
         "passes": true
+    },
+    {
+        "category": "UI Integration",
+        "description": "Pull ffxi-stats-1.0.0.tgz from the npm registry and integrate it into the frontend to display player stats.",
+        "steps": [
+            "Integrate this command into gradle build process to pull the package from the npm registry: npm install ffxi-stats@1.0.0",
+            "Pull from this location: http://eaglejs-mac-mini.local:8091/repository/npm-hosted/ffxi-stats/-/ffxi-stats-1.0.0.tgz",
+            "This should place the package inside of the dropwizard service's static directory, which is served by the frontend."
+        ],
+        "passes": true
     }
 ]
