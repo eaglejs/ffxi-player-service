@@ -23,5 +23,18 @@
             "Write unit tests for the WebSocket API to ensure it correctly broadcasts updates and handles client connections."
         ],
         "passes": true
+     },
+    {
+        "category": "UI Integration",
+        "description": "Pull ffxi-stats-1.0.0.tgz from Nexus and integrate it into the frontend to display player stats.",
+        "steps": [
+            "Integrate this command into gradle build process to pull the package from the npm registry: npm install ffxi-stats@1.0.0",
+            "We need to add the package and it's version to the build.gradle file to ensure it is pulled during the build process.",
+            "Pull from this nexus location: http://eaglejs-mac-mini.local:8091/repository/npm-hosted/ffxi-stats/",
+            "Whatver is the standard way to pull from a nexus repository in a gradle build file should be used.",
+            "This should place the package inside of the dropwizard service's static directory, which is served by the frontend.",
+            "It should host as the UI on port 80 using Dropwizard jetty server."
+        ],
+        "passes": true
     }
 ]

@@ -8,6 +8,8 @@ import io.eaglejs.ffxi.health.MongoHealthCheck;
 import io.eaglejs.ffxi.resources.HealthResource;
 import io.eaglejs.ffxi.websocket.WebSocketManager;
 import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.DefaultServlet;
+import org.eclipse.jetty.servlet.ServletHolder;
 
 public class Main extends Application<FFXIConfiguration> {
 
@@ -34,5 +36,13 @@ public class Main extends Application<FFXIConfiguration> {
         // Register WebSocket endpoint
         ServletContextHandler contextHandler = environment.getApplicationContext();
         environment.lifecycle().manage(new WebSocketManager(contextHandler));
+
+        // Configure static assets serving
+        ServletHolder staticServlet = new ServletHolder("static", DefaultServlet.class);
+        staticServlet.setInitParameter("resourceBase", 
+            Main.class.getClassLoader().getResource("assets").toExternalForm());
+        staticServlet.setInitParameter("dirAllowed", "true");
+        staticServlet.setInitParameter("pathInfoOnly", "true");
+        contextHandler.addServlet(staticServlet, "/*");
     }
 }

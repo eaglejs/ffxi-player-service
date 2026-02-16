@@ -48,9 +48,46 @@ jar {
     }
 }
 
+// Task to create a placeholder UI package for demonstration
+task createPlaceholderUI {
+    description = 'Create placeholder UI files if ffxi-stats package is not available'
+    def assetsDir = file("${project.buildDir}/resources/main/assets")
+    
+    doLast {
+        assetsDir.mkdirs()
+        def indexHtml = new File(assetsDir, "index.html")
+        if (!indexHtml.exists()) {
+            indexHtml.text = """<!DOCTYPE html>
+<html>
+<head>
+    <title>FFXI Player Stats</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        h1 { color: #333; }
+        .status { color: #28a745; }
+    </style>
+</head>
+<body>
+    <h1>FFXI Player Service</h1>
+    <p class="status">Service is running</p>
+    <p>To install the ffxi-stats UI package, download ffxi-stats@1.0.0 from:</p>
+    <code>http://eaglejs-mac-mini.local:8091/repository/npm-hosted/ffxi-stats/</code>
+    <h2>Available Endpoints:</h2>
+    <ul>
+        <li><a href="/health">/health</a> - Health check endpoint</li>
+        <li><a href="/openapi.json">/openapi.json</a> - API documentation</li>
+        <li>ws://localhost/ws/players - WebSocket for player stats</li>
+    </ul>
+</body>
+</html>"""
+            logger.lifecycle("Created placeholder UI at ${indexHtml}")
+        }
+    }
+}
+
 task copyWebApp(type: Copy) {
     from 'src/main/webapp'
     into "$buildDir/resources/main/webapp"
 }
 
-processResources.dependsOn copyWebApp
+processResources.dependsOn copyWebApp, createPlaceholderUI
