@@ -43,6 +43,6 @@ public class Main extends Application<FFXIConfiguration> {
             Main.class.getClassLoader().getResource("assets").toExternalForm());
         staticServlet.setInitParameter("dirAllowed", "true");
         staticServlet.setInitParameter("pathInfoOnly", "true");
-        contextHandler.addServlet(staticServlet, "/*");
+        contextHandler.addServlet(staticServlet, "/api/*");
     }
 }
