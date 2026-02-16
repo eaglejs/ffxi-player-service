@@ -23,18 +23,3 @@
   subscription filtering, unsubscribe, unsubscribe_all, closed session skip, empty broadcast
 - All 16 tests passing (2 health + 4 resource + 10 websocket)
 - PRD "Websocket API" feature marked as passes: true
-
-2026-02-16: Implemented UI Integration for ffxi-stats frontend
-- Added Gradle task npmInstallStats to pull ffxi-stats-1.0.0.tgz from custom npm registry
-  (http://eaglejs-mac-mini.local:8091/repository/npm-hosted/ffxi-stats/-/ffxi-stats-1.0.0.tgz)
-- Added Gradle task npmInstallStatsDeps to install Vue app build dependencies
-- Added Gradle task buildStats to run Vite production build of the ffxi-stats Vue application
-- Added Gradle task copyNpmAssets to copy built dist output into src/main/webapp/assets
-- Updated copyWebApp task to depend on copyNpmAssets and exclude node_modules/package files
-- All tasks use onlyIf guards to avoid redundant re-execution
-- Added dropwizard-assets dependency for serving static files
-- Registered AssetsBundle in Main.java to serve /webapp/assets at root path "/"
-- Updated .gitignore to exclude webapp node_modules, package.json, package-lock.json, and assets
-- Build pipeline: npmInstallStats -> npmInstallStatsDeps -> buildStats -> copyNpmAssets -> copyWebApp -> processResources
-- All 16 existing tests still passing
-- PRD "UI Integration" feature marked as passes: true

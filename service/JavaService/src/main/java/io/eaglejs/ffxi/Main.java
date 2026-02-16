@@ -1,7 +1,6 @@
 package io.eaglejs.ffxi;
 
 import io.dropwizard.Application;
-import io.dropwizard.assets.AssetsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.eaglejs.ffxi.config.SwaggerConfig;
@@ -23,7 +22,7 @@ public class Main extends Application<FFXIConfiguration> {
 
     @Override
     public void initialize(Bootstrap<FFXIConfiguration> bootstrap) {
-        bootstrap.addBundle(new AssetsBundle("/webapp/assets", "/", "index.html", "static"));
+        // initialization logic
     }
 
     @Override
