@@ -85,6 +85,17 @@ public class PlayerWebSocket {
     @OnMessage
     public void onMessage(String message, Session session) {
         try {
+            // Handle plain-text ping/pong (non-JSON heartbeat responses)
+            String trimmed = message.trim();
+            if ("pong".equalsIgnoreCase(trimmed)) {
+                LOG.debug("Received pong from session {}", session.getId());
+                return;
+            }
+            if ("ping".equalsIgnoreCase(trimmed)) {
+                session.getBasicRemote().sendText("pong");
+                return;
+            }
+
             @SuppressWarnings("unchecked")
             Map<String, Object> msg = MAPPER.readValue(message, Map.class);
             String action = (String) msg.get("action");
