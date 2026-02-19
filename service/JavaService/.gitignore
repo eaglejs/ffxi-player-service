@@ -3,6 +3,7 @@
 build/
 bin/
 out/
+gradle.properties
 
 # Java compiled classes
 *.class

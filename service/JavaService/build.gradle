@@ -6,7 +6,7 @@ plugins {
 repositories {
     mavenCentral()
     maven {
-        url 'http://192.168.5.30:8091/'
+        url "http://${nexusHost}:${nexusPort}/"
         allowInsecureProtocol = true
     }
 }
@@ -16,9 +16,9 @@ repositories {
 // If the package contains a 'dist' folder, only those built assets will be used.
 // Otherwise, index.html and public/ folder will be extracted from source.
 ext {
-    uiPackageName = 'ffxi-stats'
-    uiPackageVersion = '1.0.0'
-    nexusNpmUrl = 'http://192.168.5.30:8091/repository/npm-hosted'  // Use IP address to avoid IPv6 issues
+    uiPackageName = properties.getOrDefault('uiPackageName', 'ffxi-stats')
+    uiPackageVersion = properties.getOrDefault('uiPackageVersion', '1.0.0')
+    nexusNpmUrl = "http://${nexusHost}:${nexusPort}/repository/${nexusNpmRepo}/" // Use IP address to avoid IPv6 issues
 }
 
 dependencies {
@@ -211,46 +211,6 @@ task extractUI {
     }
 }
 
-// Task to create a placeholder UI package for demonstration
-task createPlaceholderUI {
-    description = 'Create placeholder UI files if ffxi-stats package is not available'
-    def assetsDir = file("${project.buildDir}/resources/main/assets")
-    
-    // Only create placeholder if extractUI didn't successfully create files
-    onlyIf {
-        !assetsDir.exists() || assetsDir.listFiles().length == 0
-    }
-    
-    doLast {
-        assetsDir.mkdirs()
-        def indexHtml = new File(assetsDir, "index.html")
-        indexHtml.text = """<!DOCTYPE html>
-<html>
-<head>
-    <title>FFXI Player Stats</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 40px; }
-        h1 { color: #333; }
-        .status { color: #28a745; }
-    </style>
-</head>
-<body>
-    <h1>FFXI Player Service</h1>
-    <p class="status">Service is running</p>
-    <p>To install the ffxi-stats UI package, download ffxi-stats@1.0.0 from:</p>
-    <code>http://eaglejs-mac-mini.local:8091/repository/npm-hosted/ffxi-stats/</code>
-    <h2>Available Endpoints:</h2>
-    <ul>
-        <li><a href="/health">/health</a> - Health check endpoint</li>
-        <li><a href="/openapi.json">/openapi.json</a> - API documentation</li>
-        <li>ws://localhost/ws/players - WebSocket for player stats</li>
-    </ul>
-</body>
-</html>"""
-        logger.lifecycle("Created placeholder UI at ${indexHtml}")
-    }
-}
-
 task copyWebApp(type: Copy) {
     from 'src/main/webapp'
     into "$buildDir/resources/main/webapp"
@@ -258,4 +218,3 @@ task copyWebApp(type: Copy) {
 
 // Try to fetch and extract UI from Nexus first, then fall back to placeholder
 processResources.dependsOn copyWebApp, extractUI
-processResources.finalizedBy createPlaceholderUI
