@@ -7,6 +7,7 @@ import io.eaglejs.ffxi.config.SwaggerConfig;
 import io.eaglejs.ffxi.health.MongoHealthCheck;
 import io.eaglejs.ffxi.resources.HealthResource;
 import io.eaglejs.ffxi.resources.PlayerResource;
+import io.eaglejs.ffxi.service.MongoDBService;
 import io.eaglejs.ffxi.websocket.WebSocketManager;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.DefaultServlet;
@@ -40,9 +41,12 @@ public class Main extends Application<FFXIConfiguration> {
             configureCors(environment, configuration.getCors());
         }
         
+        // Initialize MongoDB service
+        MongoDBService mongoDBService = new MongoDBService(configuration.getMongoUri());
+        
         environment.healthChecks().register("mongodb", new MongoHealthCheck(configuration.getMongoUri()));
         environment.jersey().register(new HealthResource(environment.healthChecks()));
-        environment.jersey().register(new PlayerResource());
+        environment.jersey().register(new PlayerResource(mongoDBService));
         environment.jersey().register(new SwaggerConfig());
 
         // Register WebSocket endpoint
