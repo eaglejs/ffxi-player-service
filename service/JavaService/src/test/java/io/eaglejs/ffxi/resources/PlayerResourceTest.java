@@ -2,6 +2,8 @@ package io.eaglejs.ffxi.resources;
 
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
+
+import io.eaglejs.ffxi.models.Player;
 import io.eaglejs.ffxi.service.MongoDBService;
 import org.bson.Document;
 import org.bson.conversions.Bson;
@@ -46,13 +48,13 @@ public class PlayerResourceTest {
                 .append("playerName", "Bob")
                 .append("lastOnline", System.currentTimeMillis() / 1000 - 45);
 
-        List<Document> expectedPlayers = Arrays.asList(player1, player2);
+        List<Document> expectedDocuments = Arrays.asList(player1, player2);
 
         when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
         when(mockFindIterable.sort(any(Bson.class))).thenReturn(mockFindIterable);
         when(mockFindIterable.into(any(List.class))).thenAnswer(invocation -> {
             List<Document> list = invocation.getArgument(0);
-            list.addAll(expectedPlayers);
+            list.addAll(expectedDocuments);
             return list;
         });
 
@@ -61,10 +63,10 @@ public class PlayerResourceTest {
 
         // Assert
         assertEquals(200, response.getStatus());
-        List<Document> actualPlayers = (List<Document>) response.getEntity();
+        List<Player> actualPlayers = (List<Player>) response.getEntity();
         assertEquals(2, actualPlayers.size());
-        assertEquals("Alice", actualPlayers.get(0).getString("playerName"));
-        assertEquals("Bob", actualPlayers.get(1).getString("playerName"));
+        assertEquals("Alice", actualPlayers.get(0).getPlayerName());
+        assertEquals("Bob", actualPlayers.get(1).getPlayerName());
 
         verify(mockCollection).find(any(Bson.class));
         verify(mockFindIterable).sort(any(Bson.class));
@@ -83,7 +85,7 @@ public class PlayerResourceTest {
 
         // Assert
         assertEquals(200, response.getStatus());
-        List<Document> actualPlayers = (List<Document>) response.getEntity();
+        List<Player> actualPlayers = (List<Player>) response.getEntity();
         assertNotNull(actualPlayers);
         assertEquals(0, actualPlayers.size());
     }

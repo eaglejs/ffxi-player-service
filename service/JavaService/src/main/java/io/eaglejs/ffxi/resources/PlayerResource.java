@@ -1,6 +1,8 @@
 package io.eaglejs.ffxi.resources;
 
 import com.mongodb.client.MongoCollection;
+import io.eaglejs.ffxi.mapper.PlayerMapper;
+import io.eaglejs.ffxi.models.Player;
 import io.eaglejs.ffxi.service.MongoDBService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -16,6 +18,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.mongodb.client.model.Filters.gte;
 import static com.mongodb.client.model.Sorts.ascending;
@@ -32,6 +35,11 @@ public class PlayerResource {
     public PlayerResource(MongoDBService mongoDBService) {
         this.mongoDBService = mongoDBService;
     }
+
+    // TODO: Implement player initialization endpoint
+    // @POST
+    // @Path("/initialize_player")
+    // public Response initializePlayer(Player player) { ... }
   
     // get_players   @GET /players/get_players
     @GET
@@ -51,10 +59,15 @@ public class PlayerResource {
             long thresholdTime = currentTime - 60; // 60 seconds ago
 
             MongoCollection<Document> playersCollection = mongoDBService.getPlayersCollection();
-            List<Document> players = playersCollection
+            List<Document> documents = playersCollection
                     .find(gte("lastOnline", thresholdTime))
                     .sort(ascending("playerName"))
                     .into(new ArrayList<>());
+
+            // Convert Documents to Player objects
+            List<Player> players = documents.stream()
+                    .map(PlayerMapper::documentToPlayer)
+                    .collect(Collectors.toList());
 
             return Response.ok(players).build();
         } catch (Exception e) {

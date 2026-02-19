@@ -147,7 +147,7 @@ public class PlayerWebSocketTest {
 
         // Subscribe, then unsubscribe
         webSocket.onMessage("{\"action\":\"subscribe\",\"playerId\":123}", session);
-        webSocket.onMessage("{\"action\":\"unsubscribe\",\"playerId\":123}", session);
+        webSocket.onMessage("{\"action\":\"close\",\"playerId\":123}", session);
 
         // Broadcast for any player should now reach this session
         Map<String, Object> data = new HashMap<>();
