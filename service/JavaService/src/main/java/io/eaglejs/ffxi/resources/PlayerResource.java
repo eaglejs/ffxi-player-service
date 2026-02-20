@@ -12,8 +12,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
@@ -36,10 +38,37 @@ public class PlayerResource {
         this.mongoDBService = mongoDBService;
     }
 
-    // TODO: Implement player initialization endpoint
-    // @POST
-    // @Path("/initialize_player")
-    // public Response initializePlayer(Player player) { ... }
+    @POST
+    @Path("/initialize_player")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(
+        summary = "Initialize Player",
+        description = "Initializes a new player record in the database.",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Player initialized successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid player data"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+        }
+    )
+    public Response initializePlayer(Player player) { 
+      try {
+          if (player == null) {
+              return Response.status(Response.Status.BAD_REQUEST)
+                      .entity("Player data cannot be null.")
+                      .build();
+          }
+          
+          MongoCollection<Document> playersCollection = mongoDBService.getPlayersCollection();
+          Document doc = PlayerMapper.playerToDocument(player);
+          playersCollection.insertOne(doc);
+          return Response.ok("Player initialized successfully").build();
+      } catch (Exception e) {
+          LOG.error("Error initializing player", e);
+          return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                  .entity("An error occurred while initializing the player.")
+                  .build();
+      }
+    }
   
     // get_players   @GET /players/get_players
     @GET

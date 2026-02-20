@@ -8,6 +8,95 @@ import org.bson.Document;
  */
 public class PlayerMapper {
 
+      /**
+      * Convert a Player object to a MongoDB Document for storage.
+      */
+    public static Document playerToDocument(Player player) {
+        if (player == null) {
+            return null;
+        }
+
+        Document document = new Document();
+        document.append("playerId", player.getPlayerId());
+        document.append("playerName", player.getPlayerName());
+        document.append("mainJob", player.getMainJob());
+        document.append("mainJobLevel", player.getMainJobLevel());
+        document.append("subJob", player.getSubJob());
+        document.append("subJobLevel", player.getSubJobLevel());
+        document.append("masterLevel", player.getMasterLevel());
+        document.append("zone", player.getZone());
+        document.append("title", player.getTitle());
+        document.append("nationRank", player.getNationRank());
+        document.append("status", player.getStatus());
+        document.append("lastOnline", player.getLastOnline());
+        document.append("gil", player.getGil());
+        document.append("hpp", player.getHpp());
+        document.append("mpp", player.getMpp());
+        document.append("tp", player.getTp());
+        document.append("attack", player.getAttack());
+        document.append("defense", player.getDefense());
+        document.append("currentExemplar", player.getCurrentExemplar());
+        document.append("requiredExemplar", player.getRequiredExemplar());
+
+        // For nested objects, we can convert them to sub-documents
+        if (player.getStats() != null) {
+            Document statsDoc = new Document();
+            statsDoc.append("baseSTR", player.getStats().getBaseSTR());
+            statsDoc.append("baseDEX", player.getStats().getBaseDEX());
+            statsDoc.append("baseVIT", player.getStats().getBaseVIT());
+            statsDoc.append("baseAGI", player.getStats().getBaseAGI());
+            statsDoc.append("baseINT", player.getStats().getBaseINT());
+            statsDoc.append("baseMND", player.getStats().getBaseMND());
+            statsDoc.append("baseCHR", player.getStats().getBaseCHR());
+            statsDoc.append("addedSTR", player.getStats().getAddedSTR());
+            statsDoc.append("addedDEX", player.getStats().getAddedDEX());
+            statsDoc.append("addedVIT", player.getStats().getAddedVIT());
+            statsDoc.append("addedAGI", player.getStats().getAddedAGI());
+            statsDoc.append("addedINT", player.getStats().getAddedINT());
+            statsDoc.append("addedMND", player.getStats().getAddedMND());
+            statsDoc.append("addedCHR", player.getStats().getAddedCHR());
+            statsDoc.append("fireResistance", player.getStats().getFireResistance());
+            statsDoc.append("iceResistance", player.getStats().getIceResistance());
+            statsDoc.append("windResistance", player.getStats().getWindResistance());
+            statsDoc.append("earthResistance", player.getStats().getEarthResistance());
+            statsDoc.append("lightningResistance", player.getStats().getLightningResistance());
+            statsDoc.append("waterResistance", player.getStats().getWaterResistance());
+            statsDoc.append("lightResistance", player.getStats().getLightResistance());
+            statsDoc.append("darkResistance", player.getStats().getDarkResistance());
+            document.append("stats", statsDoc);
+        }
+        if (player.getMerits() != null) {
+            Document meritsDoc = new Document();
+            meritsDoc.append("total", player.getMerits().getTotal());
+            meritsDoc.append("max", player.getMerits().getMax());
+            document.append("merits", meritsDoc);
+        }
+        if (player.getCapacityPoints() != null) {
+            Document capacityDoc = new Document();
+            capacityDoc.append("total", player.getCapacityPoints().getTotal());
+            document.append("capacityPoints", capacityDoc);
+        }
+        if (player.getCurrency1() != null) {
+            document.append("currency1", player.getCurrency1());
+        }
+        if (player.getCurrency2() != null) {
+            document.append("currency2", player.getCurrency2());
+        }
+        if (player.getBuffs() != null) {
+            document.append("buffs", player.getBuffs());
+        }
+        if (player.getAbilities() != null) {
+            document.append("abilities", player.getAbilities());
+        }
+        if (player.getExpHistory() != null) {
+            Document expHistoryDoc = new Document();
+            // Note: For simplicity, keeping as generic lists
+            // You could add more detailed mapping here if needed
+            document.append("expHistory", expHistoryDoc);
+        }
+        return document;
+    }
+
     /**
      * Convert a MongoDB Document to a Player object.
      * Uses Jackson's ObjectMapper for automatic mapping.
