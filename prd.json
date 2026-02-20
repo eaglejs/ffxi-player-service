@@ -1,40 +1,40 @@
 [
-    {
-        "category": "Restful API",
-        "description": "Healthchecker API for monitoring the health of the service.",
-        "steps": [
-            "Create a new endpoint /health that returns the status of the service.",
-            "Implement a health check function that verifies the database connection and other critical dependencies.",
-            "Return a JSON response with the status of the service (e.g., { 'status': 'ok' }) and appropriate HTTP status codes (200 for healthy, 503 for unhealthy).",
-            "Write unit tests for the health check function to ensure it correctly identifies healthy and unhealthy states.",
-            "Document the API endpoint and its expected responses in the API documentation using Swagger UI."
-        ],
-        "passes": true
-    },
-    {
-        "category": "Websocket API",
-        "description": "Connection to feed player stats to the frontend in real-time.",
-        "steps": [
-            "Please Review the websocket implementation in service/NodeService/routes/Player.js as a reference, but we want to implement a standalone in our JavaService.",
-            "Establish a WebSocket connection between the server and the frontend to enable real-time communication.",
-            "Implement a mechanism to broadcast player stats updates to all connected clients.",
-            "Handle client subscriptions and unsubscriptions to specific player stats.",
-            "Ensure the WebSocket connection is secure and handles reconnections gracefully.",
-            "Write unit tests for the WebSocket API to ensure it correctly broadcasts updates and handles client connections."
-        ],
-        "passes": true
-     },
-    {
-        "category": "UI Integration",
-        "description": "Pull ffxi-stats-1.0.0.tgz from Nexus and integrate it into the frontend to display player stats.",
-        "steps": [
-            "Integrate this command into gradle build process to pull the package from the npm registry: npm install ffxi-stats@1.0.0",
-            "We need to add the package and it's version to the build.gradle file to ensure it is pulled during the build process.",
-            "Pull from this nexus location: http://eaglejs-mac-mini.local:8091/repository/npm-hosted/ffxi-stats/",
-            "Whatver is the standard way to pull from a nexus repository in a gradle build file should be used.",
-            "This should place the package inside of the dropwizard service's static directory, which is served by the frontend.",
-            "It should host as the UI on port 80 using Dropwizard jetty server."
-        ],
-        "passes": true
-    }
+  {
+    "category": "Restful API",
+    "description": "Healthchecker API for monitoring the health of the service.",
+    "steps": [
+      "Create a new endpoint /health that returns the status of the service.",
+      "Implement a health check function that verifies the database connection and other critical dependencies.",
+      "Return a JSON response with the status of the service (e.g., { 'status': 'ok' }) and appropriate HTTP status codes (200 for healthy, 503 for unhealthy).",
+      "Write unit tests for the health check function to ensure it correctly identifies healthy and unhealthy states.",
+      "Document the API endpoint and its expected responses in the API documentation using Swagger UI."
+    ],
+    "passes": true
+  },
+  {
+    "category": "Websocket API",
+    "description": "Connection to feed player stats to the frontend in real-time.",
+    "steps": [
+      "Please Review the websocket implementation in service/NodeService/routes/Player.js as a reference, but we want to implement a standalone in our JavaService.",
+      "Establish a WebSocket connection between the server and the frontend to enable real-time communication.",
+      "Implement a mechanism to broadcast player stats updates to all connected clients.",
+      "Handle client subscriptions and unsubscriptions to specific player stats.",
+      "Ensure the WebSocket connection is secure and handles reconnections gracefully.",
+      "Write unit tests for the WebSocket API to ensure it correctly broadcasts updates and handles client connections."
+    ],
+    "passes": true
+  },
+  {
+    "category": "UI Integration",
+    "description": "Pull ffxi-stats-1.0.0.tgz from Nexus and integrate it into the frontend to display player stats.",
+    "steps": [
+      "Integrate this command into gradle build process to pull the package from the npm registry: npm install ffxi-stats@1.0.0",
+      "We need to add the package and it's version to the build.gradle file to ensure it is pulled during the build process.",
+      "Pull from this nexus location: http://eaglejs-mac-mini.local:8091/repository/npm-hosted/ffxi-stats/",
+      "Whatver is the standard way to pull from a nexus repository in a gradle build file should be used.",
+      "This should place the package inside of the dropwizard service's static directory, which is served by the frontend.",
+      "It should host as the UI on port 80 using Dropwizard jetty server."
+    ],
+    "passes": true
+  }
 ]
