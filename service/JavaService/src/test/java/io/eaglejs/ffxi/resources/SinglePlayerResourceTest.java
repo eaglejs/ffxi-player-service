@@ -5,6 +5,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.result.UpdateResult;
 
 import io.eaglejs.ffxi.models.Player;
+import io.eaglejs.ffxi.models.SetJobsRequest;
 import io.eaglejs.ffxi.models.SetOnlineRequest;
 import io.eaglejs.ffxi.service.MongoDBService;
 import io.eaglejs.ffxi.websocket.PlayerWebSocket;
@@ -289,5 +290,206 @@ public class SinglePlayerResourceTest {
         assertEquals(500, response.getStatus());
         String errorMessage = (String) response.getEntity();
         assertEquals("Failed to update player status", errorMessage);
+    }
+
+    @Test
+    public void testSetJobs_Success() {
+        // Arrange
+        SetJobsRequest request = new SetJobsRequest();
+        request.setPlayerId(123);
+        request.setPlayerName("testplayer");
+        request.setMainJob("WAR");
+        request.setSubJob("NIN");
+
+        Document existingPlayer = new Document("playerId", 123);
+        
+        when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
+        when(mockFindIterable.first()).thenReturn(existingPlayer);
+        when(mockCollection.updateOne(any(Bson.class), any(Bson.class))).thenReturn(mockUpdateResult);
+        when(mockUpdateResult.getModifiedCount()).thenReturn(1L);
+
+        // Act
+        Response response = resource.setJobs(request);
+
+        // Assert
+        assertEquals(200, response.getStatus());
+        assertEquals("Jobs: OK", response.getEntity());
+        verify(mockCollection).find(any(Bson.class));
+        verify(mockCollection).updateOne(any(Bson.class), any(Bson.class));
+    }
+
+    @Test
+    public void testSetJobs_UpdatesCorrectFields() {
+        // Arrange
+        SetJobsRequest request = new SetJobsRequest();
+        request.setPlayerId(456);
+        request.setPlayerName("testplayer");
+        request.setMainJob("WHM");
+        request.setSubJob("BLM");
+
+        Document existingPlayer = new Document("playerId", 456);
+        ArgumentCaptor<Bson> updateCaptor = ArgumentCaptor.forClass(Bson.class);
+        
+        when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
+        when(mockFindIterable.first()).thenReturn(existingPlayer);
+        when(mockCollection.updateOne(any(Bson.class), updateCaptor.capture())).thenReturn(mockUpdateResult);
+        when(mockUpdateResult.getModifiedCount()).thenReturn(1L);
+
+        // Act
+        resource.setJobs(request);
+
+        // Assert
+        Bson capturedUpdate = updateCaptor.getValue();
+        assertNotNull(capturedUpdate);
+        assertTrue(capturedUpdate.toString().contains("WHM"));
+        assertTrue(capturedUpdate.toString().contains("BLM"));
+    }
+
+    @Test
+    public void testSetJobs_PlayerNotFound() {
+        // Arrange
+        SetJobsRequest request = new SetJobsRequest();
+        request.setPlayerId(999);
+        request.setPlayerName("nonexistent");
+        request.setMainJob("WAR");
+        request.setSubJob("NIN");
+
+        when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
+        when(mockFindIterable.first()).thenReturn(null);
+
+        // Act
+        Response response = resource.setJobs(request);
+
+        // Assert
+        assertEquals(404, response.getStatus());
+        String errorMessage = (String) response.getEntity();
+        assertTrue(errorMessage.contains("Player not found"));
+        assertTrue(errorMessage.contains("999"));
+        verify(mockCollection, never()).updateOne(any(Bson.class), any(Bson.class));
+    }
+
+    @Test
+    public void testSetJobs_NullRequest() {
+        // Arrange
+        SetJobsRequest request = null;
+
+        // Act
+        Response response = resource.setJobs(request);
+
+        // Assert
+        assertEquals(400, response.getStatus());
+        String errorMessage = (String) response.getEntity();
+        assertEquals("playerId, playerName, mainJob, and subJob are required", errorMessage);
+        verify(mockCollection, never()).updateOne(any(Bson.class), any(Bson.class));
+    }
+
+    @Test
+    public void testSetJobs_MissingPlayerId() {
+        // Arrange
+        SetJobsRequest request = new SetJobsRequest();
+        request.setPlayerName("testplayer");
+        request.setMainJob("WAR");
+        request.setSubJob("NIN");
+
+        // Act
+        Response response = resource.setJobs(request);
+
+        // Assert
+        assertEquals(400, response.getStatus());
+        assertEquals("playerId, playerName, mainJob, and subJob are required", response.getEntity());
+    }
+
+    @Test
+    public void testSetJobs_MissingPlayerName() {
+        // Arrange
+        SetJobsRequest request = new SetJobsRequest();
+        request.setPlayerId(123);
+        request.setMainJob("WAR");
+        request.setSubJob("NIN");
+
+        // Act
+        Response response = resource.setJobs(request);
+
+        // Assert
+        assertEquals(400, response.getStatus());
+        assertEquals("playerId, playerName, mainJob, and subJob are required", response.getEntity());
+    }
+
+    @Test
+    public void testSetJobs_MissingMainJob() {
+        // Arrange
+        SetJobsRequest request = new SetJobsRequest();
+        request.setPlayerId(123);
+        request.setPlayerName("testplayer");
+        request.setSubJob("NIN");
+
+        // Act
+        Response response = resource.setJobs(request);
+
+        // Assert
+        assertEquals(400, response.getStatus());
+        assertEquals("playerId, playerName, mainJob, and subJob are required", response.getEntity());
+    }
+
+    @Test
+    public void testSetJobs_MissingSubJob() {
+        // Arrange
+        SetJobsRequest request = new SetJobsRequest();
+        request.setPlayerId(123);
+        request.setPlayerName("testplayer");
+        request.setMainJob("WAR");
+
+        // Act
+        Response response = resource.setJobs(request);
+
+        // Assert
+        assertEquals(400, response.getStatus());
+        assertEquals("playerId, playerName, mainJob, and subJob are required", response.getEntity());
+    }
+
+    @Test
+    public void testSetJobs_DatabaseError() {
+        // Arrange
+        SetJobsRequest request = new SetJobsRequest();
+        request.setPlayerId(123);
+        request.setPlayerName("testplayer");
+        request.setMainJob("WAR");
+        request.setSubJob("NIN");
+
+        when(mockCollection.find(any(Bson.class))).thenThrow(new RuntimeException("Database connection lost"));
+
+        // Act
+        Response response = resource.setJobs(request);
+
+        // Assert
+        assertEquals(500, response.getStatus());
+        String errorMessage = (String) response.getEntity();
+        assertEquals("An error occurred while updating player jobs.", errorMessage);
+    }
+
+    @Test
+    public void testSetJobs_UpdateFailure() {
+        // Arrange
+        SetJobsRequest request = new SetJobsRequest();
+        request.setPlayerId(123);
+        request.setPlayerName("testplayer");
+        request.setMainJob("WAR");
+        request.setSubJob("NIN");
+
+        Document existingPlayer = new Document("playerId", 123);
+        
+        when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
+        when(mockFindIterable.first()).thenReturn(existingPlayer);
+        when(mockCollection.updateOne(any(Bson.class), any(Bson.class))).thenReturn(mockUpdateResult);
+        when(mockUpdateResult.getModifiedCount()).thenReturn(0L);
+        when(mockUpdateResult.getMatchedCount()).thenReturn(0L);
+
+        // Act
+        Response response = resource.setJobs(request);
+
+        // Assert
+        assertEquals(500, response.getStatus());
+        String errorMessage = (String) response.getEntity();
+        assertEquals("Failed to update player jobs", errorMessage);
     }
 }

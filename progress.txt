@@ -80,3 +80,19 @@
 - All 53 tests passing (40 previous + 13 new for SinglePlayerResource)
 - PRD "Fetch individual player stats" feature marked as passes: true
 - PRD "Set individual players online status" feature marked as passes: true
+
+2026-02-21: Implemented Set Player Jobs endpoint (Restful API)
+- Created SetJobsRequest DTO model for request data validation
+- Created POST endpoint /player/set_jobs accepting playerId, playerName, mainJob, and subJob in request body
+- Implemented method to update player's current jobs in MongoDB using playerId filter
+- Validates all required fields (playerId, playerName, mainJob, subJob) and returns HTTP 400 if any are missing
+- Checks player exists before updating (returns HTTP 404 if not found)
+- Updates playerName, mainJob, and subJob fields in database using MongoDB updateOne with combine and set
+- Returns "Jobs: OK" text response with HTTP 200 on success
+- Returns HTTP 404 when player not found
+- Returns HTTP 500 on database errors or update failures
+- Added Swagger/OpenAPI annotations for API documentation
+- Added unit tests: SinglePlayerResourceTest (10 new tests) covering success, field validation, not found, null/missing fields, database error, and update failure scenarios
+- All 63 tests passing (53 previous + 10 new for set_jobs)
+- PRD "Set current jobs for an individual player" feature marked as passes: true
+- ALL PRD FEATURES NOW COMPLETE!

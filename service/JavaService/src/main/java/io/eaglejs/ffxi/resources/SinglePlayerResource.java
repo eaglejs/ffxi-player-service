@@ -3,6 +3,7 @@ package io.eaglejs.ffxi.resources;
 import com.mongodb.client.MongoCollection;
 import io.eaglejs.ffxi.mapper.PlayerMapper;
 import io.eaglejs.ffxi.models.Player;
+import io.eaglejs.ffxi.models.SetJobsRequest;
 import io.eaglejs.ffxi.models.SetOnlineRequest;
 import io.eaglejs.ffxi.service.MongoDBService;
 import io.eaglejs.ffxi.websocket.PlayerWebSocket;
@@ -141,6 +142,67 @@ public class SinglePlayerResource {
             LOG.error("Error setting player online status for playerId: " + request.getPlayerId(), e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity("An error occurred while updating player status.")
+                    .build();
+        }
+    }
+
+    @POST
+    @Path("/set_jobs")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.TEXT_PLAIN)
+    @Operation(
+        summary = "Set Player Jobs",
+        description = "Updates a player's main and sub jobs in the database.",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Jobs updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request data"),
+            @ApiResponse(responseCode = "404", description = "Player not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+        }
+    )
+    public Response setJobs(SetJobsRequest request) {
+        try {
+            if (request == null || request.getPlayerId() == null || 
+                request.getPlayerName() == null || request.getMainJob() == null || 
+                request.getSubJob() == null) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity("playerId, playerName, mainJob, and subJob are required")
+                        .build();
+            }
+
+            MongoCollection<Document> playersCollection = mongoDBService.getPlayersCollection();
+            
+            Document existingPlayer = playersCollection.find(eq("playerId", request.getPlayerId())).first();
+            if (existingPlayer == null) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity("Player not found with playerId: " + request.getPlayerId())
+                        .build();
+            }
+
+            com.mongodb.client.result.UpdateResult result = playersCollection.updateOne(
+                eq("playerId", request.getPlayerId()),
+                combine(
+                    set("playerName", request.getPlayerName()),
+                    set("mainJob", request.getMainJob()),
+                    set("subJob", request.getSubJob())
+                )
+            );
+
+            if (result.getModifiedCount() == 0 && result.getMatchedCount() == 0) {
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                        .entity("Failed to update player jobs")
+                        .build();
+            }
+
+            LOG.info("Updated jobs for player {} ({}): {}/{}", 
+                request.getPlayerId(), request.getPlayerName(), 
+                request.getMainJob(), request.getSubJob());
+            
+            return Response.ok("Jobs: OK").build();
+        } catch (Exception e) {
+            LOG.error("Error setting player jobs for playerId: " + request.getPlayerId(), e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("An error occurred while updating player jobs.")
                     .build();
         }
     }
