@@ -1,6 +1,6 @@
 _addon.name = 'PlayerService'
 _addon.author = 'eaglejs'
-_addon.version = "1.2024.5.19"
+_addon.version = "1.2026.2.21"
 _addon.commands = { 'playerservice', 'ps', 'pserv' }
 
 require('strings')
@@ -41,9 +41,14 @@ function PlayerService.initialize_player()
   if not player then
     return
   end
-  local data = ("playerId=%s&playerName=%s&lastOnline=%s"):format(player.id, player.name, os.time())
 
-  PSUI.post('initialize_player', data)
+  local data = {
+    playerId = player.id,
+    playerName = player.name,
+    lastOnline = os.time()
+  }
+
+  PSUI.post('player/initialize_player', PSUI.toJSON(data))
 end
 
 function PlayerService.set_online()
@@ -51,9 +56,14 @@ function PlayerService.set_online()
   if not player or not PlayerService.active then
     return
   end
-  local data = ("playerId=%s&playerName=%s&lastOnline=%s"):format(player.id, player.name, os.time())
 
-  PSUI.post('set_online', data)
+  local data = {
+    playerId = player.id,
+    playerName = player.name,
+    lastOnline = os.time()
+  }
+
+  PSUI.post('player/set_online', PSUI.toJSON(data))
 end
 
 function PlayerService.set_jobs()
@@ -63,10 +73,14 @@ function PlayerService.set_jobs()
     return
   end
 
-  local data = ("playerId=%s&playerName=%s&mainJob=%s&subJob=%s"):format(player.id, player.name, player.main_job or "",
-    player.sub_job or "")
+  local data = {
+    playerId = player.id,
+    playerName = player.name,
+    mainJob = player.main_job or "",
+    subJob = player.sub_job or ""
+  }
 
-  PSUI.post('set_jobs', data)
+  PSUI.post('player/set_jobs', PSUI.toJSON(data))
 end
 
 function PlayerService.set_player_status(new, old)
@@ -76,9 +90,13 @@ function PlayerService.set_player_status(new, old)
     return
   end
 
-  local status_data = ("playerId=%s&playerName=%s&status=%s"):format(player.id, player.name, new)
+  local status_data = {
+    playerId = player.id,
+    playerName = player.name,
+    status = new
+  }
 
-  PSUI.post('set_player_status', status_data)
+  PSUI.post('player/set_status', PSUI.toJSON(status_data))
 
   if (new == 0 and old == 1) then
     if (os.time() - PlayerService.lastStatusFetch) < math.random(300, 600) then
@@ -96,9 +114,13 @@ function PlayerService.set_hpp()
     return
   end
 
-  local data = ("playerId=%s&playerName=%s&hpp=%s"):format(player.id, player.name, player.vitals.hpp)
+  local data = {
+    playerId = player.id,
+    playerName = player.name,
+    hpp = player.vitals.hpp
+  }
 
-  PSUI.post('set_hpp', data)
+  PSUI.post('player/set_hpp', PSUI.toJSON(data))
 end
 
 function PlayerService.set_mpp()
@@ -112,9 +134,13 @@ function PlayerService.set_mpp()
     PlayerService.log('Setting MPP: ' .. player.vitals.mpp, 'DEBUG')
   end
 
-  local data = ("playerId=%s&playerName=%s&mpp=%s"):format(player.id, player.name, player.vitals.mpp)
+  local data = {
+    playerId = player.id,
+    playerName = player.name,
+    mpp = player.vitals.mpp
+  }
 
-  PSUI.post('set_mpp', data)
+  PSUI.post('player/set_mpp', PSUI.toJSON(data))
 end
 
 function PlayerService.set_tp(newTP, oldTP)
@@ -124,9 +150,13 @@ function PlayerService.set_tp(newTP, oldTP)
     return
   end
 
-  local data = ("playerId=%s&playerName=%s&tp=%s"):format(player.id, player.name, newTP)
+  local data = {
+    playerId = player.id,
+    playerName = player.name,
+    tp = newTP
+  }
 
-  PSUI.post('set_tp', data)
+  PSUI.post('player/set_tp', PSUI.toJSON(data))
 end
 
 function PlayerService.set_stats(original)
@@ -201,75 +231,43 @@ function PlayerService.set_stats(original)
     ['currentExemplar'] = packet_stats.currentExemplar,
     ['requiredExemplar'] = packet_stats.requiredExemplar
   }
-  local data = ('playerId=%s&playerName=%s' ..
-    '&mainJobLevel=%s' ..
-    '&subJobLevel=%s' ..
-    '&masterLevel=%s' ..
-    '&attack=%s' ..
-    '&defense=%s' ..
-    '&currentExemplar=%s' ..
-    '&requiredExemplar=%s' ..
-    '&baseSTR=%s' ..
-    '&baseDEX=%s' ..
-    '&baseVIT=%s' ..
-    '&baseAGI=%s' ..
-    '&baseINT=%s' ..
-    '&baseMND=%s' ..
-    '&baseCHR=%s' ..
-    '&addedSTR=%s' ..
-    '&addedDEX=%s' ..
-    '&addedVIT=%s' ..
-    '&addedAGI=%s' ..
-    '&addedINT=%s' ..
-    '&addedMND=%s' ..
-    '&addedCHR=%s' ..
-    '&fireResistance=%s' ..
-    '&iceResistance=%s' ..
-    '&windResistance=%s' ..
-    '&earthResistance=%s' ..
-    '&lightningResistance=%s' ..
-    '&waterResistance=%s' ..
-    '&lightResistance=%s' ..
-    '&darkResistance=%s' ..
-    '&title=%s' ..
-    '&nationRank=%s')
-    :format(
-      player.id,
-      player.name,
-      stats.mainJobLevel or 0,
-      stats.subJobLevel or 0,
-      stats.masterLevel or 0,
-      stats.attack or 0,
-      stats.defense or 0,
-      stats.currentExemplar or 0,
-      stats.requiredExemplar or 0,
-      stats.baseSTR or 0,
-      stats.baseDEX or 0,
-      stats.baseVIT or 0,
-      stats.baseAGI or 0,
-      stats.baseINT or 0,
-      stats.baseMND or 0,
-      stats.baseCHR or 0,
-      stats.addedSTR or 0,
-      stats.addedDEX or 0,
-      stats.addedVIT or 0,
-      stats.addedAGI or 0,
-      stats.addedINT or 0,
-      stats.addedMND or 0,
-      stats.addedCHR or 0,
-      stats.fireResistance or 0,
-      stats.iceResistance or 0,
-      stats.windResistance or 0,
-      stats.earthResistance or 0,
-      stats.lightningResistance or 0,
-      stats.waterResistance or 0,
-      stats.lightResistance or 0,
-      stats.darkResistance or 0,
-      res.titles[stats.title].en or '',
-      stats.nationRank or 0
-    )
+  local data = {
+    playerId = player.id,
+    playerName = player.name,
+    mainJobLevel = stats.mainJobLevel or 0,
+    subJobLevel = stats.subJobLevel or 0,
+    masterLevel = stats.masterLevel or 0,
+    attack = stats.attack or 0,
+    defense = stats.defense or 0,
+    currentExemplar = stats.currentExemplar or 0,
+    requiredExemplar = stats.requiredExemplar or 0,
+    baseSTR = stats.baseSTR or 0,
+    baseDEX = stats.baseDEX or 0,
+    baseVIT = stats.baseVIT or 0,
+    baseAGI = stats.baseAGI or 0,
+    baseINT = stats.baseINT or 0,
+    baseMND = stats.baseMND or 0,
+    baseCHR = stats.baseCHR or 0,
+    addedSTR = stats.addedSTR or 0,
+    addedDEX = stats.addedDEX or 0,
+    addedVIT = stats.addedVIT or 0,
+    addedAGI = stats.addedAGI or 0,
+    addedINT = stats.addedINT or 0,
+    addedMND = stats.addedMND or 0,
+    addedCHR = stats.addedCHR or 0,
+    fireResistance = stats.fireResistance or 0,
+    iceResistance = stats.iceResistance or 0,
+    windResistance = stats.windResistance or 0,
+    earthResistance = stats.earthResistance or 0,
+    lightningResistance = stats.lightningResistance or 0,
+    waterResistance = stats.waterResistance or 0,
+    lightResistance = stats.lightResistance or 0,
+    darkResistance = stats.darkResistance or 0,
+    title = res.titles[stats.title].en or '',
+    nationRank = stats.nationRank or 0,
+  }
 
-  PSUI.post('set_stats', data)
+  PSUI.post('player/set_stats', PSUI.toJSON(data))
 end
 
 function PlayerService.set_currency1(original)
@@ -295,37 +293,24 @@ function PlayerService.set_currency1(original)
     ['voidstones'] = packet['Voidstones'] or 0
   }
 
-  local data = ('playerId=%s&playerName=%s' ..
-    '&conquestPointsBastok=%s' ..
-    '&conquestPointsSandoria=%s' ..
-    '&conquestPointsWindurst=%s' ..
-    '&deeds=%s' ..
-    '&dominionNotes=%s' ..
-    '&imperialStanding=%s' ..
-    '&loginPoints=%s' ..
-    '&nyzulTokens=%s' ..
-    '&sparksOfEminence=%s' ..
-    '&therionIchor=%s' ..
-    '&unityAccolades=%s' ..
-    '&voidstones=%s')
-    :format(
-      player.id,
-      player.name,
-      packet_currency.conquestPointsBastok or 0,
-      packet_currency.conquestPointsSandoria or 0,
-      packet_currency.conquestPointsWindurst or 0,
-      packet_currency.deeds or 0,
-      packet_currency.dominionNotes or 0,
-      packet_currency.imperialStanding or 0,
-      packet_currency.loginPoints or packet_currency.nyzulTokens,
-      packet_currency.nyzulTokens or 0,
-      packet_currency.sparksOfEminence or 0,
-      packet_currency.therionIchor or 0,
-      packet_currency.unityAccolades or 0,
-      packet_currency.voidstones or 0
-    )
+  local data = {
+    playerId = player.id,
+    playerName = player.name,
+    conquestPointsBastok = packet_currency.conquestPointsBastok or 0,
+    conquestPointsSandoria = packet_currency.conquestPointsSandoria or 0,
+    conquestPointsWindurst = packet_currency.conquestPointsWindurst or 0,
+    deeds = packet_currency.deeds or 0,
+    dominionNotes = packet_currency.dominionNotes or 0,
+    imperialStanding = packet_currency.imperialStanding or 0,
+    loginPoints = packet_currency.loginPoints or packet_currency.nyzulTokens,
+    nyzulTokens = packet_currency.nyzulTokens or 0,
+    sparksOfEminence = packet_currency.sparksOfEminence or 0,
+    therionIchor = packet_currency.therionIchor or 0,
+    unityAccolades = packet_currency.unityAccolades or 0,
+    voidstones = packet_currency.voidstones or 0,
+  }
 
-  PSUI.post('set_currency1', data)
+  PSUI.post('player/set_currency1', PSUI.toJSON(data))
 end
 
 function PlayerService.set_currency2(original)
@@ -351,37 +336,24 @@ function PlayerService.set_currency2(original)
     ['apollyonUnits'] = packet['Apollyon Units'],
   }
 
-  local data = ('playerId=%s&playerName=%s' ..
-    '&coalitionImprimaturs=%s' ..
-    '&domainPoints=%s' ..
-    '&eschaBeads=%s' ..
-    '&eschaSilt=%s' ..
-    '&gallantry=%s' ..
-    '&gallimaufry=%s' ..
-    '&hallmarks=%s' ..
-    '&mogSegments=%s' ..
-    '&mweyaPlasmCorpuscles=%s' ..
-    '&potpourri=%s' ..
-    '&temenosUnits=%s' ..
-    '&apollyonUnits=%s')
-    :format(
-      player.id,
-      player.name,
-      packet_currency.coalitionImprimaturs or 0,
-      packet_currency.domainPoints or 0,
-      packet_currency.eschaBeads or 0,
-      packet_currency.eschaSilt or 0,
-      packet_currency.gallantry or 0,
-      packet_currency.gallimaufry or 0,
-      packet_currency.hallmarks or 0,
-      packet_currency.mogSegments or 0,
-      packet_currency.mweyaPlasmCorpuscles or 0,
-      packet_currency.potpourri or 0,
-      packet_currency.temenosUnits or 0,
-      packet_currency.apollyonUnits or 0
-    )
+  local data = {
+    playerId = player.id,
+    playerName = player.name,
+    coalitionImprimaturs = packet_currency.coalitionImprimaturs or 0,
+    domainPoints = packet_currency.domainPoints or 0,
+    eschaBeads = packet_currency.eschaBeads or 0,
+    eschaSilt = packet_currency.eschaSilt or 0,
+    gallantry = packet_currency.gallantry or 0,
+    gallimaufry = packet_currency.gallimaufry or 0,
+    hallmarks = packet_currency.hallmarks or 0,
+    mogSegments = packet_currency.mogSegments or 0,
+    mweyaPlasmCorpuscles = packet_currency.mweyaPlasmCorpuscles or 0,
+    potpourri = packet_currency.potpourri or 0,
+    temenosUnits = packet_currency.temenosUnits or 0,
+    apollyonUnits = packet_currency.apollyonUnits or 0,
+  }
 
-  PSUI.post('set_currency2', data)
+  PSUI.post('player/set_currency2', PSUI.toJSON(data))
 end
 
 function PlayerService.set_buffs_with_timers()
@@ -399,7 +371,7 @@ function PlayerService.set_buffs_with_timers()
 
   pkg = PSUI.toJSON(pkg)
 
-  PSUI.post_json('set_buffs_json', pkg)
+  PSUI.post('player/set_buffs', pkg)
 end
 
 function PlayerService.set_zone()
@@ -414,10 +386,20 @@ function PlayerService.set_zone()
     return
   end
 
-  local data = ("playerId=%s&playerName=%s&zone=%s"):format(player.id, player.name, res.zones[gameInfo.zone].en)
+  local zone_info = {
+    playerId = player.id,
+    playerName = player.name,
+    zone = res.zones[gameInfo.zone].en,
+  }
 
-  PSUI.post('set_zone', data)
-  PSUI.post('reset_exp_history', ("playerId=%s&playerName=%s"):format(player.id, player.name))
+  local exp_history = {
+    playerId = player.id,
+    playerName = player.name,
+    exp = player.exp,
+  }
+
+  PSUI.post('player/set_zone', PSUI.toJSON(zone_info))
+  PSUI.post('player/reset_exp_history', PSUI.toJSON(exp_history))
   PlayerService.updateGil()
 end
 
@@ -426,9 +408,13 @@ function PlayerService.updateGil()
   if not player or not PlayerService.active then
     return
   end
-  local data = ("playerId=%s&playerName=%s&gil=%s"):format(player.id, player.name, windower.ffxi.get_items('gil'))
+  local data = {
+    playerId = player.id,
+    playerName = player.name,
+    gil = windower.ffxi.get_items('gil')
+  }
 
-  PSUI.post('set_gil', data)
+  PSUI.post('player/set_gil', PSUI.toJSON(data))
 end
 
 function PlayerService.incoming_chunk_handler(id, original, modified, injected, blocked)
@@ -489,7 +475,7 @@ function PlayerService.incoming_chunk_handler(id, original, modified, injected, 
         total = packet['Merit Points'],
         max = packet['Max Merit Points']
       }
-      coroutine.schedule(function() PSUI.post_json('update_merits', PSUI.toJSON(meritPackage)) end, .5)
+      coroutine.schedule(function() PSUI.post('player/update_merits', PSUI.toJSON(meritPackage)) end, .5)
     elseif packet['Order'] == 5 then
       local player = windower.ffxi.get_player()
       if player then
@@ -500,7 +486,7 @@ function PlayerService.incoming_chunk_handler(id, original, modified, injected, 
           numberOfJobPoints = packet[job .. ' Job Points']
         }
 
-        coroutine.schedule(function() PSUI.post_json('update_capacity_points', PSUI.toJSON(cpPackage)) end, 1)
+        coroutine.schedule(function() PSUI.post('player/update_capacity_points', PSUI.toJSON(cpPackage)) end, 1)
       end
     end
   elseif id == 0x02D then
@@ -519,7 +505,7 @@ function PlayerService.incoming_chunk_handler(id, original, modified, injected, 
         ["chain"] = packet['Param 2'],
         ["timestamp"] = formatted_utc_time
       }
-      coroutine.schedule(function() PSUI.post_json('update_exp_history', PSUI.toJSON(expPackage)) end, 2)
+      coroutine.schedule(function() PSUI.post('player/update_exp_history', PSUI.toJSON(expPackage)) end, 2)
     end
   end
 

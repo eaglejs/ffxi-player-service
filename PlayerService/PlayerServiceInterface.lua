@@ -1,6 +1,7 @@
 local http = require('socket.http')
 local ltn12 = require('ltn12')
 local host = "http://192.168.5.30:8080"
+-- local host = "http://192.168.5.143/api"
 
 http.TIMEOUT = 0.5
 
@@ -22,13 +23,14 @@ local function getHearBeat()
   if (PlayerServiceInterface.freezeOnlineCheck) then return end
   coroutine.schedule(function()
     local response_body = {}
+    local url_string = ("%s/health"):format(host)
     local _, status_code, headers, status_text = http.request({
-      url = ("%s/health"):format(host),
+      url = url_string,
       method = "GET",
       sink = ltn12.sink.table(response_body)
     })
     if status_code ~= 200 then
-      printHTTPError(status_code, status_text, "/health")
+      printHTTPError(status_code, status_text, "/Health")
     else
       if not PlayerServiceInterface.online then print("Heartbeat Online") end
       PlayerServiceInterface.online = true
@@ -41,30 +43,9 @@ function PlayerServiceInterface.post(endpoint, data)
 
   coroutine.schedule(function()
     local response_body = {}
+    local url_string = ("%s/%s"):format(host, endpoint)
     local _, status_code, headers, status_text = http.request({
-      url = ("%s/%s"):format(host, endpoint),
-      method = "POST",
-      headers = {
-        ["Content-Type"] = "application/x-www-form-urlencoded",
-        ["Content-Length"] = tostring(#data)
-      },
-      source = ltn12.source.string(data),
-      sink = ltn12.sink.table(response_body)
-    })
-
-    if status_code ~= 200 then
-      printHTTPError(status_code, status_text, endpoint)
-    end
-  end, math.random(0, 1))
-end
-
-function PlayerServiceInterface.post_json(endpoint, data)
-  if not PlayerServiceInterface.online then return nil end
-
-  coroutine.schedule(function()
-    local response_body = {}
-    local _, status_code, headers, status_text = http.request({
-      url = ("%s/%s"):format(host, endpoint),
+      url = url_string,
       method = "POST",
       headers = {
         ["Content-Type"] = "application/json",
@@ -84,8 +65,9 @@ function PlayerServiceInterface.get(endpoint)
   if not PlayerServiceInterface.online then return nil end
 
   local response_body = {}
+  local url_string = ("%s/%s"):format(host, endpoint)
   local _, status_code, headers, status_text = http.request({
-    url = ("%s/%s"):format(host, endpoint),
+    url = url_string,
     method = "GET",
     sink = ltn12.sink.table(response_body)
   })
