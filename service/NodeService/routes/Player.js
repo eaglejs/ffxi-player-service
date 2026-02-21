@@ -9,7 +9,9 @@ const chatScheme = require('../schemas/Chat');
 
 mongoose.connect('mongodb://localhost:27017/ffxi');
 
-const wss = new WebSocket.Server({ port: 8081 });
+// inherit current port from app.js
+
+const wss = new WebSocket.Server({ noServer: true });
 
 wss.on('connection', function connection(ws) {
   ws.send('{"msg": "Hello! I am the server!"}')
