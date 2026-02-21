@@ -9,8 +9,6 @@ const chatScheme = require('../schemas/Chat');
 
 mongoose.connect('mongodb://localhost:27017/ffxi');
 
-// inherit current port from app.js
-
 const wss = new WebSocket.Server({ noServer: true });
 
 wss.on('connection', function connection(ws) {
