@@ -20,8 +20,9 @@ app.use('/', routes);
 // Create HTTP server from Express app
 const server = http.createServer(app);
 
-// Import WebSocket server from routes
-const { wss } = require('./routes/Player');
+// Import WebSocket server from Player router
+const Player = require('./routes/Player');
+const wss = Player.wss;
 
 // Handle WebSocket upgrade requests
 server.on('upgrade', (request, socket, head) => {

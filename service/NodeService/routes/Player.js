@@ -922,5 +922,5 @@ router.post('/player/set_messages', async (req, res) => {
   }
 });
 
+router.wss = wss;
 module.exports = router;
-module.exports.wss = wss;
