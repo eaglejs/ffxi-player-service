@@ -658,7 +658,7 @@ router.get('/player/get_buffs', async (req, res) => {
   }
 });
 
-router.post('/player/set_buffs_json', async (req, res) => {
+router.post('/player/set_buffs', async (req, res) => {
   try {
     const data = req.body;
     const playerId = parseInt(data.playerId);
@@ -683,7 +683,7 @@ router.post('/player/set_buffs_json', async (req, res) => {
 
     res.send(`Buffs: OK`);
   } catch (error) {
-    console.error('set_buffs_json', error);
+    console.error('set_buffs', error);
     res.status(500).send('An error occurred while updating the buffs.');
   }
 });
