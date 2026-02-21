@@ -25,13 +25,17 @@ const { wss } = require('./routes/Player');
 
 // Handle WebSocket upgrade requests
 server.on('upgrade', (request, socket, head) => {
-  const pathname = new URL(request.url, `http://${request.headers.host}`).pathname;
+  const pathname = request.url;
   
-  if (pathname === '/ws/players') {
+  console.log('WebSocket upgrade request received for:', pathname);
+  
+  if (pathname === '/ws/players' || pathname.startsWith('/ws/players')) {
     wss.handleUpgrade(request, socket, head, (ws) => {
+      console.log('WebSocket client connected successfully');
       wss.emit('connection', ws, request);
     });
   } else {
+    console.log('WebSocket upgrade rejected - invalid path:', pathname);
     socket.destroy();
   }
 });
