@@ -12,9 +12,10 @@ for ((i=1; i<=$1; i++)); do
 1. Find the highest priority feature to work on and only work on that feature. \
 This should be the one YOU decide has the highest priority - not necessarily what is first in the list. \
 2. Implement the feature within the JavaService codebase using Dropwizard as our Framework. \
-3. Update the PRD with the work that was done. \
-4. Append your progress to progress.txt. \
-5. Make a git commit of that feature. \
+3. Refactor the code as needed to ensure it is clean and maintainable. \
+4. Update the PRD with the work that was done. \
+5. Append your progress to progress.txt. \
+6. Make a git commit of that feature. \
 ONLY WORK ON A SINGLE FEATURE PER ITERATION. \
 If, while implementing a feature, you notice the PRD is complete, output <promise>COMPLETE</promise>. \
   " )

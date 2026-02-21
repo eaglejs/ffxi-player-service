@@ -37,3 +37,15 @@
 - Static assets are accessible at root path (/) when service runs
 - PRD "UI Integration" feature marked as passes: true
 - All 16 tests still passing (2 health + 4 resource + 10 websocket)
+
+2026-02-21: Implemented Get Player by ID endpoint (Restful API)
+- Created GET endpoint /players/get_player accepting playerId as query parameter
+- Implemented method to fetch player stats from MongoDB using playerId with eq filter
+- Returns JSON response with player data and HTTP 200 on success
+- Returns HTTP 404 with error message when player not found
+- Returns HTTP 400 when playerId query parameter is missing
+- Returns HTTP 500 on database errors with appropriate error message
+- Added Swagger/OpenAPI annotations for API documentation
+- Added unit tests: PlayerResourceTest (4 new tests) covering success, not found, null playerId, and database error scenarios
+- All 31 tests passing (2 health + 4 health resource + 15 player resource + 10 websocket)
+- PRD "Restful API - Fetch individual player stats" feature marked as passes: true
