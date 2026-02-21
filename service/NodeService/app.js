@@ -4,7 +4,7 @@ const cors = require('cors');
 const routes = require('./routes');
 const app = express();
 const ipfilter = require('express-ipfilter').IpFilter;
-const ips = ['192.168.0.0/16', '::ffff:192.168.0.0/112'];
+const ips = ['127.0.0.1', '::1', '192.168.0.0/16', '::ffff:192.168.0.0/112'];
 const protectedRoutes = require('./routes/protected-routes');
 
 const port = process.env.EXPRESS_PORT || 8080;
