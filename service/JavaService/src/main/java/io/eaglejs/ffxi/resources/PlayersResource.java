@@ -12,16 +12,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.Consumes;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Filters.gte;
 import static com.mongodb.client.model.Sorts.ascending;
 
@@ -71,6 +71,45 @@ public class PlayersResource {
             LOG.error("Error retrieving players", e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity("An error occurred while retrieving the players.")
+                    .build();
+        }
+    }
+
+    @GET
+    @Path("/get_player")
+    @Operation(
+        summary = "Get Player by ID",
+        description = "Returns player stats from the database by playerId.",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Player retrieved successfully"),
+            @ApiResponse(responseCode = "404", description = "Player not found"),
+            @ApiResponse(responseCode = "400", description = "Invalid playerId"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+        }
+    )
+    public Response getPlayer(@QueryParam("playerId") Integer playerId) {
+        try {
+            if (playerId == null) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity("playerId query parameter is required")
+                        .build();
+            }
+
+            MongoCollection<Document> playersCollection = mongoDBService.getPlayersCollection();
+            Document document = playersCollection.find(eq("playerId", playerId)).first();
+
+            if (document == null) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity("Player not found with playerId: " + playerId)
+                        .build();
+            }
+
+            Player player = PlayerMapper.documentToPlayer(document);
+            return Response.ok(player).build();
+        } catch (Exception e) {
+            LOG.error("Error retrieving player with playerId: " + playerId, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("An error occurred while retrieving the player.")
                     .build();
         }
     }

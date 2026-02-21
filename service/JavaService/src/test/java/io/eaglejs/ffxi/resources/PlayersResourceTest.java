@@ -160,4 +160,77 @@ public class PlayersResourceTest {
         verify(mockMongoService, times(1)).getPlayersCollection();
         verifyNoMoreInteractions(mockMongoService);
     }
+
+    @Test
+    public void testGetPlayer_Success() {
+        // Arrange
+        Integer playerId = 123;
+        Document playerDoc = new Document("playerId", playerId)
+                .append("playerName", "TestPlayer")
+                .append("mainJob", "WAR")
+                .append("mainJobLevel", 99);
+
+        when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
+        when(mockFindIterable.first()).thenReturn(playerDoc);
+
+        // Act
+        Response response = resource.getPlayer(playerId);
+
+        // Assert
+        assertEquals(200, response.getStatus());
+        Player player = (Player) response.getEntity();
+        assertNotNull(player);
+        assertEquals("TestPlayer", player.getPlayerName());
+        assertEquals("WAR", player.getMainJob());
+        verify(mockCollection).find(any(Bson.class));
+    }
+
+    @Test
+    public void testGetPlayer_NotFound() {
+        // Arrange
+        Integer playerId = 999;
+
+        when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
+        when(mockFindIterable.first()).thenReturn(null);
+
+        // Act
+        Response response = resource.getPlayer(playerId);
+
+        // Assert
+        assertEquals(404, response.getStatus());
+        String errorMessage = (String) response.getEntity();
+        assertTrue(errorMessage.contains("Player not found"));
+        assertTrue(errorMessage.contains("999"));
+    }
+
+    @Test
+    public void testGetPlayer_NullPlayerId() {
+        // Arrange
+        Integer playerId = null;
+
+        // Act
+        Response response = resource.getPlayer(playerId);
+
+        // Assert
+        assertEquals(400, response.getStatus());
+        String errorMessage = (String) response.getEntity();
+        assertEquals("playerId query parameter is required", errorMessage);
+        verify(mockCollection, never()).find(any(Bson.class));
+    }
+
+    @Test
+    public void testGetPlayer_DatabaseError() {
+        // Arrange
+        Integer playerId = 123;
+
+        when(mockCollection.find(any(Bson.class))).thenThrow(new RuntimeException("Database connection lost"));
+
+        // Act
+        Response response = resource.getPlayer(playerId);
+
+        // Assert
+        assertEquals(500, response.getStatus());
+        String errorMessage = (String) response.getEntity();
+        assertEquals("An error occurred while retrieving the player.", errorMessage);
+    }
   }
