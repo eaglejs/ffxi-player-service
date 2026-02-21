@@ -41,6 +41,38 @@ public class SinglePlayerResource {
         this.mongoDBService = mongoDBService;
     }
 
+    @POST
+    @Path("/initialize_player")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(
+        summary = "Initialize Player",
+        description = "Initializes a new player record in the database.",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Player initialized successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid player data"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+        }
+    )
+    public Response initializePlayer(Player player) { 
+      try {
+          if (player == null) {
+              return Response.status(Response.Status.BAD_REQUEST)
+                      .entity("Player data cannot be null.")
+                      .build();
+          }
+          
+          MongoCollection<Document> playersCollection = mongoDBService.getPlayersCollection();
+          Document doc = PlayerMapper.playerToDocument(player);
+          playersCollection.insertOne(doc);
+          return Response.ok("Player initialized successfully").build();
+      } catch (Exception e) {
+          LOG.error("Error initializing player", e);
+          return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                  .entity("An error occurred while initializing the player.")
+                  .build();
+      }
+    }
+
     @GET
     @Path("/get_player")
     @Operation(

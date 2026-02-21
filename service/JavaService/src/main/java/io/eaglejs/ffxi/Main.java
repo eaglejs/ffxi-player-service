@@ -6,7 +6,7 @@ import io.dropwizard.setup.Environment;
 import io.eaglejs.ffxi.config.SwaggerConfig;
 import io.eaglejs.ffxi.health.MongoHealthCheck;
 import io.eaglejs.ffxi.resources.HealthResource;
-import io.eaglejs.ffxi.resources.PlayerResource;
+import io.eaglejs.ffxi.resources.PlayersResource;
 import io.eaglejs.ffxi.resources.SinglePlayerResource;
 import io.eaglejs.ffxi.service.MongoDBService;
 import io.eaglejs.ffxi.websocket.WebSocketManager;
@@ -47,7 +47,7 @@ public class Main extends Application<FFXIConfiguration> {
         
         environment.healthChecks().register("mongodb", new MongoHealthCheck(configuration.getMongoUri()));
         environment.jersey().register(new HealthResource(environment.healthChecks()));
-        environment.jersey().register(new PlayerResource(mongoDBService));
+        environment.jersey().register(new PlayersResource(mongoDBService));
         environment.jersey().register(new SinglePlayerResource(mongoDBService));
         environment.jersey().register(new SwaggerConfig());
 
