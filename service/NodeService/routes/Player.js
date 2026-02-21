@@ -63,17 +63,6 @@ router.post('/player/initialize_player', async (req, res) => {
   }
 });
 
-router.get('/players/get_player', async (req, res) => {
-  try {
-    const playerId = parseInt(req.query.playerId);
-    const player = await players.findOne({ playerId });
-    res.send(player);
-  } catch (error) {
-    console.error('get_player', error);
-    res.status(500).send('An error occurred while retrieving the player.');
-  }
-});
-
 router.get('/players/get_players', async (req, res) => {
   try {
     // get all online players that lastOnline is within the last 60 seconds
@@ -84,6 +73,17 @@ router.get('/players/get_players', async (req, res) => {
   } catch (error) {
     console.error('get_players', error);
     res.status(500).send('An error occurred while retrieving the players.');
+  }
+});
+
+router.get('/players/get_player', async (req, res) => {
+  try {
+    const playerId = parseInt(req.query.playerId);
+    const player = await players.findOne({ playerId });
+    res.send(player);
+  } catch (error) {
+    console.error('get_player', error);
+    res.status(500).send('An error occurred while retrieving the player.');
   }
 });
 
