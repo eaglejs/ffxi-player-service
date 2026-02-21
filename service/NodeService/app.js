@@ -11,6 +11,12 @@ const port = process.env.EXPRESS_PORT || 8080;
 
 app.use(cors());
 
+// Request logging middleware
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+  next();
+});
+
 for (const protectedRoute of protectedRoutes) {
   app.use(protectedRoute, ipfilter(ips, { mode: 'allow', logLevel: 'deny'}));
 }
