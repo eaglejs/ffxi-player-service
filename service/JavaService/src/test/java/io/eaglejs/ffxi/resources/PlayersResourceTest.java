@@ -11,6 +11,8 @@ import org.bson.conversions.Bson;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import javax.ws.rs.core.Response;
 import java.util.Arrays;
@@ -23,16 +25,16 @@ import static org.mockito.Mockito.*;
 public class PlayersResourceTest {
 
     private MongoDBService mockMongoService;
+    @Mock
     private MongoCollection<Document> mockCollection;
+    @Mock
     private FindIterable<Document> mockFindIterable;
     private PlayersResource resource;
 
     @Before
-    @SuppressWarnings("unchecked")
     public void setUp() {
+        MockitoAnnotations.openMocks(this);
         mockMongoService = mock(MongoDBService.class);
-        mockCollection = (MongoCollection<Document>) mock(MongoCollection.class);
-        mockFindIterable = (FindIterable<Document>) mock(FindIterable.class);
         resource = new PlayersResource(mockMongoService);
 
         when(mockMongoService.getPlayersCollection()).thenReturn(mockCollection);
@@ -41,7 +43,6 @@ public class PlayersResourceTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     public void testGetPlayers_ReturnsOnlinePlayers() {
         // Arrange
         Document player1 = new Document("playerId", 1)
@@ -55,7 +56,7 @@ public class PlayersResourceTest {
 
         when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
         when(mockFindIterable.sort(any(Bson.class))).thenReturn(mockFindIterable);
-        when(mockFindIterable.into(any(List.class))).thenAnswer(invocation -> {
+        when(mockFindIterable.into(any())).thenAnswer(invocation -> {
             List<Document> list = invocation.getArgument(0);
             list.addAll(expectedDocuments);
             return list;
@@ -66,7 +67,7 @@ public class PlayersResourceTest {
 
         // Assert
         assertEquals(200, response.getStatus());
-        List<Player> actualPlayers = (List<Player>) response.getEntity();
+        List<Player> actualPlayers = getPlayersFromResponse(response);
         assertEquals(2, actualPlayers.size());
         assertEquals("Alice", actualPlayers.get(0).getPlayerName());
         assertEquals("Bob", actualPlayers.get(1).getPlayerName());
@@ -76,19 +77,18 @@ public class PlayersResourceTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     public void testGetPlayers_ReturnsEmptyListWhenNoPlayersOnline() {
         // Arrange
         when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
         when(mockFindIterable.sort(any(Bson.class))).thenReturn(mockFindIterable);
-        when(mockFindIterable.into(any(List.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(mockFindIterable.into(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         // Act
         Response response = resource.getPlayers();
 
         // Assert
         assertEquals(200, response.getStatus());
-        List<Player> actualPlayers = (List<Player>) response.getEntity();
+        List<Player> actualPlayers = getPlayersFromResponse(response);
         assertNotNull(actualPlayers);
         assertEquals(0, actualPlayers.size());
     }
@@ -114,7 +114,7 @@ public class PlayersResourceTest {
 
         when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
         when(mockFindIterable.sort(any(Bson.class))).thenReturn(mockFindIterable);
-        when(mockFindIterable.into(any(List.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(mockFindIterable.into(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         // Act
         resource.getPlayers();
@@ -134,7 +134,7 @@ public class PlayersResourceTest {
 
         when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
         when(mockFindIterable.sort(any(Bson.class))).thenReturn(mockFindIterable);
-        when(mockFindIterable.into(any(List.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(mockFindIterable.into(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         // Act
         resource.getPlayers();
@@ -151,7 +151,7 @@ public class PlayersResourceTest {
         // Arrange
         when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
         when(mockFindIterable.sort(any(Bson.class))).thenReturn(mockFindIterable);
-        when(mockFindIterable.into(any(List.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(mockFindIterable.into(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         // Act
         resource.getPlayers();
@@ -232,5 +232,10 @@ public class PlayersResourceTest {
         assertEquals(500, response.getStatus());
         String errorMessage = (String) response.getEntity();
         assertEquals("An error occurred while retrieving the player.", errorMessage);
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<Player> getPlayersFromResponse(Response response) {
+        return (List<Player>) response.getEntity();
     }
   }
