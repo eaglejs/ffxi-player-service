@@ -21,6 +21,10 @@ ext {
     nexusNpmUrl = "http://${nexusHost}:${nexusPort}/repository/${nexusNpmRepo}/" // Use IP address to avoid IPv6 issues
 }
 
+def isTestTaskRequested = gradle.startParameter.taskNames.any { taskName ->
+    taskName.toLowerCase().contains('test')
+}
+
 dependencies {
     implementation 'io.dropwizard:dropwizard-core:2.0.24'
     implementation "io.dropwizard:dropwizard-jetty:2.0.24"
@@ -146,7 +150,7 @@ task downloadUI(type: Exec) {
 downloadUI.onlyIf { 
     def downloadDir = file("${project.buildDir}/ui-download")
     def markerFile = new File(downloadDir, "download-failed.marker")
-    !markerFile.exists()
+    !isTestTaskRequested && !markerFile.exists()
 }
 
 // Task to extract UI package
@@ -162,7 +166,7 @@ task extractUI {
     inputs.file(tarFile)
     outputs.dir(assetsDir)
     
-    onlyIf { tarFile.exists() }
+    onlyIf { !isTestTaskRequested && tarFile.exists() }
     
     doLast {
         // Extract to temporary location first
