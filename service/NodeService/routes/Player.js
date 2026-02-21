@@ -63,7 +63,7 @@ router.post('/player/initialize_player', async (req, res) => {
   }
 });
 
-router.get('/player/get_player', async (req, res) => {
+router.get('/players/get_player', async (req, res) => {
   try {
     const playerId = parseInt(req.query.playerId);
     const player = await players.findOne({ playerId });

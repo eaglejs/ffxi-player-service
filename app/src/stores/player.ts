@@ -31,14 +31,14 @@ export const usePlayerStore = defineStore('player', () => {
   }
 
   async function fetchChatLog(playerId: number) {
-    const response = await axios.get(`${fullUrl}/players/get_chat_log?playerId=${playerId}`)
+    const response = await axios.get(`${fullUrl}/player/get_chat_log?playerId=${playerId}`)
     chatLog.value = response.data
     return Promise.resolve(chatLog)
   }
 
   async function fetchChatLogByMessageType(playerId: number, messageType: string) {
     const response = await axios.get(
-      `${fullUrl}/players/get_chat_log_by_type?playerId=${playerId}&messageType=${messageType}`
+      `${fullUrl}/player/get_chat_log_by_type?playerId=${playerId}&messageType=${messageType}`
     )
     chatLog.value = response.data
     return Promise.resolve(chatLog)
