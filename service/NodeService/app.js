@@ -1,4 +1,5 @@
 const express = require('express');
+const http = require('http');
 const cors = require('cors');
 const routes = require('./routes');
 const app = express();
@@ -16,6 +17,20 @@ for (const protectedRoute of protectedRoutes) {
 
 app.use('/', routes);
 
-app.listen(port, () => {
+// Create HTTP server from Express app
+const server = http.createServer(app);
+
+// Import WebSocket server from routes
+const { wss } = require('./routes/Player');
+
+// Handle WebSocket upgrade requests
+server.on('upgrade', (request, socket, head) => {
+  wss.handleUpgrade(request, socket, head, (ws) => {
+    wss.emit('connection', ws, request);
+  });
+});
+
+server.listen(port, () => {
   console.log(`Server is running on port ${port}`);
+  console.log(`WebSocket server is running on the same port`);
 });
