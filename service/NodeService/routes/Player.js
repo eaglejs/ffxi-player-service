@@ -43,7 +43,7 @@ function removeControlCharacters(str) {
   return str.replace(/[\x00-\x1F\x7F]/g, '');
 }
 
-router.post('/initialize_player', async (req, res) => {
+router.post('/player/initialize_player', async (req, res) => {
   try {
     const data = req.body;
     const playerId = parseInt(data.playerId);
@@ -63,7 +63,7 @@ router.post('/initialize_player', async (req, res) => {
   }
 });
 
-router.get('/get_player', async (req, res) => {
+router.get('/player/get_player', async (req, res) => {
   try {
     const playerId = parseInt(req.query.playerId);
     const player = await players.findOne({ playerId });
@@ -74,7 +74,7 @@ router.get('/get_player', async (req, res) => {
   }
 });
 
-router.get('/get_players', async (req, res) => {
+router.get('/players/get_players', async (req, res) => {
   try {
     // get all online players that lastOnline is within the last 60 seconds
     const currentTime = Math.floor(Date.now() / 1000);
@@ -87,7 +87,7 @@ router.get('/get_players', async (req, res) => {
   }
 });
 
-router.post('/set_online', async (req, res) => {
+router.post('/player/set_online', async (req, res) => {
   try {
     const data = req.body;
     const playerId = parseInt(data.playerId);
@@ -117,7 +117,7 @@ router.post('/set_online', async (req, res) => {
   }
 });
 
-router.post('/set_jobs', async (req, res) => {
+router.post('/player/set_jobs', async (req, res) => {
   try {
     const data = req.body;
     const main_job = data.mainJob;
@@ -149,7 +149,7 @@ router.post('/set_jobs', async (req, res) => {
   }
 });
 
-router.post('/set_gil', async (req, res) => {
+router.post('/player/set_gil', async (req, res) => {
   try {
     const data = req.body;
     const playerId = parseInt(data.playerId);
@@ -180,7 +180,7 @@ router.post('/set_gil', async (req, res) => {
   }
 });
 
-router.post('/set_player_status', async (req, res) => {
+router.post('/player/set_status', async (req, res) => {
   try {
     const data = req.body;
     const playerId = parseInt(data.playerId);
@@ -211,7 +211,7 @@ router.post('/set_player_status', async (req, res) => {
   }
 });
 
-router.post('/set_hpp', async (req, res) => {
+router.post('/player/set_hpp', async (req, res) => {
   try {
     const data = req.body;
     const playerId = parseInt(data.playerId);
@@ -251,7 +251,7 @@ router.post('/set_hpp', async (req, res) => {
   }
 });
 
-router.post('/set_mpp', async (req, res) => {
+router.post('/player/set_mpp', async (req, res) => {
   try {
     const data = req.body;
     const playerId = parseInt(data.playerId);
@@ -281,7 +281,7 @@ router.post('/set_mpp', async (req, res) => {
   }
 });
 
-router.post('/set_tp', async (req, res) => {
+router.post('/player/set_tp', async (req, res) => {
   try {
     const data = req.body;
     const playerId = parseInt(data.playerId);
@@ -312,7 +312,7 @@ router.post('/set_tp', async (req, res) => {
   }
 });
 
-router.post('/set_stats', async (req, res) => {
+router.post('/player/set_stats', async (req, res) => {
   try {
     const data = req.body;
     const playerId = parseInt(data.playerId);
@@ -372,7 +372,7 @@ router.post('/set_stats', async (req, res) => {
   }
 });
 
-router.post('/set_currency1', async (req, res) => {
+router.post('/player/set_currency1', async (req, res) => {
   try {
     const data = req.body;
     const playerId = parseInt(data?.playerId);
@@ -418,7 +418,7 @@ router.post('/set_currency1', async (req, res) => {
 
 });
 
-router.post('/set_currency2', async (req, res) => {
+router.post('/player/set_currency2', async (req, res) => {
   try {
     const data = req.body;
     const playerId = parseInt(data.playerId);
@@ -452,7 +452,7 @@ router.post('/set_currency2', async (req, res) => {
 
 });
 
-router.post('/update_merits', async (req, res) => {
+router.post('/player/update_merits', async (req, res) => {
   try {
     const data = req.body;
     const playerId = parseInt(data.playerId);
@@ -482,7 +482,7 @@ router.post('/update_merits', async (req, res) => {
   }
 });
 
-router.post('/update_capacity_points', async (req, res) => {
+router.post('/player/update_capacity_points', async (req, res) => {
   try {
     const data = req.body;
     const playerId = parseInt(data.playerId);
@@ -521,7 +521,7 @@ router.post('/update_capacity_points', async (req, res) => {
   }
 });
 
-router.post('/update_exp_history', async (req, res) => {
+router.post('/player/update_exp_history', async (req, res) => {
   try {
     // (8|253) = exp, (371|372) = limit, (718|735) = capacity, (809|810) = exemplar
     const expIds = [8, 253, 371, 372, 718, 735, 809, 810];
@@ -589,7 +589,7 @@ router.post('/update_exp_history', async (req, res) => {
 
 });
 
-router.post('/reset_exp_history', async (req, res) => {
+router.post('/player/reset_exp_history', async (req, res) => {
   try {
     const playerId = parseInt(req.body.playerId);
     const playerName = req.body.playerName.toLowerCase();
@@ -625,7 +625,7 @@ router.post('/reset_exp_history', async (req, res) => {
   }
 });
 
-router.get('/get_buffs', async (req, res) => {
+router.get('/player/get_buffs', async (req, res) => {
   try {
     const playerId = parseInt(req.query.playerId);
     const player = await players.findOne({ playerId: parseInt(playerId) });
@@ -658,7 +658,7 @@ router.get('/get_buffs', async (req, res) => {
   }
 });
 
-router.post('/set_buffs_json', async (req, res) => {
+router.post('/player/set_buffs_json', async (req, res) => {
   try {
     const data = req.body;
     const playerId = parseInt(data.playerId);
@@ -688,7 +688,7 @@ router.post('/set_buffs_json', async (req, res) => {
   }
 });
 
-router.post('/refresh_buffs', async (req, res) => {
+router.post('/player/refresh_buffs', async (req, res) => {
   try {
     const playerId = parseInt(req.body.playerId);
     const playerName = req.body.playerName.toLowerCase();
@@ -722,7 +722,7 @@ router.post('/refresh_buffs', async (req, res) => {
   }
 });
 
-router.post('/set_ability_recasts', async (req, res) => {
+router.post('/player/set_ability_recasts', async (req, res) => {
   try {
     const { playerName, abilities } = req.body;
     const playerId = parseInt(req.body.playerId);
@@ -758,7 +758,7 @@ router.post('/set_ability_recasts', async (req, res) => {
   }
 });
 
-router.post('/set_zone', async (req, res) => {
+router.post('/player/set_zone', async (req, res) => {
   try {
     const data = req.body;
     const playerId = parseInt(data.playerId);
@@ -788,7 +788,7 @@ router.post('/set_zone', async (req, res) => {
   }
 });
 
-router.get('/get_chat_log', async (req, res) => {
+router.get('/player/get_chat_log', async (req, res) => {
   try {
     const playerId = parseInt(req.query.playerId);
     // get the last 5000 messages across all types
@@ -828,7 +828,7 @@ router.get('/get_chat_log', async (req, res) => {
   }
 });
 
-router.get('/get_chat_log_by_type', async (req, res) => {
+router.get('/player/get_chat_log_by_type', async (req, res) => {
   try {
     const playerId = parseInt(req.query.playerId);
     const messageType = req.query.messageType.trim().toUpperCase();
@@ -837,7 +837,7 @@ router.get('/get_chat_log_by_type', async (req, res) => {
     const player = await chats.findOne({ playerId });
 
     if (!player || !player.chatLog) {
-      console.error('get_chat_log', 'Player not found or chatLog is empty');
+      console.error('get_chat_log_by_type', 'Player not found or chatLog is empty');
       return res.send({ chatLog: [] });
     }
 
@@ -858,12 +858,12 @@ router.get('/get_chat_log_by_type', async (req, res) => {
 
     res.send(limitedMessages);
   } catch (error) {
-    console.error('get_chat_log_by_type', error);
+    console.error('player/get_chat_log_by_type', error);
     res.status(500).send('An error occurred while retrieving the chat log.');
   }
 });
 
-router.post('/set_messages', async (req, res) => {
+router.post('/player/set_messages', async (req, res) => {
   try {
     const data = req.body;
 
