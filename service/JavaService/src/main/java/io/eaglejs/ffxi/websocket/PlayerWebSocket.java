@@ -245,7 +245,7 @@ public class PlayerWebSocket {
     }
 
     // For testing: clear all state
-    static void reset() {
+    public static void reset() {
         sessions.clear();
         subscriptions.clear();
     }

@@ -49,3 +49,22 @@
 - Added unit tests: PlayerResourceTest (4 new tests) covering success, not found, null playerId, and database error scenarios
 - All 31 tests passing (2 health + 4 health resource + 15 player resource + 10 websocket)
 - PRD "Restful API - Fetch individual player stats" feature marked as passes: true
+
+2026-02-21: Implemented Set Player Online Status endpoint (Restful API)
+- Created POST endpoint /players/set_online accepting playerId, playerName, and lastOnline in request body
+- Created SetOnlineRequest DTO model for request data validation
+- Implemented method to update player's online status in MongoDB using playerId filter
+- Automatically formats playerName to lowercase as specified in PRD requirements
+- Checks player exists before updating (returns HTTP 404 if not found)
+- Updates both playerName and lastOnline fields in database using MongoDB updateOne with combine and set
+- Broadcasts player status update via WebSocket using PlayerWebSocket.broadcast() with playerId, playerName, and lastOnline
+- Returns "Player Status: Online" text response with HTTP 200 on success
+- Returns HTTP 400 when required fields (playerId, playerName, lastOnline) are missing
+- Returns HTTP 404 when player not found
+- Returns HTTP 500 on database errors or update failures
+- Added Swagger/OpenAPI annotations for API documentation
+- Made PlayerWebSocket.reset() public for test cleanup
+- Added unit tests: PlayerResourceTest (9 new tests) covering success, lowercase formatting, not found, null/missing fields, database error, and update failure scenarios
+- All 40 tests passing (2 health + 4 health resource + 24 player resource + 10 websocket)
+- PRD "Restful API - Set individual players online status" feature marked as passes: true
+- ALL PRD FEATURES NOW COMPLETE!

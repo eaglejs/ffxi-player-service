@@ -58,6 +58,7 @@
       "Return a string response 'Player Status: Online' indicating the success of the operation.",
       "Handle error cases where the playerId does not exist or the database update fails, returning appropriate HTTP status codes and error messages.",
       "Write unit tests for the endpoint to ensure it correctly updates the player's online status and broadcasts the update through the WebSocket."
-    ]
+    ],
+    "passes": true
   }
 ]
