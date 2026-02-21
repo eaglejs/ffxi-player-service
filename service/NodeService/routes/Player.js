@@ -206,7 +206,7 @@ router.post('/player/set_status', async (req, res) => {
 
     res.send(`Status: OK`);
   } catch (error) {
-    console.error('set_player_status', error);
+    console.error('set_status', error);
     res.status(500).send('An error occurred while updating the status.');
   }
 });
