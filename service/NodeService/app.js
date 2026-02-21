@@ -6,7 +6,7 @@ const ipfilter = require('express-ipfilter').IpFilter;
 const ips = ['192.168.0.0/16', '::ffff:192.168.0.0/112'];
 const protectedRoutes = require('./routes/protected-routes');
 
-const port = process.env.PORT || 8080;
+const port = process.env.EXPRESS_PORT || 8080;
 
 app.use(cors());
 
