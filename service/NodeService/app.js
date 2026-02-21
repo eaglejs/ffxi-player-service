@@ -25,9 +25,15 @@ const { wss } = require('./routes/Player');
 
 // Handle WebSocket upgrade requests
 server.on('upgrade', (request, socket, head) => {
-  wss.handleUpgrade(request, socket, head, (ws) => {
-    wss.emit('connection', ws, request);
-  });
+  const pathname = new URL(request.url, `http://${request.headers.host}`).pathname;
+  
+  if (pathname === '/ws/players') {
+    wss.handleUpgrade(request, socket, head, (ws) => {
+      wss.emit('connection', ws, request);
+    });
+  } else {
+    socket.destroy();
+  }
 });
 
 server.listen(port, () => {
