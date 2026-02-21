@@ -49,7 +49,7 @@ public class Player {
     private Long lastOnline;
 
     @JsonProperty("gil")
-    private Long gil;
+    private Integer gil;
 
     @JsonProperty("hpp")
     private Integer hpp;
@@ -197,11 +197,11 @@ public class Player {
         this.lastOnline = lastOnline;
     }
 
-    public Long getGil() {
+    public Integer getGil() {
         return gil;
     }
 
-    public void setGil(Long gil) {
+    public void setGil(Integer gil) {
         this.gil = gil;
     }
 
