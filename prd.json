@@ -39,9 +39,10 @@
   },
   {
     "category": "Restful API",
-    "description": "Fetch invidiual player stats from the database by playerId.",
+    "description": "Fetch individual player stats from the database by playerId.",
     "steps": [
-      "Create a GET endpoint /players/get_player that accepts a playerId as a query parameter.",
+      "Move the /players/get_player endpoint to /player/get_player to be more RESTful.",
+      "Create a GET endpoint /player/get_player that accepts a playerId as a query parameter.",
       "Implement a method to fetch player stats from the database using the provided playerId.",
       "Return the player stats in a JSON response with appropriate HTTP status codes (200 for success, 404 for not found).",
       "Write unit tests for the endpoint to ensure it correctly retrieves player stats and handles cases where the playerId does not exist."
@@ -52,7 +53,8 @@
     "category": "Restful API",
     "description": "Set individual players online status in the database, and pipe the status through the websocket to the frontend.",
     "steps": [
-      "Create a POST endpoint /players/set_online that accepts a playerId, playerName(formatted lowercase) and lastOnline timestamp in the request body.",
+      "/Move the /players/set_online endpoint to /player/set_online to be more RESTful.",
+      "Create a POST endpoint /player/set_online that accepts a playerId, playerName(formatted lowercase) and lastOnline timestamp in the request body.",
       "Implement a method to update the player's online status in the database using the provided playerId, playerName, and lastOnline timestamp.",
       "After updating the database, broadcast the player's online status by sending playerId, playerName, and lastOnline as JSON through the WebSocket connection.",
       "Return a string response 'Player Status: Online' indicating the success of the operation.",
@@ -60,5 +62,17 @@
       "Write unit tests for the endpoint to ensure it correctly updates the player's online status and broadcasts the update through the WebSocket."
     ],
     "passes": true
+  },
+  {
+    "category": "Restful API",
+    "description": "Set current jobs for an individual player.",
+    "steps": [
+      "Create a POST endpoint /player/set_jobs that accepts a playerId, playerName, mainJob, subJob in the request body.",
+      "Implement a method to update the player's current jobs in the database using the provided playerId and list of current jobs.",
+      "Return a string response 'Jobs: OK' indicating the success of the operation.",
+      "Handle error cases where the playerId does not exist or the database update fails, returning appropriate HTTP status codes and error messages.",
+      "Write unit tests for the endpoint to ensure it correctly updates the player's current jobs."
+    ],
+    "passes": false
   }
 ]

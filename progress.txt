@@ -68,3 +68,15 @@
 - All 40 tests passing (2 health + 4 health resource + 24 player resource + 10 websocket)
 - PRD "Restful API - Set individual players online status" feature marked as passes: true
 - ALL PRD FEATURES NOW COMPLETE!
+
+2026-02-21: Refactored endpoints to be more RESTful - moved to /player path (Restful API)
+- Created new SinglePlayerResource class with @Path("/player") for individual player operations
+- Moved GET /players/get_player to GET /player/get_player for RESTful singular resource naming
+- Moved POST /players/set_online to POST /player/set_online for RESTful singular resource naming
+- Kept /players path for list/collection operations (get_players, initialize_player)
+- Registered SinglePlayerResource in Main.java alongside existing PlayerResource
+- Both endpoints maintain identical functionality and error handling as before
+- Created comprehensive test suite: SinglePlayerResourceTest (13 tests) covering all scenarios
+- All 53 tests passing (40 previous + 13 new for SinglePlayerResource)
+- PRD "Fetch individual player stats" feature marked as passes: true
+- PRD "Set individual players online status" feature marked as passes: true
