@@ -3,6 +3,10 @@ plugins {
     id 'application'
 }
 
+// Set the project version and JAR base name
+version = '1.0.0'
+base.archivesName = 'ffxi-player-service'
+
 repositories {
     mavenCentral()
     maven {
@@ -255,5 +259,135 @@ task runDev(type: JavaExec) {
         logger.lifecycle("Files being watched: src/main/java, src/main/resources")
         logger.lifecycle("Run with: ./gradlew runDev --continuous")
         logger.lifecycle("Debug port: 5005")
+    }
+}
+
+// Auto-reload task that watches for changes and restarts the server
+task runDevWatch {
+    description = 'Run application with automatic reload on file changes (use -Pconfig="server config.yml")'
+    group = 'application'
+    
+    doLast {
+        def configArg = project.hasProperty('config') ? project.property('config') : 'server config.yml'
+        def configParts = configArg.split(/\s+/)
+        
+        logger.lifecycle("")
+        logger.lifecycle("=" * 80)
+        logger.lifecycle("FFXI Player Service - Development Watch Mode")
+        logger.lifecycle("=" * 80)
+        logger.lifecycle("Watching: src/main/java, src/main/resources")
+        logger.lifecycle("Config: ${configParts.join(' ')}")
+        logger.lifecycle("Debug port: 5005")
+        logger.lifecycle("")
+        logger.lifecycle("Press Ctrl+C to stop")
+        logger.lifecycle("=" * 80)
+        logger.lifecycle("")
+        
+        def serverProcess = null
+        def lastModified = [:]
+        def isShuttingDown = false
+        
+        // Register shutdown hook
+        Runtime.runtime.addShutdownHook(new Thread({
+            isShuttingDown = true
+            if (serverProcess?.alive) {
+                logger.lifecycle("\nShutting down server...")
+                serverProcess.destroy()
+                serverProcess.waitForOrKill(5000)
+            }
+        }))
+        
+        def startServer = {
+            if (serverProcess?.alive) {
+                logger.lifecycle("Stopping server...")
+                serverProcess.destroy()
+                serverProcess.waitForOrKill(5000)
+                Thread.sleep(1000) // Give ports time to release
+            }
+            
+            logger.lifecycle("Building project...")
+            def buildResult = project.exec {
+                commandLine './gradlew', 'classes', '--quiet'
+                ignoreExitValue = true
+            }
+            
+            if (buildResult.exitValue != 0) {
+                logger.error("Build failed! Server not started.")
+                return
+            }
+            
+            logger.lifecycle("Starting server...")
+            def classpath = sourceSets.main.runtimeClasspath.asPath
+            def javaCmd = [
+                'java',
+                '-Xdebug',
+                '-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005',
+                '-Ddw.server.applicationConnectors[0].port=8080',
+                '-Ddw.logging.level=INFO',
+                '-cp', classpath,
+                'io.eaglejs.ffxi.Main',
+                *configParts
+            ]
+            
+            def processBuilder = new ProcessBuilder(javaCmd as List<String>)
+            processBuilder.inheritIO()
+            processBuilder.directory(project.projectDir)
+            serverProcess = processBuilder.start()
+            
+            logger.lifecycle("Server started (PID: ${serverProcess.pid()})")
+            logger.lifecycle("Watching for changes...\n")
+        }
+        
+        def collectFiles = {
+            def files = [:]
+            ['src/main/java', 'src/main/resources'].each { dir ->
+                fileTree(dir).each { file ->
+                    files[file.absolutePath] = file.lastModified()
+                }
+            }
+            return files
+        }
+        
+        def checkForChanges = {
+            def currentFiles = collectFiles()
+            def changed = false
+            
+            // Check for modified files
+            currentFiles.each { path, modified ->
+                if (!lastModified.containsKey(path) || lastModified[path] != modified) {
+                    if (lastModified.containsKey(path)) {
+                        logger.lifecycle("Changed: ${file(path).name}")
+                        changed = true
+                    }
+                }
+            }
+            
+            // Check for deleted files
+            lastModified.keySet().each { path ->
+                if (!currentFiles.containsKey(path)) {
+                    logger.lifecycle("Deleted: ${file(path).name}")
+                    changed = true
+                }
+            }
+            
+            lastModified = currentFiles
+            return changed
+        }
+        
+        // Initial build and start
+        lastModified = collectFiles()
+        startServer()
+        
+        // Watch loop
+        while (!isShuttingDown && !Thread.currentThread().interrupted) {
+            Thread.sleep(1000) // Check every second
+            
+            if (checkForChanges()) {
+                logger.lifecycle("\n" + "=" * 80)
+                logger.lifecycle("Changes detected - Restarting server...")
+                logger.lifecycle("=" * 80 + "\n")
+                startServer()
+            }
+        }
     }
 }
