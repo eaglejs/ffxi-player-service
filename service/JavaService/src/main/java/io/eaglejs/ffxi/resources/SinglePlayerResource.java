@@ -11,6 +11,7 @@ import io.eaglejs.ffxi.models.SetBuffsRequest;
 import io.eaglejs.ffxi.models.SetCapacityPointsRequest;
 import io.eaglejs.ffxi.models.SetCurrency1Request;
 import io.eaglejs.ffxi.models.SetCurrency2Request;
+import io.eaglejs.ffxi.models.SetExpHistoryRequest;
 import io.eaglejs.ffxi.models.SetGilRequest;
 import io.eaglejs.ffxi.models.SetHppRequest;
 import io.eaglejs.ffxi.models.SetJobsRequest;
@@ -1485,6 +1486,110 @@ public class SinglePlayerResource {
             LOG.error("Error setting player stats for playerId: " + request.getPlayerId(), e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity("An error occurred while updating player stats.")
+                    .build();
+        }
+    }
+
+    @POST
+    @Path("/set_exp_history")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.TEXT_PLAIN)
+    @Operation(
+        summary = "Set Player Experience History",
+        description = "Updates a player's experience history in the database and broadcasts the update via WebSocket. Maintains a maximum of 50 entries per exp type.",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Experience history updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request data"),
+            @ApiResponse(responseCode = "404", description = "Player not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+        }
+    )
+    public Response setExpHistory(SetExpHistoryRequest request) {
+        try {
+            if (request == null || request.getPlayerId() == null || 
+                request.getPlayerName() == null || request.getExpType() == null ||
+                request.getPoints() == null || request.getChain() == null ||
+                request.getTimestamp() == null) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity("playerId, playerName, expType, points, chain, and timestamp are required")
+                        .build();
+            }
+
+            String playerName = request.getPlayerName().toLowerCase();
+            
+            // Map expType to database field name
+            String expTypeName;
+            int expType = request.getExpType();
+            if (expType == 8 || expType == 253 || expType == 371 || expType == 372) {
+                expTypeName = "experience";
+            } else if (expType == 718 || expType == 735) {
+                expTypeName = "capacity";
+            } else if (expType == 809 || expType == 810) {
+                expTypeName = "exemplar";
+            } else {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity("Invalid expType: " + expType)
+                        .build();
+            }
+            
+            MongoCollection<Document> playersCollection = mongoDBService.getPlayersCollection();
+            
+            Document existingPlayer = playersCollection.find(eq("playerId", request.getPlayerId())).first();
+            if (existingPlayer == null) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity("Player not found with playerId: " + request.getPlayerId())
+                        .build();
+            }
+
+            // Get current expHistory
+            Document expHistory = existingPlayer.get("expHistory", new Document());
+            List<Document> typeHistory = expHistory.get(expTypeName, new ArrayList<>());
+            
+            // Create new entry
+            Document newEntry = new Document();
+            newEntry.put("points", request.getPoints());
+            newEntry.put("chain", request.getChain());
+            newEntry.put("timestamp", request.getTimestamp());
+            
+            // Add new entry and maintain max 50
+            typeHistory.add(newEntry);
+            if (typeHistory.size() > 50) {
+                typeHistory.remove(0); // Remove oldest
+            }
+            
+            // Update expHistory
+            expHistory.put(expTypeName, typeHistory);
+            
+            // Update database
+            com.mongodb.client.result.UpdateResult result = playersCollection.updateOne(
+                eq("playerId", request.getPlayerId()),
+                combine(
+                    set("playerName", playerName),
+                    set("expHistory", expHistory)
+                )
+            );
+
+            if (result.getModifiedCount() == 0 && result.getMatchedCount() == 0) {
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                        .entity("Failed to update player experience history")
+                        .build();
+            }
+
+            Map<String, Object> broadcastData = new HashMap<>();
+            broadcastData.put("playerId", request.getPlayerId());
+            broadcastData.put("playerName", playerName);
+            broadcastData.put("expHistory", expHistory);
+            
+            PlayerWebSocket.broadcast(broadcastData);
+            
+            LOG.info("Updated exp history for player {} ({}): {} - {} points", 
+                request.getPlayerId(), playerName, expTypeName, request.getPoints());
+            
+            return Response.ok("Experience history: OK").build();
+        } catch (Exception e) {
+            LOG.error("Error setting player exp history for playerId: " + request.getPlayerId(), e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("An error occurred while updating player experience history.")
                     .build();
         }
     }

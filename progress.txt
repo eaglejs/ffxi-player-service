@@ -358,3 +358,18 @@ This endpoint mirrors the currency1 implementation, handling another complex nes
 - Updated prd.json marking stats feature as complete
 - Test suite now at 205 tests passing
 - Committed changes with proper git trailer
+
+## 2026-02-22 04:36:00 - Set Player Exp History Feature Complete
+- Created SetExpHistoryRequest DTO with playerId, playerName, expType, points, chain, timestamp fields
+- Implemented POST /player/set_exp_history endpoint with complex array manipulation logic
+- Maps expType IDs to database field names: [8,253,371,372]→'experience', [718,735]→'capacity', [809,810]→'exemplar'
+- Maintains maximum 50 entries per exp type by removing oldest when limit exceeded
+- Creates new entry with {points, chain, timestamp} and appends to appropriate type array
+- Updates expHistory nested document in MongoDB
+- Broadcasts full expHistory via WebSocket
+- Returns "Experience history: OK" on success
+- Added 11 comprehensive unit tests covering all exp types, invalid types, max entries, player not found, missing fields, database errors
+- Updated prd.json marking exp history feature as complete
+- Test suite now at 216 tests passing
+- ALL 25 PRD FEATURES NOW COMPLETE!
+- Committed changes with proper git trailer

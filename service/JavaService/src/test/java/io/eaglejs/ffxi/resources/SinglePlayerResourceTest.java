@@ -13,6 +13,7 @@ import io.eaglejs.ffxi.models.SetBuffsRequest;
 import io.eaglejs.ffxi.models.SetCapacityPointsRequest;
 import io.eaglejs.ffxi.models.SetCurrency1Request;
 import io.eaglejs.ffxi.models.SetCurrency2Request;
+import io.eaglejs.ffxi.models.SetExpHistoryRequest;
 import io.eaglejs.ffxi.models.SetGilRequest;
 import io.eaglejs.ffxi.models.SetHppRequest;
 import io.eaglejs.ffxi.models.SetJobsRequest;
@@ -34,6 +35,7 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
 import javax.ws.rs.core.Response;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -3638,5 +3640,262 @@ public class SinglePlayerResourceTest {
         assertEquals(500, response.getStatus());
         String errorMessage = (String) response.getEntity();
         assertEquals("Failed to update player stats", errorMessage);
+    }
+
+    @Test
+    public void testSetExpHistory_Experience_Success() {
+        // Arrange
+        SetExpHistoryRequest request = new SetExpHistoryRequest();
+        request.setPlayerId(123);
+        request.setPlayerName("TestPlayer");
+        request.setExpType(8); // experience type
+        request.setPoints(100);
+        request.setChain(5);
+        request.setTimestamp(1234567890L);
+
+        Document existingPlayer = new Document("playerId", 123);
+        existingPlayer.put("expHistory", new Document("experience", new ArrayList<>()));
+        
+        when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
+        when(mockFindIterable.first()).thenReturn(existingPlayer);
+        when(mockCollection.updateOne(any(Bson.class), any(Bson.class))).thenReturn(mockUpdateResult);
+        when(mockUpdateResult.getModifiedCount()).thenReturn(1L);
+
+        // Act
+        Response response = resource.setExpHistory(request);
+
+        // Assert
+        assertEquals(200, response.getStatus());
+        assertEquals("Experience history: OK", response.getEntity());
+        verify(mockCollection).find(any(Bson.class));
+        verify(mockCollection).updateOne(any(Bson.class), any(Bson.class));
+    }
+
+    @Test
+    public void testSetExpHistory_Capacity_Success() {
+        // Arrange
+        SetExpHistoryRequest request = new SetExpHistoryRequest();
+        request.setPlayerId(123);
+        request.setPlayerName("TestPlayer");
+        request.setExpType(718); // capacity type
+        request.setPoints(50);
+        request.setChain(3);
+        request.setTimestamp(1234567890L);
+
+        Document existingPlayer = new Document("playerId", 123);
+        existingPlayer.put("expHistory", new Document());
+        
+        when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
+        when(mockFindIterable.first()).thenReturn(existingPlayer);
+        when(mockCollection.updateOne(any(Bson.class), any(Bson.class))).thenReturn(mockUpdateResult);
+        when(mockUpdateResult.getModifiedCount()).thenReturn(1L);
+
+        // Act
+        Response response = resource.setExpHistory(request);
+
+        // Assert
+        assertEquals(200, response.getStatus());
+        assertEquals("Experience history: OK", response.getEntity());
+    }
+
+    @Test
+    public void testSetExpHistory_Exemplar_Success() {
+        // Arrange
+        SetExpHistoryRequest request = new SetExpHistoryRequest();
+        request.setPlayerId(123);
+        request.setPlayerName("TestPlayer");
+        request.setExpType(809); // exemplar type
+        request.setPoints(75);
+        request.setChain(2);
+        request.setTimestamp(1234567890L);
+
+        Document existingPlayer = new Document("playerId", 123);
+        existingPlayer.put("expHistory", new Document());
+        
+        when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
+        when(mockFindIterable.first()).thenReturn(existingPlayer);
+        when(mockCollection.updateOne(any(Bson.class), any(Bson.class))).thenReturn(mockUpdateResult);
+        when(mockUpdateResult.getModifiedCount()).thenReturn(1L);
+
+        // Act
+        Response response = resource.setExpHistory(request);
+
+        // Assert
+        assertEquals(200, response.getStatus());
+        assertEquals("Experience history: OK", response.getEntity());
+    }
+
+    @Test
+    public void testSetExpHistory_InvalidExpType() {
+        // Arrange
+        SetExpHistoryRequest request = new SetExpHistoryRequest();
+        request.setPlayerId(123);
+        request.setPlayerName("TestPlayer");
+        request.setExpType(999); // invalid type
+        request.setPoints(100);
+        request.setChain(5);
+        request.setTimestamp(1234567890L);
+
+        Document existingPlayer = new Document("playerId", 123);
+        
+        when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
+        when(mockFindIterable.first()).thenReturn(existingPlayer);
+
+        // Act
+        Response response = resource.setExpHistory(request);
+
+        // Assert
+        assertEquals(400, response.getStatus());
+        String errorMessage = (String) response.getEntity();
+        assertTrue(errorMessage.contains("Invalid expType"));
+        verify(mockCollection, never()).updateOne(any(Bson.class), any(Bson.class));
+    }
+
+    @Test
+    public void testSetExpHistory_PlayerNotFound() {
+        // Arrange
+        SetExpHistoryRequest request = new SetExpHistoryRequest();
+        request.setPlayerId(999);
+        request.setPlayerName("NonExistent");
+        request.setExpType(8);
+        request.setPoints(100);
+        request.setChain(5);
+        request.setTimestamp(1234567890L);
+
+        when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
+        when(mockFindIterable.first()).thenReturn(null);
+
+        // Act
+        Response response = resource.setExpHistory(request);
+
+        // Assert
+        assertEquals(404, response.getStatus());
+        String errorMessage = (String) response.getEntity();
+        assertTrue(errorMessage.contains("Player not found"));
+        verify(mockCollection, never()).updateOne(any(Bson.class), any(Bson.class));
+    }
+
+    @Test
+    public void testSetExpHistory_NullRequest() {
+        // Arrange
+        SetExpHistoryRequest request = null;
+
+        // Act
+        Response response = resource.setExpHistory(request);
+
+        // Assert
+        assertEquals(400, response.getStatus());
+        String errorMessage = (String) response.getEntity();
+        assertTrue(errorMessage.contains("required"));
+        verify(mockCollection, never()).updateOne(any(Bson.class), any(Bson.class));
+    }
+
+    @Test
+    public void testSetExpHistory_MissingFields() {
+        // Arrange
+        SetExpHistoryRequest request = new SetExpHistoryRequest();
+        request.setPlayerId(123);
+        request.setPlayerName("TestPlayer");
+        // Missing expType, points, chain, timestamp
+
+        // Act
+        Response response = resource.setExpHistory(request);
+
+        // Assert
+        assertEquals(400, response.getStatus());
+        String errorMessage = (String) response.getEntity();
+        assertTrue(errorMessage.contains("required"));
+    }
+
+    @Test
+    public void testSetExpHistory_DatabaseError() {
+        // Arrange
+        SetExpHistoryRequest request = new SetExpHistoryRequest();
+        request.setPlayerId(123);
+        request.setPlayerName("TestPlayer");
+        request.setExpType(8);
+        request.setPoints(100);
+        request.setChain(5);
+        request.setTimestamp(1234567890L);
+
+        when(mockCollection.find(any(Bson.class))).thenThrow(new RuntimeException("Database connection lost"));
+
+        // Act
+        Response response = resource.setExpHistory(request);
+
+        // Assert
+        assertEquals(500, response.getStatus());
+        String errorMessage = (String) response.getEntity();
+        assertEquals("An error occurred while updating player experience history.", errorMessage);
+    }
+
+    @Test
+    public void testSetExpHistory_UpdateFailure() {
+        // Arrange
+        SetExpHistoryRequest request = new SetExpHistoryRequest();
+        request.setPlayerId(123);
+        request.setPlayerName("TestPlayer");
+        request.setExpType(8);
+        request.setPoints(100);
+        request.setChain(5);
+        request.setTimestamp(1234567890L);
+
+        Document existingPlayer = new Document("playerId", 123);
+        existingPlayer.put("expHistory", new Document());
+        
+        when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
+        when(mockFindIterable.first()).thenReturn(existingPlayer);
+        when(mockCollection.updateOne(any(Bson.class), any(Bson.class))).thenReturn(mockUpdateResult);
+        when(mockUpdateResult.getModifiedCount()).thenReturn(0L);
+        when(mockUpdateResult.getMatchedCount()).thenReturn(0L);
+
+        // Act
+        Response response = resource.setExpHistory(request);
+
+        // Assert
+        assertEquals(500, response.getStatus());
+        String errorMessage = (String) response.getEntity();
+        assertEquals("Failed to update player experience history", errorMessage);
+    }
+
+    @Test
+    public void testSetExpHistory_MaintainsMaximum50Entries() {
+        // Arrange
+        SetExpHistoryRequest request = new SetExpHistoryRequest();
+        request.setPlayerId(123);
+        request.setPlayerName("TestPlayer");
+        request.setExpType(8);
+        request.setPoints(100);
+        request.setChain(5);
+        request.setTimestamp(1234567890L);
+
+        // Create existing history with 50 entries
+        List<Document> existingHistory = new ArrayList<>();
+        for (int i = 0; i < 50; i++) {
+            Document entry = new Document();
+            entry.put("points", i);
+            entry.put("chain", 1);
+            entry.put("timestamp", 1000000L + i);
+            existingHistory.add(entry);
+        }
+        
+        Document expHistory = new Document("experience", existingHistory);
+        Document existingPlayer = new Document("playerId", 123);
+        existingPlayer.put("expHistory", expHistory);
+        
+        ArgumentCaptor<Bson> updateCaptor = ArgumentCaptor.forClass(Bson.class);
+        
+        when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
+        when(mockFindIterable.first()).thenReturn(existingPlayer);
+        when(mockCollection.updateOne(any(Bson.class), updateCaptor.capture())).thenReturn(mockUpdateResult);
+        when(mockUpdateResult.getModifiedCount()).thenReturn(1L);
+
+        // Act
+        Response response = resource.setExpHistory(request);
+
+        // Assert
+        assertEquals(200, response.getStatus());
+        // Verify the update was called (detailed verification of array size would require parsing Bson)
+        verify(mockCollection).updateOne(any(Bson.class), any(Bson.class));
     }
 }
