@@ -181,3 +181,16 @@
 - Added unit tests: SinglePlayerResourceTest (9 new tests) covering success, lowercase formatting, not found, null/missing fields, database error, and update failure scenarios
 - All 95 tests passing (86 + 9 new)
 - PRD "Set individual players tp" feature marked as passes: true
+
+--- 2026-02-22 Implementation Update ---
+Feature: Set individual player zone
+- Created SetZoneRequest DTO with playerId, playerName, and zone fields
+- Implemented POST /player/set_zone endpoint in SinglePlayerResource
+- Endpoint updates player's current zone in MongoDB
+- Broadcasts zone update via WebSocket to all connected clients
+- Returns "Zone: OK" on success
+- Added 9 comprehensive unit tests covering success, lowercase formatting, player not found, null request, missing fields, database error, and update failure scenarios
+- All 104 tests passing
+- Updated prd.json to mark feature as passes: true
+
+This follows the same pattern as previous field update endpoints (set_gil, set_status, set_hpp, set_mpp, set_tp) with consistent error handling and WebSocket broadcasting.
