@@ -2279,4 +2279,118 @@ public class SinglePlayerResourceTest {
         String errorMessage = (String) response.getEntity();
         assertEquals("Failed to update player buffs", errorMessage);
     }
+
+    @Test
+    public void testGetChatLog_Success() {
+        // Arrange
+        Integer playerId = 123;
+        List<Document> chatLog = new java.util.ArrayList<>();
+        chatLog.add(new Document("messageType", 1).append("message", "Hello world"));
+        chatLog.add(new Document("messageType", 2).append("message", "Test message"));
+        Document existingPlayer = new Document("playerId", playerId).append("chatLog", chatLog);
+        
+        when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
+        when(mockFindIterable.first()).thenReturn(existingPlayer);
+
+        // Act
+        Response response = resource.getChatLog(playerId);
+
+        // Assert
+        assertEquals(200, response.getStatus());
+        @SuppressWarnings("unchecked")
+        List<Document> returnedChatLog = (List<Document>) response.getEntity();
+        assertNotNull(returnedChatLog);
+        assertEquals(2, returnedChatLog.size());
+        verify(mockCollection).find(any(Bson.class));
+    }
+
+    @Test
+    public void testGetChatLog_EmptyChatLog() {
+        // Arrange
+        Integer playerId = 456;
+        List<Document> chatLog = new java.util.ArrayList<>();
+        Document existingPlayer = new Document("playerId", playerId).append("chatLog", chatLog);
+        
+        when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
+        when(mockFindIterable.first()).thenReturn(existingPlayer);
+
+        // Act
+        Response response = resource.getChatLog(playerId);
+
+        // Assert
+        assertEquals(200, response.getStatus());
+        @SuppressWarnings("unchecked")
+        List<Document> returnedChatLog = (List<Document>) response.getEntity();
+        assertNotNull(returnedChatLog);
+        assertEquals(0, returnedChatLog.size());
+    }
+
+    @Test
+    public void testGetChatLog_NoChatLogField() {
+        // Arrange
+        Integer playerId = 789;
+        Document existingPlayer = new Document("playerId", playerId);
+        
+        when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
+        when(mockFindIterable.first()).thenReturn(existingPlayer);
+
+        // Act
+        Response response = resource.getChatLog(playerId);
+
+        // Assert
+        assertEquals(200, response.getStatus());
+        @SuppressWarnings("unchecked")
+        List<Document> returnedChatLog = (List<Document>) response.getEntity();
+        assertNotNull(returnedChatLog);
+        assertEquals(0, returnedChatLog.size());
+    }
+
+    @Test
+    public void testGetChatLog_PlayerNotFound() {
+        // Arrange
+        Integer playerId = 999;
+        
+        when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
+        when(mockFindIterable.first()).thenReturn(null);
+
+        // Act
+        Response response = resource.getChatLog(playerId);
+
+        // Assert
+        assertEquals(404, response.getStatus());
+        String errorMessage = (String) response.getEntity();
+        assertTrue(errorMessage.contains("Player not found"));
+        assertTrue(errorMessage.contains("999"));
+    }
+
+    @Test
+    public void testGetChatLog_NullPlayerId() {
+        // Arrange
+        Integer playerId = null;
+
+        // Act
+        Response response = resource.getChatLog(playerId);
+
+        // Assert
+        assertEquals(400, response.getStatus());
+        String errorMessage = (String) response.getEntity();
+        assertEquals("playerId query parameter is required", errorMessage);
+        verify(mockCollection, never()).find(any(Bson.class));
+    }
+
+    @Test
+    public void testGetChatLog_DatabaseError() {
+        // Arrange
+        Integer playerId = 123;
+        
+        when(mockCollection.find(any(Bson.class))).thenThrow(new RuntimeException("Database connection lost"));
+
+        // Act
+        Response response = resource.getChatLog(playerId);
+
+        // Assert
+        assertEquals(500, response.getStatus());
+        String errorMessage = (String) response.getEntity();
+        assertEquals("An error occurred while retrieving player chat log.", errorMessage);
+    }
 }

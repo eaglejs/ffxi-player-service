@@ -883,4 +883,49 @@ public class SinglePlayerResource {
                     .build();
         }
     }
+
+    @GET
+    @Path("/get_chat_log")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(
+        summary = "Get Player Chat Log",
+        description = "Retrieves a player's chat log from the database by playerId.",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Chat log retrieved successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request data"),
+            @ApiResponse(responseCode = "404", description = "Player not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+        }
+    )
+    public Response getChatLog(@QueryParam("playerId") Integer playerId) {
+        try {
+            if (playerId == null) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity("playerId query parameter is required")
+                        .build();
+            }
+
+            MongoCollection<Document> playersCollection = mongoDBService.getPlayersCollection();
+            Document document = playersCollection.find(eq("playerId", playerId)).first();
+
+            if (document == null) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity("Player not found with playerId: " + playerId)
+                        .build();
+            }
+
+            // Extract chatLog array from the document, return empty array if not present
+            List<Document> chatLog = document.get("chatLog", List.class);
+            if (chatLog == null) {
+                chatLog = new ArrayList<>();
+            }
+
+            return Response.ok(chatLog).build();
+        } catch (Exception e) {
+            LOG.error("Error retrieving chat log for playerId: " + playerId, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("An error occurred while retrieving player chat log.")
+                    .build();
+        }
+    }
 }
