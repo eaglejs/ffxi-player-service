@@ -813,10 +813,7 @@ public class SinglePlayerResource {
             }
 
             // Extract buffs array from the document, return empty array if not present
-            List<Integer> buffs = document.get("buffs", List.class);
-            if (buffs == null) {
-                buffs = new ArrayList<>();
-            }
+            List<Integer> buffs = getIntegerList(document, "buffs");
 
             return Response.ok(buffs).build();
         } catch (Exception e) {
@@ -925,10 +922,7 @@ public class SinglePlayerResource {
             }
 
             // Extract chatLog array from the document, return empty array if not present
-            List<Document> chatLog = document.get("chatLog", List.class);
-            if (chatLog == null) {
-                chatLog = new ArrayList<>();
-            }
+            List<Document> chatLog = getDocumentList(document, "chatLog");
 
             return Response.ok(chatLog).build();
         } catch (Exception e) {
@@ -978,10 +972,7 @@ public class SinglePlayerResource {
             }
 
             // Extract chatLog array from the document
-            List<Document> chatLog = document.get("chatLog", List.class);
-            if (chatLog == null) {
-                chatLog = new ArrayList<>();
-            }
+            List<Document> chatLog = getDocumentList(document, "chatLog");
 
             // Filter by messageType
             List<Document> filteredChatLog = new ArrayList<>();
@@ -1542,8 +1533,11 @@ public class SinglePlayerResource {
             }
 
             // Get current expHistory
-            Document expHistory = existingPlayer.get("expHistory", new Document());
-            List<Document> typeHistory = expHistory.get(expTypeName, new ArrayList<>());
+            Document expHistory = existingPlayer.get("expHistory", Document.class);
+            if (expHistory == null) {
+                expHistory = new Document();
+            }
+            List<Document> typeHistory = getDocumentList(expHistory, expTypeName);
             
             // Create new entry
             Document newEntry = new Document();
@@ -1592,5 +1586,35 @@ public class SinglePlayerResource {
                     .entity("An error occurred while updating player experience history.")
                     .build();
         }
+    }
+
+    private List<Integer> getIntegerList(Document source, String key) {
+        Object value = source.get(key);
+        if (!(value instanceof List<?>)) {
+            return new ArrayList<>();
+        }
+
+        List<Integer> result = new ArrayList<>();
+        for (Object item : (List<?>) value) {
+            if (item instanceof Number) {
+                result.add(((Number) item).intValue());
+            }
+        }
+        return result;
+    }
+
+    private List<Document> getDocumentList(Document source, String key) {
+        Object value = source.get(key);
+        if (!(value instanceof List<?>)) {
+            return new ArrayList<>();
+        }
+
+        List<Document> result = new ArrayList<>();
+        for (Object item : (List<?>) value) {
+            if (item instanceof Document) {
+                result.add((Document) item);
+            }
+        }
+        return result;
     }
 }
