@@ -1811,7 +1811,7 @@ public class SinglePlayerResourceTest {
         SetCapacityPointsRequest request = new SetCapacityPointsRequest();
         request.setPlayerId(123);
         request.setPlayerName("TestPlayer");
-        request.setTotal(5000);
+        request.setNumberOfJobPoints(5000);
 
         Document existingPlayer = new Document("playerId", 123);
         
@@ -1836,7 +1836,7 @@ public class SinglePlayerResourceTest {
         SetCapacityPointsRequest request = new SetCapacityPointsRequest();
         request.setPlayerId(456);
         request.setPlayerName("TestPlayer");
-        request.setTotal(3000);
+        request.setNumberOfJobPoints(3000);
 
         Document existingPlayer = new Document("playerId", 456);
         ArgumentCaptor<Bson> updateCaptor = ArgumentCaptor.forClass(Bson.class);
@@ -1861,7 +1861,7 @@ public class SinglePlayerResourceTest {
         SetCapacityPointsRequest request = new SetCapacityPointsRequest();
         request.setPlayerId(999);
         request.setPlayerName("NonExistent");
-        request.setTotal(1000);
+        request.setNumberOfJobPoints(1000);
 
         when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
         when(mockFindIterable.first()).thenReturn(null);
@@ -1888,7 +1888,7 @@ public class SinglePlayerResourceTest {
         // Assert
         assertEquals(400, response.getStatus());
         String errorMessage = (String) response.getEntity();
-        assertEquals("playerId, playerName, and total are required", errorMessage);
+        assertEquals("playerId, playerName, and numberOfJobPoints are required", errorMessage);
         verify(mockCollection, never()).updateOne(any(Bson.class), any(Bson.class));
     }
 
@@ -1897,14 +1897,14 @@ public class SinglePlayerResourceTest {
         // Arrange
         SetCapacityPointsRequest request = new SetCapacityPointsRequest();
         request.setPlayerName("TestPlayer");
-        request.setTotal(2500);
+        request.setNumberOfJobPoints(2500);
 
         // Act
         Response response = resource.setCapacityPoints(request);
 
         // Assert
         assertEquals(400, response.getStatus());
-        assertEquals("playerId, playerName, and total are required", response.getEntity());
+        assertEquals("playerId, playerName, and numberOfJobPoints are required", response.getEntity());
     }
 
     @Test
@@ -1912,18 +1912,18 @@ public class SinglePlayerResourceTest {
         // Arrange
         SetCapacityPointsRequest request = new SetCapacityPointsRequest();
         request.setPlayerId(123);
-        request.setTotal(2500);
+        request.setNumberOfJobPoints(2500);
 
         // Act
         Response response = resource.setCapacityPoints(request);
 
         // Assert
         assertEquals(400, response.getStatus());
-        assertEquals("playerId, playerName, and total are required", response.getEntity());
+        assertEquals("playerId, playerName, and numberOfJobPoints are required", response.getEntity());
     }
 
     @Test
-    public void testSetCapacityPoints_MissingTotal() {
+    public void testSetCapacityPoints_MissingNumberOfJobPoints() {
         // Arrange
         SetCapacityPointsRequest request = new SetCapacityPointsRequest();
         request.setPlayerId(123);
@@ -1934,7 +1934,7 @@ public class SinglePlayerResourceTest {
 
         // Assert
         assertEquals(400, response.getStatus());
-        assertEquals("playerId, playerName, and total are required", response.getEntity());
+        assertEquals("playerId, playerName, and numberOfJobPoints are required", response.getEntity());
     }
 
     @Test
@@ -1943,7 +1943,7 @@ public class SinglePlayerResourceTest {
         SetCapacityPointsRequest request = new SetCapacityPointsRequest();
         request.setPlayerId(123);
         request.setPlayerName("TestPlayer");
-        request.setTotal(4000);
+        request.setNumberOfJobPoints(4000);
 
         when(mockCollection.find(any(Bson.class))).thenThrow(new RuntimeException("Database connection lost"));
 
@@ -1962,7 +1962,7 @@ public class SinglePlayerResourceTest {
         SetCapacityPointsRequest request = new SetCapacityPointsRequest();
         request.setPlayerId(123);
         request.setPlayerName("TestPlayer");
-        request.setTotal(3500);
+        request.setNumberOfJobPoints(3500);
 
         Document existingPlayer = new Document("playerId", 123);
         

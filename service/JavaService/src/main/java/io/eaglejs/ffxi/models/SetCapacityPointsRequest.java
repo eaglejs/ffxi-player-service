@@ -9,7 +9,7 @@ public class SetCapacityPointsRequest {
     @JsonProperty("playerName")
     private String playerName;
 
-    @JsonProperty("total")
+    @JsonProperty("numberOfJobPoints")
     private Integer total;
 
     public Integer getPlayerId() {
@@ -28,11 +28,11 @@ public class SetCapacityPointsRequest {
         this.playerName = playerName;
     }
 
-    public Integer getTotal() {
+    public Integer getNumberOfJobPoints() {
         return total;
     }
 
-    public void setTotal(Integer total) {
-        this.total = total;
+    public void setNumberOfJobPoints(Integer numberOfJobPoints) {
+        this.total = numberOfJobPoints;
     }
 }
