@@ -2,11 +2,13 @@ package io.eaglejs.ffxi.resources;
 
 import com.mongodb.client.MongoCollection;
 import io.eaglejs.ffxi.mapper.PlayerMapper;
+import io.eaglejs.ffxi.models.Currency1;
 import io.eaglejs.ffxi.models.Player;
 import io.eaglejs.ffxi.models.RefreshBuffsRequest;
 import io.eaglejs.ffxi.models.ResetExpHistoryRequest;
 import io.eaglejs.ffxi.models.SetBuffsRequest;
 import io.eaglejs.ffxi.models.SetCapacityPointsRequest;
+import io.eaglejs.ffxi.models.SetCurrency1Request;
 import io.eaglejs.ffxi.models.SetGilRequest;
 import io.eaglejs.ffxi.models.SetHppRequest;
 import io.eaglejs.ffxi.models.SetJobsRequest;
@@ -1203,6 +1205,88 @@ public class SinglePlayerResource {
             LOG.error("Error resetting player exp history for playerId: " + request.getPlayerId(), e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity("An error occurred while resetting player exp history.")
+                    .build();
+        }
+    }
+
+    @POST
+    @Path("/set_currency1")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.TEXT_PLAIN)
+    @Operation(
+        summary = "Set Player Currency1",
+        description = "Updates a player's currency1 values in the database and broadcasts the update via WebSocket.",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Currency1 updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request data"),
+            @ApiResponse(responseCode = "404", description = "Player not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+        }
+    )
+    public Response setCurrency1(SetCurrency1Request request) {
+        try {
+            if (request == null || request.getPlayerId() == null || 
+                request.getPlayerName() == null || request.getCurrency1() == null) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity("playerId, playerName, and currency1 are required")
+                        .build();
+            }
+
+            String playerName = request.getPlayerName().toLowerCase();
+            Currency1 c1 = request.getCurrency1();
+            
+            MongoCollection<Document> playersCollection = mongoDBService.getPlayersCollection();
+            
+            Document existingPlayer = playersCollection.find(eq("playerId", request.getPlayerId())).first();
+            if (existingPlayer == null) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity("Player not found with playerId: " + request.getPlayerId())
+                        .build();
+            }
+
+            Document currency1Doc = new Document();
+            currency1Doc.put("conquestPointsBastok", c1.getConquestPointsBastok());
+            currency1Doc.put("conquestPointsSandoria", c1.getConquestPointsSandoria());
+            currency1Doc.put("conquestPointsWindurst", c1.getConquestPointsWindurst());
+            currency1Doc.put("deeds", c1.getDeeds());
+            currency1Doc.put("dominionNotes", c1.getDominionNotes());
+            currency1Doc.put("imperialStanding", c1.getImperialStanding());
+            currency1Doc.put("loginPoints", c1.getLoginPoints());
+            currency1Doc.put("nyzulTokens", c1.getNyzulTokens());
+            currency1Doc.put("sparksOfEminence", c1.getSparksOfEminence());
+            currency1Doc.put("therionIchor", c1.getTherionIchor());
+            currency1Doc.put("unityAccolades", c1.getUnityAccolades());
+            currency1Doc.put("voidstones", c1.getVoidstones());
+
+            com.mongodb.client.result.UpdateResult result = playersCollection.updateOne(
+                eq("playerId", request.getPlayerId()),
+                combine(
+                    set("playerName", playerName),
+                    set("currency1", currency1Doc)
+                )
+            );
+
+            if (result.getModifiedCount() == 0 && result.getMatchedCount() == 0) {
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                        .entity("Failed to update player currency1")
+                        .build();
+            }
+
+            Map<String, Object> broadcastData = new HashMap<>();
+            broadcastData.put("playerId", request.getPlayerId());
+            broadcastData.put("playerName", playerName);
+            broadcastData.put("currency1", currency1Doc);
+            
+            PlayerWebSocket.broadcast(broadcastData);
+            
+            LOG.info("Updated currency1 for player {} ({})", 
+                request.getPlayerId(), playerName);
+            
+            return Response.ok("Currency1: OK").build();
+        } catch (Exception e) {
+            LOG.error("Error setting player currency1 for playerId: " + request.getPlayerId(), e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("An error occurred while updating player currency1.")
                     .build();
         }
     }

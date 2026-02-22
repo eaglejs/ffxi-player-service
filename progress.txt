@@ -318,3 +318,17 @@ Feature: Reset individual player exp history
 - Updated prd.json to mark feature as passes: true
 
 This endpoint provides a way to clear all experience history for a player, resetting the three exp types (experience, capacity, exemplar) to empty arrays.
+
+--- 2026-02-22 Implementation Update ---
+Feature: Set individual player currency1
+- Created Currency1 model class with 12 fields (conquestPointsBastok, conquestPointsSandoria, conquestPointsWindurst, deeds, dominionNotes, imperialStanding, loginPoints, nyzulTokens, sparksOfEminence, therionIchor, unityAccolades, voidstones)
+- Created SetCurrency1Request DTO with playerId, playerName, and currency1 fields
+- Implemented POST /player/set_currency1 endpoint in SinglePlayerResource
+- Endpoint updates player's currency1 object in MongoDB database with all 12 currency fields
+- Broadcasts currency1 update via WebSocket to all connected clients
+- Returns "Currency1: OK" on success
+- Added 9 comprehensive unit tests covering success, lowercase formatting, player not found, null request, missing fields (playerId, playerName, currency1), database error, and update failure scenarios
+- All 187 tests passing
+- Updated prd.json to mark feature as passes: true
+
+This endpoint handles a complex nested object with 12 different currency types, following the same pattern as our simpler field updates but with a more complex data structure.
