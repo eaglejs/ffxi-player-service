@@ -1,7 +1,7 @@
 package io.eaglejs.ffxi.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.util.List;
+import java.util.Map;
 
 public class SetBuffsRequest {
     @JsonProperty("playerId")
@@ -11,7 +11,7 @@ public class SetBuffsRequest {
     private String playerName;
 
     @JsonProperty("buffs")
-    private List<Integer> buffs;
+    private Map<String, Integer> buffs;
 
     public Integer getPlayerId() {
         return playerId;
@@ -29,11 +29,11 @@ public class SetBuffsRequest {
         this.playerName = playerName;
     }
 
-    public List<Integer> getBuffs() {
+    public Map<String, Integer> getBuffs() {
         return buffs;
     }
 
-    public void setBuffs(List<Integer> buffs) {
+    public void setBuffs(Map<String, Integer> buffs) {
         this.buffs = buffs;
     }
 }

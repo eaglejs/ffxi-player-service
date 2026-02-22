@@ -849,7 +849,9 @@ public class SinglePlayerResource {
             }
 
             String playerName = request.getPlayerName().toLowerCase();
-            
+
+            List<Integer> buffsList = new ArrayList<>(request.getBuffs().values());
+
             MongoCollection<Document> playersCollection = mongoDBService.getPlayersCollection();
             
             Document existingPlayer = playersCollection.find(eq("playerId", request.getPlayerId())).first();
@@ -863,7 +865,7 @@ public class SinglePlayerResource {
                 eq("playerId", request.getPlayerId()),
                 combine(
                     set("playerName", playerName),
-                    set("buffs", request.getBuffs())
+                    set("buffs", buffsList)
                 )
             );
 
@@ -876,12 +878,12 @@ public class SinglePlayerResource {
             Map<String, Object> broadcastData = new HashMap<>();
             broadcastData.put("playerId", request.getPlayerId());
             broadcastData.put("playerName", playerName);
-            broadcastData.put("buffs", request.getBuffs());
+            broadcastData.put("buffs", buffsList);
             
             PlayerWebSocket.broadcast(broadcastData);
             
             LOG.info("Updated buffs for player {} ({}): {} buffs", 
-                request.getPlayerId(), playerName, request.getBuffs().size());
+                request.getPlayerId(), playerName, buffsList.size());
             
             return Response.ok("Buffs: OK").build();
         } catch (Exception e) {
@@ -1010,16 +1012,37 @@ public class SinglePlayerResource {
     public Response setMessages(SetMessagesRequest request) {
         try {
             if (request == null || request.getPlayerId() == null || 
-                request.getPlayerName() == null || request.getMessagesPackage() == null) {
+                request.getPlayerName() == null || request.getMessages() == null ||
+                request.getMessageType() == null) {
                 return Response.status(Response.Status.BAD_REQUEST)
-                        .entity("playerId, playerName, and messagesPackage are required")
+                        .entity("playerId, playerName, messages, and messageType are required")
                         .build();
             }
 
+            if (request.getMessages().isEmpty()) {
+                return Response.ok("Message: OK (No messages to process)").build();
+            }
+
             String playerName = request.getPlayerName().toLowerCase();
-            
+            String messageType = request.getMessageType();
+            String timeStamp = java.time.Instant.now().toString();
+
+            List<Document> messagesPackage = new ArrayList<>();
+            for (Object value : request.getMessages().values()) {
+                String messageString = (value instanceof String) ? (String) value : String.valueOf(value);
+                Document entry = new Document();
+                entry.put("messageType", messageType);
+                entry.put("message", messageString);
+                entry.put("timeStamp", timeStamp);
+                messagesPackage.add(entry);
+            }
+
+            if (messagesPackage.isEmpty()) {
+                return Response.ok("Message: OK (No valid messages to process)").build();
+            }
+
             MongoCollection<Document> playersCollection = mongoDBService.getPlayersCollection();
-            
+
             Document existingPlayer = playersCollection.find(eq("playerId", request.getPlayerId())).first();
             if (existingPlayer == null) {
                 return Response.status(Response.Status.NOT_FOUND)
@@ -1031,7 +1054,7 @@ public class SinglePlayerResource {
                 eq("playerId", request.getPlayerId()),
                 combine(
                     set("playerName", playerName),
-                    set("chatLog", request.getMessagesPackage())
+                    set("chatLog", messagesPackage)
                 )
             );
 
@@ -1044,14 +1067,14 @@ public class SinglePlayerResource {
             Map<String, Object> broadcastData = new HashMap<>();
             broadcastData.put("playerId", request.getPlayerId());
             broadcastData.put("playerName", playerName);
-            broadcastData.put("messagesPackage", request.getMessagesPackage());
-            
+            broadcastData.put("chatLog", messagesPackage);
+
             PlayerWebSocket.broadcast(broadcastData);
-            
-            LOG.info("Updated messages for player {} ({}): {} messages", 
-                request.getPlayerId(), playerName, request.getMessagesPackage().size());
-            
-            return Response.ok("Messages: OK").build();
+
+            LOG.info("Updated messages for player {} ({}): {} messages",
+                request.getPlayerId(), playerName, messagesPackage.size());
+
+            return Response.ok("Message: OK").build();
         } catch (Exception e) {
             LOG.error("Error setting player messages for playerId: " + request.getPlayerId(), e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)

@@ -1,8 +1,7 @@
 package io.eaglejs.ffxi.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.util.List;
-import org.bson.Document;
+import java.util.Map;
 
 public class SetMessagesRequest {
     @JsonProperty("playerId")
@@ -11,8 +10,11 @@ public class SetMessagesRequest {
     @JsonProperty("playerName")
     private String playerName;
 
-    @JsonProperty("messagesPackage")
-    private List<Document> messagesPackage;
+    @JsonProperty("messages")
+    private Map<String, Object> messages;
+
+    @JsonProperty("messageType")
+    private String messageType;
 
     public Integer getPlayerId() {
         return playerId;
@@ -30,11 +32,19 @@ public class SetMessagesRequest {
         this.playerName = playerName;
     }
 
-    public List<Document> getMessagesPackage() {
-        return messagesPackage;
+    public Map<String, Object> getMessages() {
+        return messages;
     }
 
-    public void setMessagesPackage(List<Document> messagesPackage) {
-        this.messagesPackage = messagesPackage;
+    public void setMessages(Map<String, Object> messages) {
+        this.messages = messages;
+    }
+
+    public String getMessageType() {
+        return messageType;
+    }
+
+    public void setMessageType(String messageType) {
+        this.messageType = messageType;
     }
 }
