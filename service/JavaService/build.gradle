@@ -222,3 +222,38 @@ task copyWebApp(type: Copy) {
 
 // Try to fetch and extract UI from Nexus before processing resources
 processResources.dependsOn copyWebApp, extractUI
+
+// Development task with auto-restart on file changes
+task runDev(type: JavaExec) {
+    description = 'Run application in development mode (use with --continuous for auto-restart)'
+    group = 'application'
+    
+    dependsOn classes
+    
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = application.mainClass
+    
+    // Pass server config if it exists
+    def configFile = file('config.yml')
+    if (configFile.exists()) {
+        args 'server', configFile.absolutePath
+    }
+    
+    // Enable debug mode and hot reload features
+    jvmArgs = [
+        '-Xdebug',
+        '-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005',
+        '-Ddw.server.applicationConnectors[0].port=8080',
+        '-Ddw.logging.level=INFO'
+    ]
+    
+    // Keep stdin open for interactive mode
+    standardInput = System.in
+    
+    doFirst {
+        logger.lifecycle("Starting application in development mode...")
+        logger.lifecycle("Files being watched: src/main/java, src/main/resources")
+        logger.lifecycle("Run with: ./gradlew runDev --continuous")
+        logger.lifecycle("Debug port: 5005")
+    }
+}
