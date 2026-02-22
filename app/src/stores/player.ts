@@ -78,7 +78,7 @@ export const usePlayerStore = defineStore('player', () => {
     if (new Date().getTime() - lastBuffCheck.getTime() < 1000) {
       return Promise.reject('You can only refresh buffs once per second')
     }
-    return axios.post(`${fullUrl}/players/refresh_buffs`, player).then((data) => {
+    return axios.post(`${fullUrl}/player/refresh_buffs`, player).then((data) => {
       lastBuffCheck = new Date()
       return Promise.resolve(data)
     })
