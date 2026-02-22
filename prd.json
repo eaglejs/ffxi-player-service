@@ -204,5 +204,126 @@
       "Write unit tests for the endpoint to ensure it correctly updates the player's capacity points and broadcasts the update through the WebSocket."
     ],
     "passes": false
+  },
+  {
+    "category": "Restful API",
+    "description": "Set individual player exp history in the database, and pipe the status through the websocket to the frontend.",
+    "steps": [
+      "Create a POST endpoint /player/set_exp_history that accepts a `playerId`, `playerName`(formatted lowercase), expType, points, chain, and timestamp in the request body.",
+      "Please review ./service/NodeService/routes/Player.js for reference on how the expType maps to the type we want to store in the database.",
+      "Implement a method to update the player's exp history in the database using the provided playerId, playerName, expType, points, chain, and timestamp. expType has multiple id's. if expType has [8, 253, 371, 372], then the type we define for the database is 'experience'. if exptype has [718, 735], then the type we define for the database is 'capacity'. if expType has [809, 810], then the type we define for the database is 'exemplar'. the exp history object has a type, and each type should be an array of objects which should be stored in the database as { points: points, chain: chain, timestamp: timestamp }.",
+      "Each expHistory object type should be an array, and we set the max of each to 50, so if there are more than 50 exp history objects for a player, we remove the oldest one, and append the new one.",
+      "After updating the database, broadcast the player's current exp history by sending playerId, playerName, and exp history as JSON through the WebSocket connection.",
+      "Return a string response 'Experience history: OK' indicating the success of the operation.",
+      "Handle error cases where the playerId does not exist or the database update fails, returning appropriate HTTP status codes and error messages.",
+      "Write unit tests for the endpoint to ensure it correctly updates the player's exp history and broadcasts the update through the WebSocket."
+    ],
+    "passes": false
+  },
+  {
+    "category": "Restful API",
+    "description": "Reset individual players exp history in the database, and pipe the status through the websocket to the frontend.",
+    "steps": [
+      "Create a POST endpoint /player/reset_exp_history that accepts a `playerId`, and `playerName`(formatted lowercase) in the request body.",
+      "Please review ./service/NodeService/routes/Player.js for reference on how it is implemented.",
+      "Implement a method to reset the player's exp history in the database using the provided playerId and playerName. this should reset each expType in the exp history object to an empty array.",
+      "After resetting the database, broadcast the player's current exp history by sending playerId, playerName, and exp history as JSON through the WebSocket connection.",
+      "Return a string response 'Experience history reset: OK' indicating the success of the operation.",
+      "Handle error cases where the playerId does not exist or the database update fails, returning appropriate HTTP status codes and error messages.",
+      "Write unit tests for the endpoint to ensure it correctly resets the player's exp history and broadcasts the update through the WebSocket."
+    ],
+    "passes": false
+  },
+  {
+    "category": "Restful API",
+    "description": "Get individual player buffs from the database by playerId.",
+    "steps": [
+      "Create a GET endpoint /player/get_buffs that accepts a `playerId` in the request query parameters.",
+      "Please review ./service/NodeService/routes/Player.js for reference on how it is implemented.",
+      "Implement a method to retrieve the player's buffs from the database using the provided playerId.",
+      "Return the player's buffs as a JSON response.",
+      "Handle error cases where the playerId does not exist or the database query fails, returning appropriate HTTP status codes and error messages.",
+      "Write unit tests for the endpoint to ensure it correctly retrieves the player's buffs."
+    ],
+    "passes": false
+  },
+  {
+    "category": "Restful API",
+    "description": "Set individual player buffs in the database, and pipe the status through the websocket to the frontend.",
+    "steps": [
+      "Create a POST endpoint /player/set_buffs that accepts a `playerId`, `playerName`(formatted lowercase), and a `buffs` array in the request body.",
+      "Please review ./service/NodeService/routes/Player.js for reference on how it is implemented.",
+      "Implement a method to update the player's buffs in the database using the provided playerId, playerName, and buffs array.",
+      "After updating the database, broadcast the player's current buffs by sending playerId, playerName, and buffs as JSON through the WebSocket connection.",
+      "Return a string response 'Buffs: OK' indicating the success of the operation.",
+      "Handle error cases where the playerId does not exist or the database update fails, returning appropriate HTTP status codes and error messages.",
+      "Write unit tests for the endpoint to ensure it correctly updates the player's buffs and broadcasts the update through the WebSocket."
+    ],
+    "passes": false
+  },
+  {
+    "category": "Restful API",
+    "description": "Refresh individual player buffs in the database, and pipe the status through the websocket to the frontend.",
+    "steps": [
+      "Create a POST endpoint /player/refresh_buffs that accepts a `playerId`, and `playerName`(formatted lowercase) in the request body.",
+      "Please review ./service/NodeService/routes/Player.js for reference on how it is implemented.",
+      "Implement a method to refresh the player's buffs in the database from the UI using the provided playerId and playerName. This should refresh the buffs by overwriting the buffs array with a new set of buffs.",
+      "After refreshing the database, broadcast the player's current buffs by sending playerId, playerName, and buffs as JSON through the WebSocket connection.",
+      "Return a string response 'Buffs refreshed: OK' indicating the success of the operation.",
+      "Handle error cases where the playerId does not exist or the database update fails, returning appropriate HTTP status codes and error messages.",
+      "Write unit tests for the endpoint to ensure it correctly refreshes the player's buffs and broadcasts the update through the WebSocket."
+    ],
+    "passes": false
+  },
+  {
+    "category": "Restful API",
+    "description": "Set individual player zone in the database, and pipe the status through the websocket to the frontend.",
+    "steps": [
+      "Create a POST endpoint /player/set_zone that accepts a `playerId`, `playerName`(formatted lowercase), and `zone` in the request body.",
+      "Implement a method to update the player's current zone in the database using the provided playerId, playerName, and zone.",
+      "After updating the database, broadcast the player's current zone by sending playerId, playerName, and zone as JSON through the WebSocket connection.",
+      "Return a string response 'Zone: OK' indicating the success of the operation.",
+      "Handle error cases where the playerId does not exist or the database update fails, returning appropriate HTTP status codes and error messages.",
+      "Write unit tests for the endpoint to ensure it correctly updates the player's zone and broadcasts the update through the WebSocket."
+    ],
+    "passes": false
+  },
+  {
+    "category": "Restful API",
+    "description": "Get individual players chat log from the database by playerId.",
+    "steps": [
+      "Create a GET endpoint /player/get_chat_log that accepts a `playerId` in the request query parameters.",
+      "Implement a method to retrieve the player's chat log from the database using the provided playerId.",
+      "Return the player's chat log as a JSON response.",
+      "Handle error cases where the playerId does not exist or the database query fails, returning appropriate HTTP status codes and error messages.",
+      "Write unit tests for the endpoint to ensure it correctly retrieves the player's chat log."
+    ],
+    "passes": false
+  },
+  {
+    "category": "Restful API",
+    "description": "Get individual player chat log by type from the database by playerId.",
+    "steps": [
+      "Create a GET endpoint /player/get_chat_log_by_type that accepts a `playerId` and `messageType` in the request query parameters.",
+      "Implement a method to retrieve the player's chat log from the database using the provided playerId and filter the chat log by the provided messageType.",
+      "Return the filtered player's chat log as a JSON response.",
+      "Handle error cases where the playerId does not exist or the database query fails, returning appropriate HTTP status codes and error messages.",
+      "Write unit tests for the endpoint to ensure it correctly retrieves the player's chat log filtered by message type."
+    ],
+    "passes": false
+  },
+  {
+    "category": "Restful API",
+    "description": "Set individual players messages in the database, and pipe the status through the websocket to the frontend.",
+    "steps": [
+      "Create a POST endpoint /player/set_messages that accepts a `playerId`, `playerName`(formatted lowercase), and a `messagesPackage` array in the request body.",
+      "Please review ./service/NodeService/routes/Player.js for reference on how it is implemented.",
+      "Implement a method to update the player's messages in the database using the provided playerId, playerName, and messagesPackage array. the messagesPackage array contains objects with a messageType and message string, and should be stored in the database as an array of these objects.",
+      "After updating the database, broadcast the player's current messages by sending playerId, playerName, and messagesPackage as JSON through the WebSocket connection.",
+      "Return a string response 'Messages: OK' indicating the success of the operation.",
+      "Handle error cases where the playerId does not exist or the database update fails, returning appropriate HTTP status codes and error messages.",
+      "Write unit tests for the endpoint to ensure it correctly updates the player's messages and broadcasts the update through the WebSocket."
+    ],
+    "passes": false
   }
 ]
