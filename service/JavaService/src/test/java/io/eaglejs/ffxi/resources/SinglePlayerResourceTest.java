@@ -2584,6 +2584,7 @@ public class SinglePlayerResourceTest {
         SetMessagesRequest request = new SetMessagesRequest();
         request.setPlayerId(123);
         request.setPlayerName("TestPlayer");
+        request.setMessageType("PARTY");
         Map<String, Object> messages = new java.util.HashMap<>();
         messages.put("message1", new Document("messageType", 1).append("message", "Hello"));
         messages.put("message2", new Document("messageType", 2).append("message", "World"));
@@ -2612,6 +2613,7 @@ public class SinglePlayerResourceTest {
         SetMessagesRequest request = new SetMessagesRequest();
         request.setPlayerId(456);
         request.setPlayerName("TestPlayer");
+        request.setMessageType("PARTY");
         Map<String, Object> messages = new java.util.HashMap<>();
         messages.put("message1", new Document("messageType", 1).append("message", "Test"));
         request.setMessages(messages);
@@ -2639,6 +2641,7 @@ public class SinglePlayerResourceTest {
         SetMessagesRequest request = new SetMessagesRequest();
         request.setPlayerId(789);
         request.setPlayerName("TestPlayer");
+        request.setMessageType("PARTY");
         request.setMessages(new java.util.HashMap<>());
 
         Document existingPlayer = new Document("playerId", 789);
@@ -2662,6 +2665,7 @@ public class SinglePlayerResourceTest {
         SetMessagesRequest request = new SetMessagesRequest();
         request.setPlayerId(999);
         request.setPlayerName("NonExistent");
+        request.setMessageType("PARTY");
         Map<String, Object> messages = new java.util.HashMap<>();
         messages.put("message1", new Document("messageType", 1).append("message", "Test"));
         request.setMessages(messages);
@@ -2691,7 +2695,7 @@ public class SinglePlayerResourceTest {
         // Assert
         assertEquals(400, response.getStatus());
         String errorMessage = (String) response.getEntity();
-        assertEquals("playerId, playerName, and messagesPackage are required", errorMessage);
+        assertEquals("playerId, playerName, messagesPackage, and messageType are required", errorMessage);
         verify(mockCollection, never()).updateOne(any(Bson.class), any(Bson.class));
     }
 
@@ -2708,7 +2712,7 @@ public class SinglePlayerResourceTest {
 
         // Assert
         assertEquals(400, response.getStatus());
-        assertEquals("playerId, playerName, and messagesPackage are required", response.getEntity());
+        assertEquals("playerId, playerName, messagesPackage, and messageType are required", response.getEntity());
     }
 
     @Test
@@ -2724,7 +2728,7 @@ public class SinglePlayerResourceTest {
 
         // Assert
         assertEquals(400, response.getStatus());
-        assertEquals("playerId, playerName, and messagesPackage are required", response.getEntity());
+        assertEquals("playerId, playerName, messagesPackage, and messageType are required", response.getEntity());
     }
 
     @Test
@@ -2739,7 +2743,7 @@ public class SinglePlayerResourceTest {
 
         // Assert
         assertEquals(400, response.getStatus());
-        assertEquals("playerId, playerName, and messagesPackage are required", response.getEntity());
+        assertEquals("playerId, playerName, messagesPackage, and messageType are required", response.getEntity());
     }
 
     @Test
@@ -2748,6 +2752,7 @@ public class SinglePlayerResourceTest {
         SetMessagesRequest request = new SetMessagesRequest();
         request.setPlayerId(123);
         request.setPlayerName("TestPlayer");
+        request.setMessageType("PARTY");
         Map<String, Object> messages = new java.util.HashMap<>();
         messages.put("message1", new Document("messageType", 1).append("message", "Error test"));
         request.setMessages(messages);
@@ -2769,6 +2774,7 @@ public class SinglePlayerResourceTest {
         SetMessagesRequest request = new SetMessagesRequest();
         request.setPlayerId(123);
         request.setPlayerName("TestPlayer");
+        request.setMessageType("PARTY");
         Map<String, Object> messages = new java.util.HashMap<>();
         messages.put("message1", new Document("messageType", 1).append("message", "Update test"));
         request.setMessages(messages);

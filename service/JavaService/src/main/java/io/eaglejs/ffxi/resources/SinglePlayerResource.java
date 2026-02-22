@@ -1,6 +1,7 @@
 package io.eaglejs.ffxi.resources;
 
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.PushOptions;
 import io.eaglejs.ffxi.mapper.PlayerMapper;
 import io.eaglejs.ffxi.models.Currency1;
 import io.eaglejs.ffxi.models.Currency2;
@@ -1012,9 +1013,10 @@ public class SinglePlayerResource {
     public Response setMessages(SetMessagesRequest request) {
         try {
             if (request == null || request.getPlayerId() == null || 
-                request.getPlayerName() == null || request.getMessages() == null) {
+                request.getPlayerName() == null || request.getMessages() == null ||
+                request.getMessageType() == null) {
                 return Response.status(Response.Status.BAD_REQUEST)
-                        .entity("playerId, playerName, and messagesPackage are required")
+                        .entity("playerId, playerName, messagesPackage, and messageType are required")
                         .build();
             }
 
@@ -1045,7 +1047,7 @@ public class SinglePlayerResource {
                 eq("playerId", request.getPlayerId()),
                 combine(
                     set("playerName", playerName),
-                    set("chatLog", messagesPackage)
+                    com.mongodb.client.model.Updates.pushEach("chatLog", messagesPackage, new PushOptions().slice(-5000))
                 )
             );
 
