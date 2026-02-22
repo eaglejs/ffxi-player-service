@@ -1,6 +1,6 @@
 local http = require('socket.http')
 local ltn12 = require('ltn12')
-local host = "http://192.168.5.30:8080"
+local host = "http://192.168.5.30:8080/api"
 -- local host = "http://192.168.5.143/api"
 
 http.TIMEOUT = 0.5
