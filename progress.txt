@@ -292,3 +292,16 @@ Feature: Set individual player messages
 - Updated prd.json to mark feature as passes: true
 
 Note: This endpoint stores messages in the chatLog field in the database, allowing the frontend to send chat messages which are then persisted and broadcast to all connected clients.
+
+--- 2026-02-22 Implementation Update ---
+Feature: Refresh individual player buffs
+- Created RefreshBuffsRequest DTO with playerId and playerName fields
+- Implemented POST /player/refresh_buffs endpoint in SinglePlayerResource
+- Endpoint refreshes (clears) player's buffs by setting buffs array to empty in MongoDB database
+- Broadcasts empty buffs array via WebSocket to all connected clients
+- Returns "Buffs refreshed: OK" on success
+- Added 8 comprehensive unit tests covering success, lowercase formatting, player not found, null request, missing playerId, missing playerName, database error, and update failure scenarios
+- All 170 tests passing
+- Updated prd.json to mark feature as passes: true
+
+This endpoint provides a way to clear all buffs from a player, useful for resetting state or handling buff expiration from the UI.
