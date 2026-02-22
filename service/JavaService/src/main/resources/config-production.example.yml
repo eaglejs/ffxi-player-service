@@ -1,8 +1,9 @@
 server:
-  rootPath: /*
+  rootPath: /api/*
   applicationConnectors:
     - type: http
       port: 8080
+      bindHost: 192.168.5.30
 
 # CORS configuration for PRODUCTION
 cors:

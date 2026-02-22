@@ -15,8 +15,11 @@ import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.servlets.CrossOriginFilter;
 
+import javax.servlet.*;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
+import java.io.IOException;
 import java.util.EnumSet;
 
 public class Main extends Application<FFXIConfiguration> {
@@ -55,14 +58,37 @@ public class Main extends Application<FFXIConfiguration> {
         ServletContextHandler contextHandler = environment.getApplicationContext();
         environment.lifecycle().manage(new WebSocketManager(contextHandler));
 
+        // SPA fallback filter: forwards unknown paths to index.html for Vue Router
+        FilterRegistration.Dynamic spaFilter = environment.servlets().addFilter("spaFilter", new Filter() {
+            @Override
+            public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+                    throws IOException, ServletException {
+                HttpServletRequest httpRequest = (HttpServletRequest) request;
+                String path = httpRequest.getRequestURI();
+
+                // Pass through API routes, WebSocket, and any path with a file extension
+                if (path.startsWith("/api/") || path.startsWith("/ws/") || path.contains(".")) {
+                    chain.doFilter(request, response);
+                    return;
+                }
+
+                // Forward SPA routes (e.g. /charts, /players/123) to index.html
+                request.getRequestDispatcher("/index.html").forward(request, response);
+            }
+
+            @Override public void init(FilterConfig config) {}
+            @Override public void destroy() {}
+        });
+        spaFilter.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), false, "/*");
+
         // Configure static assets serving for UI
-        // Note: API endpoints are served at /api/* (configured in config.yml)
+        // API endpoints are served at /api/* (configured in config.yml)
         // Static UI files are served at the root /*
         ServletHolder staticServlet = new ServletHolder("static", DefaultServlet.class);
-        staticServlet.setInitParameter("resourceBase", 
+        staticServlet.setInitParameter("resourceBase",
             Main.class.getClassLoader().getResource("assets").toExternalForm());
-        staticServlet.setInitParameter("dirAllowed", "false");  // Disable directory listing for security
-        staticServlet.setInitParameter("pathInfoOnly", "true");
+        staticServlet.setInitParameter("dirAllowed", "false");
+        staticServlet.setInitParameter("pathInfoOnly", "false");
         contextHandler.addServlet(staticServlet, "/*");
     }
     
