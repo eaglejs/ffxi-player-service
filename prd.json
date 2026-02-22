@@ -203,7 +203,7 @@
       "Handle error cases where the playerId does not exist or the database update fails, returning appropriate HTTP status codes and error messages.",
       "Write unit tests for the endpoint to ensure it correctly updates the player's capacity points and broadcasts the update through the WebSocket."
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "Restful API",

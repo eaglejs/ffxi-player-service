@@ -5,6 +5,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.result.UpdateResult;
 
 import io.eaglejs.ffxi.models.Player;
+import io.eaglejs.ffxi.models.SetCapacityPointsRequest;
 import io.eaglejs.ffxi.models.SetGilRequest;
 import io.eaglejs.ffxi.models.SetHppRequest;
 import io.eaglejs.ffxi.models.SetJobsRequest;
@@ -1787,5 +1788,181 @@ public class SinglePlayerResourceTest {
         assertEquals(500, response.getStatus());
         String errorMessage = (String) response.getEntity();
         assertEquals("Failed to update player merits", errorMessage);
+    }
+
+    @Test
+    public void testSetCapacityPoints_Success() {
+        // Arrange
+        SetCapacityPointsRequest request = new SetCapacityPointsRequest();
+        request.setPlayerId(123);
+        request.setPlayerName("TestPlayer");
+        request.setTotal(5000);
+
+        Document existingPlayer = new Document("playerId", 123);
+        
+        when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
+        when(mockFindIterable.first()).thenReturn(existingPlayer);
+        when(mockCollection.updateOne(any(Bson.class), any(Bson.class))).thenReturn(mockUpdateResult);
+        when(mockUpdateResult.getModifiedCount()).thenReturn(1L);
+
+        // Act
+        Response response = resource.setCapacityPoints(request);
+
+        // Assert
+        assertEquals(200, response.getStatus());
+        assertEquals("Capacity points: OK", response.getEntity());
+        verify(mockCollection).find(any(Bson.class));
+        verify(mockCollection).updateOne(any(Bson.class), any(Bson.class));
+    }
+
+    @Test
+    public void testSetCapacityPoints_FormatsPlayerNameToLowercase() {
+        // Arrange
+        SetCapacityPointsRequest request = new SetCapacityPointsRequest();
+        request.setPlayerId(456);
+        request.setPlayerName("TestPlayer");
+        request.setTotal(3000);
+
+        Document existingPlayer = new Document("playerId", 456);
+        ArgumentCaptor<Bson> updateCaptor = ArgumentCaptor.forClass(Bson.class);
+        
+        when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
+        when(mockFindIterable.first()).thenReturn(existingPlayer);
+        when(mockCollection.updateOne(any(Bson.class), updateCaptor.capture())).thenReturn(mockUpdateResult);
+        when(mockUpdateResult.getModifiedCount()).thenReturn(1L);
+
+        // Act
+        resource.setCapacityPoints(request);
+
+        // Assert
+        Bson capturedUpdate = updateCaptor.getValue();
+        assertNotNull(capturedUpdate);
+        assertTrue(capturedUpdate.toString().contains("testplayer"));
+    }
+
+    @Test
+    public void testSetCapacityPoints_PlayerNotFound() {
+        // Arrange
+        SetCapacityPointsRequest request = new SetCapacityPointsRequest();
+        request.setPlayerId(999);
+        request.setPlayerName("NonExistent");
+        request.setTotal(1000);
+
+        when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
+        when(mockFindIterable.first()).thenReturn(null);
+
+        // Act
+        Response response = resource.setCapacityPoints(request);
+
+        // Assert
+        assertEquals(404, response.getStatus());
+        String errorMessage = (String) response.getEntity();
+        assertTrue(errorMessage.contains("Player not found"));
+        assertTrue(errorMessage.contains("999"));
+        verify(mockCollection, never()).updateOne(any(Bson.class), any(Bson.class));
+    }
+
+    @Test
+    public void testSetCapacityPoints_NullRequest() {
+        // Arrange
+        SetCapacityPointsRequest request = null;
+
+        // Act
+        Response response = resource.setCapacityPoints(request);
+
+        // Assert
+        assertEquals(400, response.getStatus());
+        String errorMessage = (String) response.getEntity();
+        assertEquals("playerId, playerName, and total are required", errorMessage);
+        verify(mockCollection, never()).updateOne(any(Bson.class), any(Bson.class));
+    }
+
+    @Test
+    public void testSetCapacityPoints_MissingPlayerId() {
+        // Arrange
+        SetCapacityPointsRequest request = new SetCapacityPointsRequest();
+        request.setPlayerName("TestPlayer");
+        request.setTotal(2500);
+
+        // Act
+        Response response = resource.setCapacityPoints(request);
+
+        // Assert
+        assertEquals(400, response.getStatus());
+        assertEquals("playerId, playerName, and total are required", response.getEntity());
+    }
+
+    @Test
+    public void testSetCapacityPoints_MissingPlayerName() {
+        // Arrange
+        SetCapacityPointsRequest request = new SetCapacityPointsRequest();
+        request.setPlayerId(123);
+        request.setTotal(2500);
+
+        // Act
+        Response response = resource.setCapacityPoints(request);
+
+        // Assert
+        assertEquals(400, response.getStatus());
+        assertEquals("playerId, playerName, and total are required", response.getEntity());
+    }
+
+    @Test
+    public void testSetCapacityPoints_MissingTotal() {
+        // Arrange
+        SetCapacityPointsRequest request = new SetCapacityPointsRequest();
+        request.setPlayerId(123);
+        request.setPlayerName("TestPlayer");
+
+        // Act
+        Response response = resource.setCapacityPoints(request);
+
+        // Assert
+        assertEquals(400, response.getStatus());
+        assertEquals("playerId, playerName, and total are required", response.getEntity());
+    }
+
+    @Test
+    public void testSetCapacityPoints_DatabaseError() {
+        // Arrange
+        SetCapacityPointsRequest request = new SetCapacityPointsRequest();
+        request.setPlayerId(123);
+        request.setPlayerName("TestPlayer");
+        request.setTotal(4000);
+
+        when(mockCollection.find(any(Bson.class))).thenThrow(new RuntimeException("Database connection lost"));
+
+        // Act
+        Response response = resource.setCapacityPoints(request);
+
+        // Assert
+        assertEquals(500, response.getStatus());
+        String errorMessage = (String) response.getEntity();
+        assertEquals("An error occurred while updating player capacity points.", errorMessage);
+    }
+
+    @Test
+    public void testSetCapacityPoints_UpdateFailure() {
+        // Arrange
+        SetCapacityPointsRequest request = new SetCapacityPointsRequest();
+        request.setPlayerId(123);
+        request.setPlayerName("TestPlayer");
+        request.setTotal(3500);
+
+        Document existingPlayer = new Document("playerId", 123);
+        
+        when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
+        when(mockFindIterable.first()).thenReturn(existingPlayer);
+        when(mockCollection.updateOne(any(Bson.class), any(Bson.class))).thenReturn(mockUpdateResult);
+        when(mockUpdateResult.getModifiedCount()).thenReturn(0L);
+        when(mockUpdateResult.getMatchedCount()).thenReturn(0L);
+
+        // Act
+        Response response = resource.setCapacityPoints(request);
+
+        // Assert
+        assertEquals(500, response.getStatus());
+        String errorMessage = (String) response.getEntity();
+        assertEquals("Failed to update player capacity points", errorMessage);
     }
 }
