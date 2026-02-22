@@ -5,12 +5,14 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.result.UpdateResult;
 
 import io.eaglejs.ffxi.models.Currency1;
+import io.eaglejs.ffxi.models.Currency2;
 import io.eaglejs.ffxi.models.Player;
 import io.eaglejs.ffxi.models.RefreshBuffsRequest;
 import io.eaglejs.ffxi.models.ResetExpHistoryRequest;
 import io.eaglejs.ffxi.models.SetBuffsRequest;
 import io.eaglejs.ffxi.models.SetCapacityPointsRequest;
 import io.eaglejs.ffxi.models.SetCurrency1Request;
+import io.eaglejs.ffxi.models.SetCurrency2Request;
 import io.eaglejs.ffxi.models.SetGilRequest;
 import io.eaglejs.ffxi.models.SetHppRequest;
 import io.eaglejs.ffxi.models.SetJobsRequest;
@@ -3251,5 +3253,198 @@ public class SinglePlayerResourceTest {
         assertEquals(500, response.getStatus());
         String errorMessage = (String) response.getEntity();
         assertEquals("Failed to update player currency1", errorMessage);
+    }
+
+    @Test
+    public void testSetCurrency2_Success() {
+        // Arrange
+        SetCurrency2Request request = new SetCurrency2Request();
+        request.setPlayerId(123);
+        request.setPlayerName("TestPlayer");
+        
+        Currency2 currency2 = new Currency2();
+        currency2.setDomainPoints(100);
+        currency2.setEschaBeads(200);
+        currency2.setEschaSilt(300);
+        currency2.setGallantry(400);
+        currency2.setGallimaufry(500);
+        currency2.setHallmarks(600);
+        currency2.setMogSegments(700);
+        currency2.setMweyaPlasmCorpuscles(800);
+        currency2.setPotpourri(900);
+        currency2.setCoalitionImprimaturs(1000);
+        currency2.setTemenosUnits(1100);
+        currency2.setApollyonUnits(1200);
+        request.setCurrency2(currency2);
+
+        Document existingPlayer = new Document("playerId", 123);
+        
+        when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
+        when(mockFindIterable.first()).thenReturn(existingPlayer);
+        when(mockCollection.updateOne(any(Bson.class), any(Bson.class))).thenReturn(mockUpdateResult);
+        when(mockUpdateResult.getModifiedCount()).thenReturn(1L);
+
+        // Act
+        Response response = resource.setCurrency2(request);
+
+        // Assert
+        assertEquals(200, response.getStatus());
+        assertEquals("Currency2: OK", response.getEntity());
+        verify(mockCollection).find(any(Bson.class));
+        verify(mockCollection).updateOne(any(Bson.class), any(Bson.class));
+    }
+
+    @Test
+    public void testSetCurrency2_FormatsPlayerNameToLowercase() {
+        // Arrange
+        SetCurrency2Request request = new SetCurrency2Request();
+        request.setPlayerId(456);
+        request.setPlayerName("TestPlayer");
+        
+        Currency2 currency2 = new Currency2();
+        currency2.setDomainPoints(500);
+        request.setCurrency2(currency2);
+
+        Document existingPlayer = new Document("playerId", 456);
+        ArgumentCaptor<Bson> updateCaptor = ArgumentCaptor.forClass(Bson.class);
+        
+        when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
+        when(mockFindIterable.first()).thenReturn(existingPlayer);
+        when(mockCollection.updateOne(any(Bson.class), updateCaptor.capture())).thenReturn(mockUpdateResult);
+        when(mockUpdateResult.getModifiedCount()).thenReturn(1L);
+
+        // Act
+        resource.setCurrency2(request);
+
+        // Assert
+        Bson capturedUpdate = updateCaptor.getValue();
+        assertNotNull(capturedUpdate);
+        assertTrue(capturedUpdate.toString().contains("testplayer"));
+    }
+
+    @Test
+    public void testSetCurrency2_PlayerNotFound() {
+        // Arrange
+        SetCurrency2Request request = new SetCurrency2Request();
+        request.setPlayerId(999);
+        request.setPlayerName("NonExistent");
+        request.setCurrency2(new Currency2());
+
+        when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
+        when(mockFindIterable.first()).thenReturn(null);
+
+        // Act
+        Response response = resource.setCurrency2(request);
+
+        // Assert
+        assertEquals(404, response.getStatus());
+        String errorMessage = (String) response.getEntity();
+        assertTrue(errorMessage.contains("Player not found"));
+        assertTrue(errorMessage.contains("999"));
+        verify(mockCollection, never()).updateOne(any(Bson.class), any(Bson.class));
+    }
+
+    @Test
+    public void testSetCurrency2_NullRequest() {
+        // Arrange
+        SetCurrency2Request request = null;
+
+        // Act
+        Response response = resource.setCurrency2(request);
+
+        // Assert
+        assertEquals(400, response.getStatus());
+        String errorMessage = (String) response.getEntity();
+        assertEquals("playerId, playerName, and currency2 are required", errorMessage);
+        verify(mockCollection, never()).updateOne(any(Bson.class), any(Bson.class));
+    }
+
+    @Test
+    public void testSetCurrency2_MissingPlayerId() {
+        // Arrange
+        SetCurrency2Request request = new SetCurrency2Request();
+        request.setPlayerName("TestPlayer");
+        request.setCurrency2(new Currency2());
+
+        // Act
+        Response response = resource.setCurrency2(request);
+
+        // Assert
+        assertEquals(400, response.getStatus());
+        assertEquals("playerId, playerName, and currency2 are required", response.getEntity());
+    }
+
+    @Test
+    public void testSetCurrency2_MissingPlayerName() {
+        // Arrange
+        SetCurrency2Request request = new SetCurrency2Request();
+        request.setPlayerId(123);
+        request.setCurrency2(new Currency2());
+
+        // Act
+        Response response = resource.setCurrency2(request);
+
+        // Assert
+        assertEquals(400, response.getStatus());
+        assertEquals("playerId, playerName, and currency2 are required", response.getEntity());
+    }
+
+    @Test
+    public void testSetCurrency2_MissingCurrency2() {
+        // Arrange
+        SetCurrency2Request request = new SetCurrency2Request();
+        request.setPlayerId(123);
+        request.setPlayerName("TestPlayer");
+
+        // Act
+        Response response = resource.setCurrency2(request);
+
+        // Assert
+        assertEquals(400, response.getStatus());
+        assertEquals("playerId, playerName, and currency2 are required", response.getEntity());
+    }
+
+    @Test
+    public void testSetCurrency2_DatabaseError() {
+        // Arrange
+        SetCurrency2Request request = new SetCurrency2Request();
+        request.setPlayerId(123);
+        request.setPlayerName("TestPlayer");
+        request.setCurrency2(new Currency2());
+
+        when(mockCollection.find(any(Bson.class))).thenThrow(new RuntimeException("Database connection lost"));
+
+        // Act
+        Response response = resource.setCurrency2(request);
+
+        // Assert
+        assertEquals(500, response.getStatus());
+        String errorMessage = (String) response.getEntity();
+        assertEquals("An error occurred while updating player currency2.", errorMessage);
+    }
+
+    @Test
+    public void testSetCurrency2_UpdateFailure() {
+        // Arrange
+        SetCurrency2Request request = new SetCurrency2Request();
+        request.setPlayerId(123);
+        request.setPlayerName("TestPlayer");
+        request.setCurrency2(new Currency2());
+
+        Document existingPlayer = new Document("playerId", 123);
+        
+        when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
+        when(mockFindIterable.first()).thenReturn(existingPlayer);
+        when(mockCollection.updateOne(any(Bson.class), any(Bson.class))).thenReturn(mockUpdateResult);
+        when(mockUpdateResult.getModifiedCount()).thenReturn(0L);
+        when(mockUpdateResult.getMatchedCount()).thenReturn(0L);
+
+        // Act
+        Response response = resource.setCurrency2(request);
+
+        // Assert
+        assertEquals(500, response.getStatus());
+        String errorMessage = (String) response.getEntity();
+        assertEquals("Failed to update player currency2", errorMessage);
     }
 }

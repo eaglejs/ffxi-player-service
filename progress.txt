@@ -332,3 +332,17 @@ Feature: Set individual player currency1
 - Updated prd.json to mark feature as passes: true
 
 This endpoint handles a complex nested object with 12 different currency types, following the same pattern as our simpler field updates but with a more complex data structure.
+
+--- 2026-02-22 Implementation Update ---
+Feature: Set individual player currency2
+- Created Currency2 model class with 12 fields (domainPoints, eschaBeads, eschaSilt, gallantry, gallimaufry, hallmarks, mogSegments, mweyaPlasmCorpuscles, potpourri, coalitionImprimaturs, temenosUnits, apollyonUnits)
+- Created SetCurrency2Request DTO with playerId, playerName, and currency2 fields
+- Implemented POST /player/set_currency2 endpoint in SinglePlayerResource
+- Endpoint updates player's currency2 object in MongoDB database with all 12 currency fields
+- Broadcasts currency2 update via WebSocket to all connected clients
+- Returns "Currency2: OK" on success
+- Added 9 comprehensive unit tests covering success, lowercase formatting, player not found, null request, missing fields (playerId, playerName, currency2), database error, and update failure scenarios
+- All 196 tests passing
+- Updated prd.json to mark feature as passes: true
+
+This endpoint mirrors the currency1 implementation, handling another complex nested object with 12 different currency types.
