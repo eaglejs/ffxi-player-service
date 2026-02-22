@@ -245,7 +245,7 @@
       "Handle error cases where the playerId does not exist or the database query fails, returning appropriate HTTP status codes and error messages.",
       "Write unit tests for the endpoint to ensure it correctly retrieves the player's buffs."
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "Restful API",

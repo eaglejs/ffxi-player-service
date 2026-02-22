@@ -23,12 +23,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.POST;
+import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static com.mongodb.client.model.Filters.eq;
@@ -763,6 +767,51 @@ public class SinglePlayerResource {
             LOG.error("Error setting player capacity points for playerId: " + request.getPlayerId(), e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity("An error occurred while updating player capacity points.")
+                    .build();
+        }
+    }
+
+    @GET
+    @Path("/get_buffs")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(
+        summary = "Get Player Buffs",
+        description = "Retrieves a player's current buffs from the database by playerId.",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Buffs retrieved successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request data"),
+            @ApiResponse(responseCode = "404", description = "Player not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+        }
+    )
+    public Response getBuffs(@QueryParam("playerId") Integer playerId) {
+        try {
+            if (playerId == null) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity("playerId query parameter is required")
+                        .build();
+            }
+
+            MongoCollection<Document> playersCollection = mongoDBService.getPlayersCollection();
+            Document document = playersCollection.find(eq("playerId", playerId)).first();
+
+            if (document == null) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity("Player not found with playerId: " + playerId)
+                        .build();
+            }
+
+            // Extract buffs array from the document, return empty array if not present
+            List<Integer> buffs = document.get("buffs", List.class);
+            if (buffs == null) {
+                buffs = new ArrayList<>();
+            }
+
+            return Response.ok(buffs).build();
+        } catch (Exception e) {
+            LOG.error("Error retrieving buffs for playerId: " + playerId, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("An error occurred while retrieving player buffs.")
                     .build();
         }
     }

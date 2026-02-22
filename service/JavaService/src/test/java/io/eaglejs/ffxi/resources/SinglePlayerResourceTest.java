@@ -24,6 +24,7 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
 import javax.ws.rs.core.Response;
+import java.util.List;
 
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -1964,5 +1965,118 @@ public class SinglePlayerResourceTest {
         assertEquals(500, response.getStatus());
         String errorMessage = (String) response.getEntity();
         assertEquals("Failed to update player capacity points", errorMessage);
+    }
+
+    @Test
+    public void testGetBuffs_Success() {
+        // Arrange
+        Integer playerId = 123;
+        List<Integer> buffs = java.util.Arrays.asList(1, 2, 3, 4, 5);
+        Document existingPlayer = new Document("playerId", playerId).append("buffs", buffs);
+        
+        when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
+        when(mockFindIterable.first()).thenReturn(existingPlayer);
+
+        // Act
+        Response response = resource.getBuffs(playerId);
+
+        // Assert
+        assertEquals(200, response.getStatus());
+        @SuppressWarnings("unchecked")
+        List<Integer> returnedBuffs = (List<Integer>) response.getEntity();
+        assertNotNull(returnedBuffs);
+        assertEquals(5, returnedBuffs.size());
+        assertEquals(buffs, returnedBuffs);
+        verify(mockCollection).find(any(Bson.class));
+    }
+
+    @Test
+    public void testGetBuffs_EmptyBuffsList() {
+        // Arrange
+        Integer playerId = 456;
+        List<Integer> buffs = new java.util.ArrayList<>();
+        Document existingPlayer = new Document("playerId", playerId).append("buffs", buffs);
+        
+        when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
+        when(mockFindIterable.first()).thenReturn(existingPlayer);
+
+        // Act
+        Response response = resource.getBuffs(playerId);
+
+        // Assert
+        assertEquals(200, response.getStatus());
+        @SuppressWarnings("unchecked")
+        List<Integer> returnedBuffs = (List<Integer>) response.getEntity();
+        assertNotNull(returnedBuffs);
+        assertEquals(0, returnedBuffs.size());
+    }
+
+    @Test
+    public void testGetBuffs_NoBuffsField() {
+        // Arrange
+        Integer playerId = 789;
+        Document existingPlayer = new Document("playerId", playerId);
+        
+        when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
+        when(mockFindIterable.first()).thenReturn(existingPlayer);
+
+        // Act
+        Response response = resource.getBuffs(playerId);
+
+        // Assert
+        assertEquals(200, response.getStatus());
+        @SuppressWarnings("unchecked")
+        List<Integer> returnedBuffs = (List<Integer>) response.getEntity();
+        assertNotNull(returnedBuffs);
+        assertEquals(0, returnedBuffs.size());
+    }
+
+    @Test
+    public void testGetBuffs_PlayerNotFound() {
+        // Arrange
+        Integer playerId = 999;
+        
+        when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
+        when(mockFindIterable.first()).thenReturn(null);
+
+        // Act
+        Response response = resource.getBuffs(playerId);
+
+        // Assert
+        assertEquals(404, response.getStatus());
+        String errorMessage = (String) response.getEntity();
+        assertTrue(errorMessage.contains("Player not found"));
+        assertTrue(errorMessage.contains("999"));
+    }
+
+    @Test
+    public void testGetBuffs_NullPlayerId() {
+        // Arrange
+        Integer playerId = null;
+
+        // Act
+        Response response = resource.getBuffs(playerId);
+
+        // Assert
+        assertEquals(400, response.getStatus());
+        String errorMessage = (String) response.getEntity();
+        assertEquals("playerId query parameter is required", errorMessage);
+        verify(mockCollection, never()).find(any(Bson.class));
+    }
+
+    @Test
+    public void testGetBuffs_DatabaseError() {
+        // Arrange
+        Integer playerId = 123;
+        
+        when(mockCollection.find(any(Bson.class))).thenThrow(new RuntimeException("Database connection lost"));
+
+        // Act
+        Response response = resource.getBuffs(playerId);
+
+        // Assert
+        assertEquals(500, response.getStatus());
+        String errorMessage = (String) response.getEntity();
+        assertEquals("An error occurred while retrieving player buffs.", errorMessage);
     }
 }

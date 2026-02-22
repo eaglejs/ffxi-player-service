@@ -220,3 +220,17 @@ Feature: Set individual player capacity points
 - Updated prd.json to mark feature as passes: true
 
 This feature is similar to merits but stores only a single field (total) in the nested document instead of two fields.
+
+--- 2026-02-22 Implementation Update ---
+Feature: Get individual player buffs
+- Implemented GET /player/get_buffs endpoint in SinglePlayerResource
+- Accepts playerId as query parameter
+- Retrieves player's buffs array from MongoDB database
+- Returns buffs as JSON array response
+- Returns empty array if buffs field is not present in database
+- Handles error cases: null playerId (400), player not found (404), database errors (500)
+- Added 6 comprehensive unit tests covering success with buffs, empty buffs list, no buffs field, player not found, null playerId, and database error scenarios
+- All 129 tests passing
+- Updated prd.json to mark feature as passes: true
+
+This is the first GET endpoint in SinglePlayerResource that retrieves data rather than updating it, introducing a different pattern from the POST endpoints we've been implementing.
