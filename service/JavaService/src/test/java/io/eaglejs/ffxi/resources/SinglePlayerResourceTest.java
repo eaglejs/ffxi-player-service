@@ -37,6 +37,7 @@ import org.mockito.ArgumentCaptor;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -2098,7 +2099,13 @@ public class SinglePlayerResourceTest {
         SetBuffsRequest request = new SetBuffsRequest();
         request.setPlayerId(123);
         request.setPlayerName("TestPlayer");
-        request.setBuffs(java.util.Arrays.asList(1, 2, 3, 4, 5));
+        Map<String, Integer> buffsMap = new java.util.HashMap<>();
+        buffsMap.put("buff1", 1);
+        buffsMap.put("buff2", 2);
+        buffsMap.put("buff3", 3);
+        buffsMap.put("buff4", 4);
+        buffsMap.put("buff5", 5);
+        request.setBuffs(buffsMap);
 
         Document existingPlayer = new Document("playerId", 123);
         
@@ -2123,7 +2130,11 @@ public class SinglePlayerResourceTest {
         SetBuffsRequest request = new SetBuffsRequest();
         request.setPlayerId(456);
         request.setPlayerName("TestPlayer");
-        request.setBuffs(java.util.Arrays.asList(10, 20, 30));
+        Map<String, Integer> buffsMap = new java.util.HashMap<>();
+        buffsMap.put("buff1", 10);
+        buffsMap.put("buff2", 20);
+        buffsMap.put("buff3", 30);
+        request.setBuffs(buffsMap);
 
         Document existingPlayer = new Document("playerId", 456);
         ArgumentCaptor<Bson> updateCaptor = ArgumentCaptor.forClass(Bson.class);
@@ -2148,7 +2159,7 @@ public class SinglePlayerResourceTest {
         SetBuffsRequest request = new SetBuffsRequest();
         request.setPlayerId(789);
         request.setPlayerName("TestPlayer");
-        request.setBuffs(new java.util.ArrayList<>());
+        request.setBuffs(new java.util.HashMap<String, Integer>());
 
         Document existingPlayer = new Document("playerId", 789);
         
@@ -2171,7 +2182,11 @@ public class SinglePlayerResourceTest {
         SetBuffsRequest request = new SetBuffsRequest();
         request.setPlayerId(999);
         request.setPlayerName("NonExistent");
-        request.setBuffs(java.util.Arrays.asList(1, 2, 3));
+        Map<String, Integer> buffsMap = new java.util.HashMap<>();
+        buffsMap.put("buff1", 1);
+        buffsMap.put("buff2", 2);
+        buffsMap.put("buff3", 3);
+        request.setBuffs(buffsMap);
 
         when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
         when(mockFindIterable.first()).thenReturn(null);
@@ -2207,7 +2222,11 @@ public class SinglePlayerResourceTest {
         // Arrange
         SetBuffsRequest request = new SetBuffsRequest();
         request.setPlayerName("TestPlayer");
-        request.setBuffs(java.util.Arrays.asList(1, 2, 3));
+        Map<String, Integer> buffsMap = new java.util.HashMap<>();
+        buffsMap.put("buff1", 1);
+        buffsMap.put("buff2", 2);
+        buffsMap.put("buff3", 3);
+        request.setBuffs(buffsMap);
 
         // Act
         Response response = resource.setBuffs(request);
@@ -2222,7 +2241,11 @@ public class SinglePlayerResourceTest {
         // Arrange
         SetBuffsRequest request = new SetBuffsRequest();
         request.setPlayerId(123);
-        request.setBuffs(java.util.Arrays.asList(1, 2, 3));
+        Map<String, Integer> buffsMap = new java.util.HashMap<>();
+        buffsMap.put("buff1", 1);
+        buffsMap.put("buff2", 2);
+        buffsMap.put("buff3", 3);
+        request.setBuffs(buffsMap);
 
         // Act
         Response response = resource.setBuffs(request);
@@ -2253,7 +2276,11 @@ public class SinglePlayerResourceTest {
         SetBuffsRequest request = new SetBuffsRequest();
         request.setPlayerId(123);
         request.setPlayerName("TestPlayer");
-        request.setBuffs(java.util.Arrays.asList(5, 10, 15));
+        Map<String, Integer> buffsMap = new java.util.HashMap<>();
+        buffsMap.put("buff1", 5);
+        buffsMap.put("buff2", 10);
+        buffsMap.put("buff3", 15);
+        request.setBuffs(buffsMap);
 
         when(mockCollection.find(any(Bson.class))).thenThrow(new RuntimeException("Database connection lost"));
 
@@ -2272,7 +2299,11 @@ public class SinglePlayerResourceTest {
         SetBuffsRequest request = new SetBuffsRequest();
         request.setPlayerId(123);
         request.setPlayerName("TestPlayer");
-        request.setBuffs(java.util.Arrays.asList(7, 14, 21));
+        Map<String, Integer> buffsMap = new java.util.HashMap<>();
+        buffsMap.put("buff1", 7);
+        buffsMap.put("buff2", 14);
+        buffsMap.put("buff3", 21);
+        request.setBuffs(buffsMap);
 
         Document existingPlayer = new Document("playerId", 123);
         
@@ -2552,10 +2583,10 @@ public class SinglePlayerResourceTest {
         SetMessagesRequest request = new SetMessagesRequest();
         request.setPlayerId(123);
         request.setPlayerName("TestPlayer");
-        List<Document> messages = new java.util.ArrayList<>();
-        messages.add(new Document("messageType", 1).append("message", "Hello"));
-        messages.add(new Document("messageType", 2).append("message", "World"));
-        request.setMessagesPackage(messages);
+        Map<String, Object> messages = new java.util.HashMap<>();
+        messages.put("message1", new Document("messageType", 1).append("message", "Hello"));
+        messages.put("message2", new Document("messageType", 2).append("message", "World"));
+        request.setMessages(messages);
 
         Document existingPlayer = new Document("playerId", 123);
         
@@ -2580,9 +2611,9 @@ public class SinglePlayerResourceTest {
         SetMessagesRequest request = new SetMessagesRequest();
         request.setPlayerId(456);
         request.setPlayerName("TestPlayer");
-        List<Document> messages = new java.util.ArrayList<>();
-        messages.add(new Document("messageType", 1).append("message", "Test"));
-        request.setMessagesPackage(messages);
+        Map<String, Object> messages = new java.util.HashMap<>();
+        messages.put("message1", new Document("messageType", 1).append("message", "Test"));
+        request.setMessages(messages);
 
         Document existingPlayer = new Document("playerId", 456);
         ArgumentCaptor<Bson> updateCaptor = ArgumentCaptor.forClass(Bson.class);
@@ -2607,7 +2638,7 @@ public class SinglePlayerResourceTest {
         SetMessagesRequest request = new SetMessagesRequest();
         request.setPlayerId(789);
         request.setPlayerName("TestPlayer");
-        request.setMessagesPackage(new java.util.ArrayList<>());
+        request.setMessages(new java.util.HashMap<>());
 
         Document existingPlayer = new Document("playerId", 789);
         
@@ -2630,9 +2661,9 @@ public class SinglePlayerResourceTest {
         SetMessagesRequest request = new SetMessagesRequest();
         request.setPlayerId(999);
         request.setPlayerName("NonExistent");
-        List<Document> messages = new java.util.ArrayList<>();
-        messages.add(new Document("messageType", 1).append("message", "Test"));
-        request.setMessagesPackage(messages);
+        Map<String, Object> messages = new java.util.HashMap<>();
+        messages.put("message1", new Document("messageType", 1).append("message", "Test"));
+        request.setMessages(messages);
 
         when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
         when(mockFindIterable.first()).thenReturn(null);
@@ -2668,8 +2699,8 @@ public class SinglePlayerResourceTest {
         // Arrange
         SetMessagesRequest request = new SetMessagesRequest();
         request.setPlayerName("TestPlayer");
-        List<Document> messages = new java.util.ArrayList<>();
-        request.setMessagesPackage(messages);
+        Map<String, Object> messages = new java.util.HashMap<>();
+        request.setMessages(messages);
 
         // Act
         Response response = resource.setMessages(request);
@@ -2684,8 +2715,8 @@ public class SinglePlayerResourceTest {
         // Arrange
         SetMessagesRequest request = new SetMessagesRequest();
         request.setPlayerId(123);
-        List<Document> messages = new java.util.ArrayList<>();
-        request.setMessagesPackage(messages);
+        Map<String, Object> messages = new java.util.HashMap<>();
+        request.setMessages(messages);
 
         // Act
         Response response = resource.setMessages(request);
@@ -2716,9 +2747,9 @@ public class SinglePlayerResourceTest {
         SetMessagesRequest request = new SetMessagesRequest();
         request.setPlayerId(123);
         request.setPlayerName("TestPlayer");
-        List<Document> messages = new java.util.ArrayList<>();
-        messages.add(new Document("messageType", 1).append("message", "Error test"));
-        request.setMessagesPackage(messages);
+        Map<String, Object> messages = new java.util.HashMap<>();
+        messages.put("message1", new Document("messageType", 1).append("message", "Error test"));
+        request.setMessages(messages);
 
         when(mockCollection.find(any(Bson.class))).thenThrow(new RuntimeException("Database connection lost"));
 
@@ -2737,9 +2768,9 @@ public class SinglePlayerResourceTest {
         SetMessagesRequest request = new SetMessagesRequest();
         request.setPlayerId(123);
         request.setPlayerName("TestPlayer");
-        List<Document> messages = new java.util.ArrayList<>();
-        messages.add(new Document("messageType", 1).append("message", "Update test"));
-        request.setMessagesPackage(messages);
+        Map<String, Object> messages = new java.util.HashMap<>();
+        messages.put("message1", new Document("messageType", 1).append("message", "Update test"));
+        request.setMessages(messages);
 
         Document existingPlayer = new Document("playerId", 123);
         
