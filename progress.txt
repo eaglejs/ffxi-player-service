@@ -113,3 +113,20 @@
 - Added unit tests: SinglePlayerResourceTest (9 new tests) covering success, lowercase formatting, not found, null/missing fields, database error, and update failure scenarios
 - All 59 tests passing
 - PRD "Set individual players gil amount" feature marked as passes: true
+
+2026-02-22: Implemented Set Player Engagement Status endpoint (Restful API)
+- Created SetStatusRequest DTO model for request data validation (playerId, playerName, status)
+- Created POST endpoint /player/set_status accepting playerId, playerName, and status in request body
+- Implemented method to update player's engagement status in MongoDB using playerId filter
+- Automatically formats playerName to lowercase as specified in PRD requirements
+- Validates all required fields (playerId, playerName, status) and returns HTTP 400 if any are missing
+- Checks player exists before updating (returns HTTP 404 if not found)
+- Updates playerName and status fields in database using MongoDB updateOne with combine and set
+- Broadcasts status update via WebSocket using PlayerWebSocket.broadcast() with playerId, playerName, and status
+- Returns "Status: OK" text response with HTTP 200 on success
+- Returns HTTP 404 when player not found
+- Returns HTTP 500 on database errors or update failures
+- Added Swagger/OpenAPI annotations for API documentation
+- Added unit tests: SinglePlayerResourceTest (9 new tests) covering success, lowercase formatting, not found, null/missing fields, database error, and update failure scenarios
+- All 68 tests passing (59 + 9 new)
+- PRD "Set individual players engagement status" feature marked as passes: true

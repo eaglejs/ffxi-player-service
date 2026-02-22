@@ -8,6 +8,7 @@ import io.eaglejs.ffxi.models.Player;
 import io.eaglejs.ffxi.models.SetGilRequest;
 import io.eaglejs.ffxi.models.SetJobsRequest;
 import io.eaglejs.ffxi.models.SetOnlineRequest;
+import io.eaglejs.ffxi.models.SetStatusRequest;
 import io.eaglejs.ffxi.service.MongoDBService;
 import io.eaglejs.ffxi.websocket.PlayerWebSocket;
 import org.bson.Document;
@@ -701,5 +702,181 @@ public class SinglePlayerResourceTest {
         assertEquals(500, response.getStatus());
         String errorMessage = (String) response.getEntity();
         assertEquals("Failed to update player gil", errorMessage);
+    }
+
+    @Test
+    public void testSetStatus_Success() {
+        // Arrange
+        SetStatusRequest request = new SetStatusRequest();
+        request.setPlayerId(123);
+        request.setPlayerName("TestPlayer");
+        request.setStatus(1);
+
+        Document existingPlayer = new Document("playerId", 123);
+        
+        when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
+        when(mockFindIterable.first()).thenReturn(existingPlayer);
+        when(mockCollection.updateOne(any(Bson.class), any(Bson.class))).thenReturn(mockUpdateResult);
+        when(mockUpdateResult.getModifiedCount()).thenReturn(1L);
+
+        // Act
+        Response response = resource.setStatus(request);
+
+        // Assert
+        assertEquals(200, response.getStatus());
+        assertEquals("Status: OK", response.getEntity());
+        verify(mockCollection).find(any(Bson.class));
+        verify(mockCollection).updateOne(any(Bson.class), any(Bson.class));
+    }
+
+    @Test
+    public void testSetStatus_FormatsPlayerNameToLowercase() {
+        // Arrange
+        SetStatusRequest request = new SetStatusRequest();
+        request.setPlayerId(456);
+        request.setPlayerName("TestPlayer");
+        request.setStatus(2);
+
+        Document existingPlayer = new Document("playerId", 456);
+        ArgumentCaptor<Bson> updateCaptor = ArgumentCaptor.forClass(Bson.class);
+        
+        when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
+        when(mockFindIterable.first()).thenReturn(existingPlayer);
+        when(mockCollection.updateOne(any(Bson.class), updateCaptor.capture())).thenReturn(mockUpdateResult);
+        when(mockUpdateResult.getModifiedCount()).thenReturn(1L);
+
+        // Act
+        resource.setStatus(request);
+
+        // Assert
+        Bson capturedUpdate = updateCaptor.getValue();
+        assertNotNull(capturedUpdate);
+        assertTrue(capturedUpdate.toString().contains("testplayer"));
+    }
+
+    @Test
+    public void testSetStatus_PlayerNotFound() {
+        // Arrange
+        SetStatusRequest request = new SetStatusRequest();
+        request.setPlayerId(999);
+        request.setPlayerName("NonExistent");
+        request.setStatus(1);
+
+        when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
+        when(mockFindIterable.first()).thenReturn(null);
+
+        // Act
+        Response response = resource.setStatus(request);
+
+        // Assert
+        assertEquals(404, response.getStatus());
+        String errorMessage = (String) response.getEntity();
+        assertTrue(errorMessage.contains("Player not found"));
+        assertTrue(errorMessage.contains("999"));
+        verify(mockCollection, never()).updateOne(any(Bson.class), any(Bson.class));
+    }
+
+    @Test
+    public void testSetStatus_NullRequest() {
+        // Arrange
+        SetStatusRequest request = null;
+
+        // Act
+        Response response = resource.setStatus(request);
+
+        // Assert
+        assertEquals(400, response.getStatus());
+        String errorMessage = (String) response.getEntity();
+        assertEquals("playerId, playerName, and status are required", errorMessage);
+        verify(mockCollection, never()).updateOne(any(Bson.class), any(Bson.class));
+    }
+
+    @Test
+    public void testSetStatus_MissingPlayerId() {
+        // Arrange
+        SetStatusRequest request = new SetStatusRequest();
+        request.setPlayerName("TestPlayer");
+        request.setStatus(1);
+
+        // Act
+        Response response = resource.setStatus(request);
+
+        // Assert
+        assertEquals(400, response.getStatus());
+        assertEquals("playerId, playerName, and status are required", response.getEntity());
+    }
+
+    @Test
+    public void testSetStatus_MissingPlayerName() {
+        // Arrange
+        SetStatusRequest request = new SetStatusRequest();
+        request.setPlayerId(123);
+        request.setStatus(1);
+
+        // Act
+        Response response = resource.setStatus(request);
+
+        // Assert
+        assertEquals(400, response.getStatus());
+        assertEquals("playerId, playerName, and status are required", response.getEntity());
+    }
+
+    @Test
+    public void testSetStatus_MissingStatus() {
+        // Arrange
+        SetStatusRequest request = new SetStatusRequest();
+        request.setPlayerId(123);
+        request.setPlayerName("TestPlayer");
+
+        // Act
+        Response response = resource.setStatus(request);
+
+        // Assert
+        assertEquals(400, response.getStatus());
+        assertEquals("playerId, playerName, and status are required", response.getEntity());
+    }
+
+    @Test
+    public void testSetStatus_DatabaseError() {
+        // Arrange
+        SetStatusRequest request = new SetStatusRequest();
+        request.setPlayerId(123);
+        request.setPlayerName("TestPlayer");
+        request.setStatus(1);
+
+        when(mockCollection.find(any(Bson.class))).thenThrow(new RuntimeException("Database connection lost"));
+
+        // Act
+        Response response = resource.setStatus(request);
+
+        // Assert
+        assertEquals(500, response.getStatus());
+        String errorMessage = (String) response.getEntity();
+        assertEquals("An error occurred while updating player status.", errorMessage);
+    }
+
+    @Test
+    public void testSetStatus_UpdateFailure() {
+        // Arrange
+        SetStatusRequest request = new SetStatusRequest();
+        request.setPlayerId(123);
+        request.setPlayerName("TestPlayer");
+        request.setStatus(1);
+
+        Document existingPlayer = new Document("playerId", 123);
+        
+        when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
+        when(mockFindIterable.first()).thenReturn(existingPlayer);
+        when(mockCollection.updateOne(any(Bson.class), any(Bson.class))).thenReturn(mockUpdateResult);
+        when(mockUpdateResult.getModifiedCount()).thenReturn(0L);
+        when(mockUpdateResult.getMatchedCount()).thenReturn(0L);
+
+        // Act
+        Response response = resource.setStatus(request);
+
+        // Assert
+        assertEquals(500, response.getStatus());
+        String errorMessage = (String) response.getEntity();
+        assertEquals("Failed to update player status", errorMessage);
     }
 }
