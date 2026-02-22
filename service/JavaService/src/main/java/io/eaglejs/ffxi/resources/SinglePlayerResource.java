@@ -899,7 +899,7 @@ public class SinglePlayerResource {
   })
   public Response getChatLogByType(
       @QueryParam("playerId") Integer playerId,
-      @QueryParam("messageType") Integer messageType) {
+      @QueryParam("messageType") String messageType) {
     try {
       if (playerId == null) {
         return Response.status(Response.Status.BAD_REQUEST)
