@@ -305,3 +305,16 @@ Feature: Refresh individual player buffs
 - Updated prd.json to mark feature as passes: true
 
 This endpoint provides a way to clear all buffs from a player, useful for resetting state or handling buff expiration from the UI.
+
+--- 2026-02-22 Implementation Update ---
+Feature: Reset individual player exp history
+- Created ResetExpHistoryRequest DTO with playerId and playerName fields
+- Implemented POST /player/reset_exp_history endpoint in SinglePlayerResource
+- Endpoint resets player's expHistory by setting all exp types (experience, capacity, exemplar) to empty arrays in MongoDB database
+- Broadcasts reset expHistory via WebSocket to all connected clients
+- Returns "Experience history reset: OK" on success
+- Added 8 comprehensive unit tests covering success, lowercase formatting, player not found, null request, missing playerId, missing playerName, database error, and update failure scenarios
+- All 178 tests passing
+- Updated prd.json to mark feature as passes: true
+
+This endpoint provides a way to clear all experience history for a player, resetting the three exp types (experience, capacity, exemplar) to empty arrays.

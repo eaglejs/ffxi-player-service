@@ -4,6 +4,7 @@ import com.mongodb.client.MongoCollection;
 import io.eaglejs.ffxi.mapper.PlayerMapper;
 import io.eaglejs.ffxi.models.Player;
 import io.eaglejs.ffxi.models.RefreshBuffsRequest;
+import io.eaglejs.ffxi.models.ResetExpHistoryRequest;
 import io.eaglejs.ffxi.models.SetBuffsRequest;
 import io.eaglejs.ffxi.models.SetCapacityPointsRequest;
 import io.eaglejs.ffxi.models.SetGilRequest;
@@ -1125,6 +1126,83 @@ public class SinglePlayerResource {
             LOG.error("Error refreshing player buffs for playerId: " + request.getPlayerId(), e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity("An error occurred while refreshing player buffs.")
+                    .build();
+        }
+    }
+
+    @POST
+    @Path("/reset_exp_history")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.TEXT_PLAIN)
+    @Operation(
+        summary = "Reset Player Experience History",
+        description = "Resets a player's experience history by clearing all exp types to empty arrays in the database and broadcasts the update via WebSocket.",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Experience history reset successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request data"),
+            @ApiResponse(responseCode = "404", description = "Player not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+        }
+    )
+    public Response resetExpHistory(ResetExpHistoryRequest request) {
+        try {
+            if (request == null || request.getPlayerId() == null || request.getPlayerName() == null) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity("playerId and playerName are required")
+                        .build();
+            }
+
+            String playerName = request.getPlayerName().toLowerCase();
+            
+            MongoCollection<Document> playersCollection = mongoDBService.getPlayersCollection();
+            
+            Document existingPlayer = playersCollection.find(eq("playerId", request.getPlayerId())).first();
+            if (existingPlayer == null) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity("Player not found with playerId: " + request.getPlayerId())
+                        .build();
+            }
+
+            // Reset exp history by setting all types to empty arrays
+            Document expHistory = new Document();
+            expHistory.put("experience", new ArrayList<>());
+            expHistory.put("capacity", new ArrayList<>());
+            expHistory.put("exemplar", new ArrayList<>());
+
+            com.mongodb.client.result.UpdateResult result = playersCollection.updateOne(
+                eq("playerId", request.getPlayerId()),
+                combine(
+                    set("playerName", playerName),
+                    set("expHistory", expHistory)
+                )
+            );
+
+            if (result.getModifiedCount() == 0 && result.getMatchedCount() == 0) {
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                        .entity("Failed to reset player exp history")
+                        .build();
+            }
+
+            Map<String, Object> broadcastData = new HashMap<>();
+            broadcastData.put("playerId", request.getPlayerId());
+            broadcastData.put("playerName", playerName);
+            
+            Map<String, Object> expHistoryData = new HashMap<>();
+            expHistoryData.put("experience", new ArrayList<>());
+            expHistoryData.put("capacity", new ArrayList<>());
+            expHistoryData.put("exemplar", new ArrayList<>());
+            broadcastData.put("expHistory", expHistoryData);
+            
+            PlayerWebSocket.broadcast(broadcastData);
+            
+            LOG.info("Reset exp history for player {} ({})", 
+                request.getPlayerId(), playerName);
+            
+            return Response.ok("Experience history reset: OK").build();
+        } catch (Exception e) {
+            LOG.error("Error resetting player exp history for playerId: " + request.getPlayerId(), e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("An error occurred while resetting player exp history.")
                     .build();
         }
     }
