@@ -815,7 +815,7 @@ public class SinglePlayerResource {
             }
 
             // Extract buffs array from the document, return empty array if not present
-            List<Integer> buffs = getIntegerList(document, "buffs");
+            List<Object> buffs = getObjectList(document, "buffs");
 
             return Response.ok(buffs).build();
         } catch (Exception e) {
@@ -851,7 +851,7 @@ public class SinglePlayerResource {
 
             String playerName = request.getPlayerName().toLowerCase();
 
-            List<Integer> buffsList = new ArrayList<>(request.getBuffs().values());
+            List<Object> buffsList = new ArrayList<>(request.getBuffs().values());
 
             MongoCollection<Document> playersCollection = mongoDBService.getPlayersCollection();
             
@@ -1618,19 +1618,12 @@ public class SinglePlayerResource {
         }
     }
 
-    private List<Integer> getIntegerList(Document source, String key) {
+    private List<Object> getObjectList(Document source, String key) {
         Object value = source.get(key);
         if (!(value instanceof List<?>)) {
             return new ArrayList<>();
         }
-
-        List<Integer> result = new ArrayList<>();
-        for (Object item : (List<?>) value) {
-            if (item instanceof Number) {
-                result.add(((Number) item).intValue());
-            }
-        }
-        return result;
+        return new ArrayList<>((List<?>) value);
     }
 
     private List<Document> getDocumentList(Document source, String key) {

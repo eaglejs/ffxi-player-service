@@ -11,7 +11,7 @@ public class SetBuffsRequest {
     private String playerName;
 
     @JsonProperty("buffs")
-    private Map<String, Integer> buffs;
+    private Map<String, Object> buffs;
 
     public Integer getPlayerId() {
         return playerId;
@@ -29,11 +29,11 @@ public class SetBuffsRequest {
         this.playerName = playerName;
     }
 
-    public Map<String, Integer> getBuffs() {
+    public Map<String, Object> getBuffs() {
         return buffs;
     }
 
-    public void setBuffs(Map<String, Integer> buffs) {
+    public void setBuffs(Map<String, Object> buffs) {
         this.buffs = buffs;
     }
 }
