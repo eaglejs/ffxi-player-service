@@ -34,4 +34,11 @@ public class MongoDBService {
             mongoClient.close();
         }
     }
+
+    /**
+     * Get the chats collection from the ffxi database.
+     */
+    public MongoCollection<Document> getChatsCollection() {
+        return database.getCollection("chats");
+    }
 }

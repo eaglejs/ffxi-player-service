@@ -915,8 +915,8 @@ public class SinglePlayerResource {
                         .build();
             }
 
-            MongoCollection<Document> playersCollection = mongoDBService.getPlayersCollection();
-            Document document = playersCollection.find(eq("playerId", playerId)).first();
+            MongoCollection<Document> chatsCollection = mongoDBService.getChatsCollection();
+            Document document = chatsCollection.find(eq("playerId", playerId)).first();
 
             if (document == null) {
                 return Response.status(Response.Status.NOT_FOUND)
@@ -965,8 +965,8 @@ public class SinglePlayerResource {
                         .build();
             }
 
-            MongoCollection<Document> playersCollection = mongoDBService.getPlayersCollection();
-            Document document = playersCollection.find(eq("playerId", playerId)).first();
+            MongoCollection<Document> chatsCollection = mongoDBService.getChatsCollection();
+            Document document = chatsCollection.find(eq("playerId", playerId)).first();
 
             if (document == null) {
                 return Response.status(Response.Status.NOT_FOUND)
@@ -1041,16 +1041,16 @@ public class SinglePlayerResource {
                 return Response.ok("Message: OK (No valid messages to process)").build();
             }
 
-            MongoCollection<Document> playersCollection = mongoDBService.getPlayersCollection();
+            MongoCollection<Document> chatsCollection = mongoDBService.getChatsCollection();
 
-            Document existingPlayer = playersCollection.find(eq("playerId", request.getPlayerId())).first();
+            Document existingPlayer = chatsCollection.find(eq("playerId", request.getPlayerId())).first();
             if (existingPlayer == null) {
                 return Response.status(Response.Status.NOT_FOUND)
                         .entity("Player not found with playerId: " + request.getPlayerId())
                         .build();
             }
 
-            com.mongodb.client.result.UpdateResult result = playersCollection.updateOne(
+            com.mongodb.client.result.UpdateResult result = chatsCollection.updateOne(
                 eq("playerId", request.getPlayerId()),
                 combine(
                     set("playerName", playerName),
