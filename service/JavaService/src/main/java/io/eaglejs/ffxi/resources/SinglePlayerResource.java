@@ -1012,15 +1012,10 @@ public class SinglePlayerResource {
     public Response setMessages(SetMessagesRequest request) {
         try {
             if (request == null || request.getPlayerId() == null || 
-                request.getPlayerName() == null || request.getMessages() == null ||
-                request.getMessageType() == null) {
+                request.getPlayerName() == null || request.getMessages() == null) {
                 return Response.status(Response.Status.BAD_REQUEST)
-                        .entity("playerId, playerName, messages, and messageType are required")
+                        .entity("playerId, playerName, and messagesPackage are required")
                         .build();
-            }
-
-            if (request.getMessages().isEmpty()) {
-                return Response.ok("Message: OK (No messages to process)").build();
             }
 
             String playerName = request.getPlayerName().toLowerCase();
@@ -1035,10 +1030,6 @@ public class SinglePlayerResource {
                 entry.put("message", messageString);
                 entry.put("timeStamp", timeStamp);
                 messagesPackage.add(entry);
-            }
-
-            if (messagesPackage.isEmpty()) {
-                return Response.ok("Message: OK (No valid messages to process)").build();
             }
 
             MongoCollection<Document> chatsCollection = mongoDBService.getChatsCollection();
@@ -1074,7 +1065,7 @@ public class SinglePlayerResource {
             LOG.info("Updated messages for player {} ({}): {} messages",
                 request.getPlayerId(), playerName, messagesPackage.size());
 
-            return Response.ok("Message: OK").build();
+            return Response.ok("Messages: OK").build();
         } catch (Exception e) {
             LOG.error("Error setting player messages for playerId: " + request.getPlayerId(), e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)

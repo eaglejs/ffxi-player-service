@@ -61,6 +61,7 @@ public class SinglePlayerResourceTest {
         resource = new SinglePlayerResource(mockMongoService);
 
         when(mockMongoService.getPlayersCollection()).thenReturn(mockCollection);
+        when(mockMongoService.getChatsCollection()).thenReturn(mockCollection);
         
         PlayerWebSocket.reset();
     }
