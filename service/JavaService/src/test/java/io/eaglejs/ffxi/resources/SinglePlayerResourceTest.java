@@ -2446,7 +2446,7 @@ public class SinglePlayerResourceTest {
     public void testGetChatLogByType_Success() {
         // Arrange
         Integer playerId = 123;
-        Integer messageType = 1;
+        String messageType = "PARTY";
         // Node.js stores chatLog as a Document keyed by messageType string
         Document chatLogDoc = new Document();
         List<Document> type1Messages = new java.util.ArrayList<>();
@@ -2479,7 +2479,7 @@ public class SinglePlayerResourceTest {
     public void testGetChatLogByType_NoMatchingMessages() {
         // Arrange
         Integer playerId = 456;
-        Integer messageType = 99;
+        String messageType = "LINKSHELL2";
         Document chatLogDoc = new Document();
         List<Document> type1Messages = new java.util.ArrayList<>();
         type1Messages.add(new Document("messageType", 1).append("message", "Type 1 message"));
@@ -2507,7 +2507,7 @@ public class SinglePlayerResourceTest {
     public void testGetChatLogByType_NoChatLogField() {
         // Arrange
         Integer playerId = 789;
-        Integer messageType = 1;
+        String messageType = "SAY";
         Document existingPlayer = new Document("playerId", playerId);
         
         when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
@@ -2528,7 +2528,7 @@ public class SinglePlayerResourceTest {
     public void testGetChatLogByType_PlayerNotFound() {
         // Arrange
         Integer playerId = 999;
-        Integer messageType = 1;
+        String messageType = "DROP";
         
         when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
         when(mockFindIterable.first()).thenReturn(null);
@@ -2547,7 +2547,7 @@ public class SinglePlayerResourceTest {
     public void testGetChatLogByType_NullPlayerId() {
         // Arrange
         Integer playerId = null;
-        Integer messageType = 1;
+        String messageType = "DROP";
 
         // Act
         Response response = resource.getChatLogByType(playerId, messageType);
@@ -2563,7 +2563,7 @@ public class SinglePlayerResourceTest {
     public void testGetChatLogByType_NullMessageType() {
         // Arrange
         Integer playerId = 123;
-        Integer messageType = null;
+        String messageType = null;
 
         // Act
         Response response = resource.getChatLogByType(playerId, messageType);
@@ -2579,7 +2579,7 @@ public class SinglePlayerResourceTest {
     public void testGetChatLogByType_DatabaseError() {
         // Arrange
         Integer playerId = 123;
-        Integer messageType = 1;
+        String messageType = "DROP";
         
         when(mockCollection.find(any(Bson.class))).thenThrow(new RuntimeException("Database connection lost"));
 
