@@ -185,6 +185,16 @@ public class SinglePlayerResource {
                         .build();
             }
 
+            Map<String, Object> broadcastData = new HashMap<>();
+            broadcastData.put("playerId", request.getPlayerId());
+            broadcastData.put("playerName", request.getPlayerName());
+            broadcastData.put("mainJob", request.getMainJob());
+            broadcastData.put("subJob", request.getSubJob());
+            
+            PlayerWebSocket.broadcast(broadcastData);
+            
+            LOG.info("Updated online status for player {} ({})", request.getPlayerId(), request.getPlayerName());
+
             LOG.info("Updated jobs for player {} ({}): {}/{}", 
                 request.getPlayerId(), request.getPlayerName(), 
                 request.getMainJob(), request.getSubJob());
