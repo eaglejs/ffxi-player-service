@@ -2608,8 +2608,9 @@ public class SinglePlayerResourceTest {
         
         when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
         when(mockFindIterable.first()).thenReturn(existingPlayer);
-        when(mockCollection.updateOne(any(Bson.class), any(Bson.class))).thenReturn(mockUpdateResult);
+        when(mockCollection.updateOne(any(Bson.class), any(Bson.class), any(com.mongodb.client.model.UpdateOptions.class))).thenReturn(mockUpdateResult);
         when(mockUpdateResult.getModifiedCount()).thenReturn(1L);
+        when(mockUpdateResult.getUpsertedId()).thenReturn(null);
 
         // Act
         Response response = resource.setMessages(request);
@@ -2618,7 +2619,7 @@ public class SinglePlayerResourceTest {
         assertEquals(200, response.getStatus());
         assertEquals("Messages: OK", response.getEntity());
         verify(mockCollection).find(any(Bson.class));
-        verify(mockCollection).updateOne(any(Bson.class), any(Bson.class));
+        verify(mockCollection).updateOne(any(Bson.class), any(Bson.class), any(com.mongodb.client.model.UpdateOptions.class));
     }
 
     @Test
@@ -2637,8 +2638,9 @@ public class SinglePlayerResourceTest {
         
         when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
         when(mockFindIterable.first()).thenReturn(existingPlayer);
-        when(mockCollection.updateOne(any(Bson.class), updateCaptor.capture())).thenReturn(mockUpdateResult);
+        when(mockCollection.updateOne(any(Bson.class), updateCaptor.capture(), any(com.mongodb.client.model.UpdateOptions.class))).thenReturn(mockUpdateResult);
         when(mockUpdateResult.getModifiedCount()).thenReturn(1L);
+        when(mockUpdateResult.getUpsertedId()).thenReturn(null);
 
         // Act
         resource.setMessages(request);
@@ -2662,8 +2664,9 @@ public class SinglePlayerResourceTest {
         
         when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
         when(mockFindIterable.first()).thenReturn(existingPlayer);
-        when(mockCollection.updateOne(any(Bson.class), any(Bson.class))).thenReturn(mockUpdateResult);
+        when(mockCollection.updateOne(any(Bson.class), any(Bson.class), any(com.mongodb.client.model.UpdateOptions.class))).thenReturn(mockUpdateResult);
         when(mockUpdateResult.getModifiedCount()).thenReturn(1L);
+        when(mockUpdateResult.getUpsertedId()).thenReturn(null);
 
         // Act
         Response response = resource.setMessages(request);
@@ -2695,7 +2698,7 @@ public class SinglePlayerResourceTest {
         String errorMessage = (String) response.getEntity();
         assertTrue(errorMessage.contains("Player not found"));
         assertTrue(errorMessage.contains("999"));
-        verify(mockCollection, never()).updateOne(any(Bson.class), any(Bson.class));
+        verify(mockCollection, never()).updateOne(any(Bson.class), any(Bson.class), any(com.mongodb.client.model.UpdateOptions.class));
     }
 
     @Test
@@ -2709,8 +2712,8 @@ public class SinglePlayerResourceTest {
         // Assert
         assertEquals(400, response.getStatus());
         String errorMessage = (String) response.getEntity();
-        assertEquals("playerId, playerName, messagesPackage, and messageType are required", errorMessage);
-        verify(mockCollection, never()).updateOne(any(Bson.class), any(Bson.class));
+        assertEquals("Request body is null", errorMessage);
+        verify(mockCollection, never()).updateOne(any(Bson.class), any(Bson.class), any(com.mongodb.client.model.UpdateOptions.class));
     }
 
     @Test
@@ -2726,7 +2729,7 @@ public class SinglePlayerResourceTest {
 
         // Assert
         assertEquals(400, response.getStatus());
-        assertEquals("playerId, playerName, messagesPackage, and messageType are required", response.getEntity());
+        assertEquals("playerId is required", response.getEntity());
     }
 
     @Test
@@ -2742,7 +2745,7 @@ public class SinglePlayerResourceTest {
 
         // Assert
         assertEquals(400, response.getStatus());
-        assertEquals("playerId, playerName, messagesPackage, and messageType are required", response.getEntity());
+        assertEquals("playerName is required", response.getEntity());
     }
 
     @Test
@@ -2757,7 +2760,7 @@ public class SinglePlayerResourceTest {
 
         // Assert
         assertEquals(400, response.getStatus());
-        assertEquals("playerId, playerName, messagesPackage, and messageType are required", response.getEntity());
+        assertEquals("messages is required", response.getEntity());
     }
 
     @Test
@@ -2797,9 +2800,10 @@ public class SinglePlayerResourceTest {
         
         when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
         when(mockFindIterable.first()).thenReturn(existingPlayer);
-        when(mockCollection.updateOne(any(Bson.class), any(Bson.class))).thenReturn(mockUpdateResult);
+        when(mockCollection.updateOne(any(Bson.class), any(Bson.class), any(com.mongodb.client.model.UpdateOptions.class))).thenReturn(mockUpdateResult);
         when(mockUpdateResult.getModifiedCount()).thenReturn(0L);
         when(mockUpdateResult.getMatchedCount()).thenReturn(0L);
+        when(mockUpdateResult.getUpsertedId()).thenReturn(null);
 
         // Act
         Response response = resource.setMessages(request);
@@ -3124,21 +3128,18 @@ public class SinglePlayerResourceTest {
         SetCurrency1Request request = new SetCurrency1Request();
         request.setPlayerId(123);
         request.setPlayerName("TestPlayer");
-        
-        Currency1 currency1 = new Currency1();
-        currency1.setConquestPointsBastok(100);
-        currency1.setConquestPointsSandoria(200);
-        currency1.setConquestPointsWindurst(300);
-        currency1.setDeeds(10);
-        currency1.setDominionNotes(50);
-        currency1.setImperialStanding(1000);
-        currency1.setLoginPoints(25);
-        currency1.setNyzulTokens(75);
-        currency1.setSparksOfEminence(5000);
-        currency1.setTherionIchor(150);
-        currency1.setUnityAccolades(500);
-        currency1.setVoidstones(20);
-        request.setCurrency1(currency1);
+        request.setConquestPointsBastok(100);
+        request.setConquestPointsSandoria(200);
+        request.setConquestPointsWindurst(300);
+        request.setDeeds(10);
+        request.setDominionNotes(50);
+        request.setImperialStanding(1000);
+        request.setLoginPoints(25);
+        request.setNyzulTokens(75);
+        request.setSparksOfEminence(5000);
+        request.setTherionIchor(150);
+        request.setUnityAccolades(500);
+        request.setVoidstones(20);
 
         Document existingPlayer = new Document("playerId", 123);
         
@@ -3163,10 +3164,7 @@ public class SinglePlayerResourceTest {
         SetCurrency1Request request = new SetCurrency1Request();
         request.setPlayerId(456);
         request.setPlayerName("TestPlayer");
-        
-        Currency1 currency1 = new Currency1();
-        currency1.setSparksOfEminence(1000);
-        request.setCurrency1(currency1);
+        request.setSparksOfEminence(1000);
 
         Document existingPlayer = new Document("playerId", 456);
         ArgumentCaptor<Bson> updateCaptor = ArgumentCaptor.forClass(Bson.class);
@@ -3191,7 +3189,7 @@ public class SinglePlayerResourceTest {
         SetCurrency1Request request = new SetCurrency1Request();
         request.setPlayerId(999);
         request.setPlayerName("NonExistent");
-        request.setCurrency1(new Currency1());
+        request.setSparksOfEminence(1000);
 
         when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
         when(mockFindIterable.first()).thenReturn(null);
@@ -3218,7 +3216,7 @@ public class SinglePlayerResourceTest {
         // Assert
         assertEquals(400, response.getStatus());
         String errorMessage = (String) response.getEntity();
-        assertEquals("playerId, playerName, and currency1 are required", errorMessage);
+        assertEquals("playerId and playerName are required", errorMessage);
         verify(mockCollection, never()).updateOne(any(Bson.class), any(Bson.class));
     }
 
@@ -3227,14 +3225,13 @@ public class SinglePlayerResourceTest {
         // Arrange
         SetCurrency1Request request = new SetCurrency1Request();
         request.setPlayerName("TestPlayer");
-        request.setCurrency1(new Currency1());
 
         // Act
         Response response = resource.setCurrency1(request);
 
         // Assert
         assertEquals(400, response.getStatus());
-        assertEquals("playerId, playerName, and currency1 are required", response.getEntity());
+        assertEquals("playerId and playerName are required", response.getEntity());
     }
 
     @Test
@@ -3242,29 +3239,13 @@ public class SinglePlayerResourceTest {
         // Arrange
         SetCurrency1Request request = new SetCurrency1Request();
         request.setPlayerId(123);
-        request.setCurrency1(new Currency1());
 
         // Act
         Response response = resource.setCurrency1(request);
 
         // Assert
         assertEquals(400, response.getStatus());
-        assertEquals("playerId, playerName, and currency1 are required", response.getEntity());
-    }
-
-    @Test
-    public void testSetCurrency1_MissingCurrency1() {
-        // Arrange
-        SetCurrency1Request request = new SetCurrency1Request();
-        request.setPlayerId(123);
-        request.setPlayerName("TestPlayer");
-
-        // Act
-        Response response = resource.setCurrency1(request);
-
-        // Assert
-        assertEquals(400, response.getStatus());
-        assertEquals("playerId, playerName, and currency1 are required", response.getEntity());
+        assertEquals("playerId and playerName are required", response.getEntity());
     }
 
     @Test
@@ -3273,7 +3254,7 @@ public class SinglePlayerResourceTest {
         SetCurrency1Request request = new SetCurrency1Request();
         request.setPlayerId(123);
         request.setPlayerName("TestPlayer");
-        request.setCurrency1(new Currency1());
+        request.setSparksOfEminence(1000);
 
         when(mockCollection.find(any(Bson.class))).thenThrow(new RuntimeException("Database connection lost"));
 
@@ -3292,7 +3273,7 @@ public class SinglePlayerResourceTest {
         SetCurrency1Request request = new SetCurrency1Request();
         request.setPlayerId(123);
         request.setPlayerName("TestPlayer");
-        request.setCurrency1(new Currency1());
+        request.setSparksOfEminence(1000);
 
         Document existingPlayer = new Document("playerId", 123);
         
@@ -3317,21 +3298,18 @@ public class SinglePlayerResourceTest {
         SetCurrency2Request request = new SetCurrency2Request();
         request.setPlayerId(123);
         request.setPlayerName("TestPlayer");
-        
-        Currency2 currency2 = new Currency2();
-        currency2.setDomainPoints(100);
-        currency2.setEschaBeads(200);
-        currency2.setEschaSilt(300);
-        currency2.setGallantry(400);
-        currency2.setGallimaufry(500);
-        currency2.setHallmarks(600);
-        currency2.setMogSegments(700);
-        currency2.setMweyaPlasmCorpuscles(800);
-        currency2.setPotpourri(900);
-        currency2.setCoalitionImprimaturs(1000);
-        currency2.setTemenosUnits(1100);
-        currency2.setApollyonUnits(1200);
-        request.setCurrency2(currency2);
+        request.setDomainPoints(100);
+        request.setEschaBeads(200);
+        request.setEschaSilt(300);
+        request.setGallantry(400);
+        request.setGallimaufry(500);
+        request.setHallmarks(600);
+        request.setMogSegments(700);
+        request.setMweyaPlasmCorpuscles(800);
+        request.setPotpourri(900);
+        request.setCoalitionImprimaturs(1000);
+        request.setTemenosUnits(1100);
+        request.setApollyonUnits(1200);
 
         Document existingPlayer = new Document("playerId", 123);
         
@@ -3356,10 +3334,7 @@ public class SinglePlayerResourceTest {
         SetCurrency2Request request = new SetCurrency2Request();
         request.setPlayerId(456);
         request.setPlayerName("TestPlayer");
-        
-        Currency2 currency2 = new Currency2();
-        currency2.setDomainPoints(500);
-        request.setCurrency2(currency2);
+        request.setDomainPoints(500);
 
         Document existingPlayer = new Document("playerId", 456);
         ArgumentCaptor<Bson> updateCaptor = ArgumentCaptor.forClass(Bson.class);
@@ -3384,7 +3359,7 @@ public class SinglePlayerResourceTest {
         SetCurrency2Request request = new SetCurrency2Request();
         request.setPlayerId(999);
         request.setPlayerName("NonExistent");
-        request.setCurrency2(new Currency2());
+        request.setDomainPoints(500);
 
         when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
         when(mockFindIterable.first()).thenReturn(null);
@@ -3411,7 +3386,7 @@ public class SinglePlayerResourceTest {
         // Assert
         assertEquals(400, response.getStatus());
         String errorMessage = (String) response.getEntity();
-        assertEquals("playerId, playerName, and currency2 are required", errorMessage);
+        assertEquals("playerId and playerName are required", errorMessage);
         verify(mockCollection, never()).updateOne(any(Bson.class), any(Bson.class));
     }
 
@@ -3420,14 +3395,13 @@ public class SinglePlayerResourceTest {
         // Arrange
         SetCurrency2Request request = new SetCurrency2Request();
         request.setPlayerName("TestPlayer");
-        request.setCurrency2(new Currency2());
 
         // Act
         Response response = resource.setCurrency2(request);
 
         // Assert
         assertEquals(400, response.getStatus());
-        assertEquals("playerId, playerName, and currency2 are required", response.getEntity());
+        assertEquals("playerId and playerName are required", response.getEntity());
     }
 
     @Test
@@ -3435,29 +3409,13 @@ public class SinglePlayerResourceTest {
         // Arrange
         SetCurrency2Request request = new SetCurrency2Request();
         request.setPlayerId(123);
-        request.setCurrency2(new Currency2());
 
         // Act
         Response response = resource.setCurrency2(request);
 
         // Assert
         assertEquals(400, response.getStatus());
-        assertEquals("playerId, playerName, and currency2 are required", response.getEntity());
-    }
-
-    @Test
-    public void testSetCurrency2_MissingCurrency2() {
-        // Arrange
-        SetCurrency2Request request = new SetCurrency2Request();
-        request.setPlayerId(123);
-        request.setPlayerName("TestPlayer");
-
-        // Act
-        Response response = resource.setCurrency2(request);
-
-        // Assert
-        assertEquals(400, response.getStatus());
-        assertEquals("playerId, playerName, and currency2 are required", response.getEntity());
+        assertEquals("playerId and playerName are required", response.getEntity());
     }
 
     @Test
@@ -3466,7 +3424,7 @@ public class SinglePlayerResourceTest {
         SetCurrency2Request request = new SetCurrency2Request();
         request.setPlayerId(123);
         request.setPlayerName("TestPlayer");
-        request.setCurrency2(new Currency2());
+        request.setDomainPoints(500);
 
         when(mockCollection.find(any(Bson.class))).thenThrow(new RuntimeException("Database connection lost"));
 
@@ -3485,7 +3443,7 @@ public class SinglePlayerResourceTest {
         SetCurrency2Request request = new SetCurrency2Request();
         request.setPlayerId(123);
         request.setPlayerName("TestPlayer");
-        request.setCurrency2(new Currency2());
+        request.setDomainPoints(500);
 
         Document existingPlayer = new Document("playerId", 123);
         

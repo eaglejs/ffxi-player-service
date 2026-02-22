@@ -939,12 +939,39 @@ public class SinglePlayerResource {
   })
   public Response setMessages(SetMessagesRequest request) {
     try {
-      LOG.info("8=====D Receive Messages request: {}", request);
-      if (request == null || request.getPlayerId() == null ||
-          request.getPlayerName() == null || request.getMessages() == null ||
-          request.getMessageType() == null) {
+      LOG.info("Received set_messages request: playerId={}, playerName={}, messageType={}, messages={}",
+          request != null ? request.getPlayerId() : null,
+          request != null ? request.getPlayerName() : null,
+          request != null ? request.getMessageType() : null,
+          request != null ? request.getMessages() : null);
+      
+      if (request == null) {
         return Response.status(Response.Status.BAD_REQUEST)
-            .entity("playerId, playerName, messagesPackage, and messageType are required")
+            .entity("Request body is null")
+            .build();
+      }
+      
+      if (request.getPlayerId() == null) {
+        return Response.status(Response.Status.BAD_REQUEST)
+            .entity("playerId is required")
+            .build();
+      }
+      
+      if (request.getPlayerName() == null) {
+        return Response.status(Response.Status.BAD_REQUEST)
+            .entity("playerName is required")
+            .build();
+      }
+      
+      if (request.getMessages() == null) {
+        return Response.status(Response.Status.BAD_REQUEST)
+            .entity("messages is required")
+            .build();
+      }
+      
+      if (request.getMessageType() == null) {
+        return Response.status(Response.Status.BAD_REQUEST)
+            .entity("messageType is required")
             .build();
       }
 
@@ -962,23 +989,27 @@ public class SinglePlayerResource {
         messagesPackage.add(entry);
       }
 
-      MongoCollection<Document> chatsCollection = mongoDBService.getChatsCollection();
+      MongoCollection<Document> playersCollection = mongoDBService.getPlayersCollection();
 
-      Document existingPlayer = chatsCollection.find(eq("playerId", request.getPlayerId())).first();
+      Document existingPlayer = playersCollection.find(eq("playerId", request.getPlayerId())).first();
       if (existingPlayer == null) {
         return Response.status(Response.Status.NOT_FOUND)
             .entity("Player not found with playerId: " + request.getPlayerId())
             .build();
       }
 
+      MongoCollection<Document> chatsCollection = mongoDBService.getChatsCollection();
+
       com.mongodb.client.result.UpdateResult result = chatsCollection.updateOne(
           eq("playerId", request.getPlayerId()),
           combine(
               set("playerName", playerName),
+              set("playerId", request.getPlayerId()),
               com.mongodb.client.model.Updates.pushEach("chatLog." + messageType, messagesPackage,
-                  new PushOptions().slice(-5000))));
+                  new PushOptions().slice(-5000))),
+          new com.mongodb.client.model.UpdateOptions().upsert(true));
 
-      if (result.getModifiedCount() == 0 && result.getMatchedCount() == 0) {
+      if (result.getModifiedCount() == 0 && result.getMatchedCount() == 0 && result.getUpsertedId() == null) {
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
             .entity("Failed to update player messages")
             .build();
@@ -1150,14 +1181,13 @@ public class SinglePlayerResource {
   public Response setCurrency1(SetCurrency1Request request) {
     try {
       if (request == null || request.getPlayerId() == null ||
-          request.getPlayerName() == null || request.getCurrency1() == null) {
+          request.getPlayerName() == null) {
         return Response.status(Response.Status.BAD_REQUEST)
-            .entity("playerId, playerName, and currency1 are required")
+            .entity("playerId and playerName are required")
             .build();
       }
 
       String playerName = request.getPlayerName().toLowerCase();
-      Currency1 c1 = request.getCurrency1();
 
       MongoCollection<Document> playersCollection = mongoDBService.getPlayersCollection();
 
@@ -1169,18 +1199,18 @@ public class SinglePlayerResource {
       }
 
       Document currency1Doc = new Document();
-      currency1Doc.put("conquestPointsBastok", c1.getConquestPointsBastok());
-      currency1Doc.put("conquestPointsSandoria", c1.getConquestPointsSandoria());
-      currency1Doc.put("conquestPointsWindurst", c1.getConquestPointsWindurst());
-      currency1Doc.put("deeds", c1.getDeeds());
-      currency1Doc.put("dominionNotes", c1.getDominionNotes());
-      currency1Doc.put("imperialStanding", c1.getImperialStanding());
-      currency1Doc.put("loginPoints", c1.getLoginPoints());
-      currency1Doc.put("nyzulTokens", c1.getNyzulTokens());
-      currency1Doc.put("sparksOfEminence", c1.getSparksOfEminence());
-      currency1Doc.put("therionIchor", c1.getTherionIchor());
-      currency1Doc.put("unityAccolades", c1.getUnityAccolades());
-      currency1Doc.put("voidstones", c1.getVoidstones());
+      currency1Doc.put("conquestPointsBastok", request.getConquestPointsBastok());
+      currency1Doc.put("conquestPointsSandoria", request.getConquestPointsSandoria());
+      currency1Doc.put("conquestPointsWindurst", request.getConquestPointsWindurst());
+      currency1Doc.put("deeds", request.getDeeds());
+      currency1Doc.put("dominionNotes", request.getDominionNotes());
+      currency1Doc.put("imperialStanding", request.getImperialStanding());
+      currency1Doc.put("loginPoints", request.getLoginPoints());
+      currency1Doc.put("nyzulTokens", request.getNyzulTokens());
+      currency1Doc.put("sparksOfEminence", request.getSparksOfEminence());
+      currency1Doc.put("therionIchor", request.getTherionIchor());
+      currency1Doc.put("unityAccolades", request.getUnityAccolades());
+      currency1Doc.put("voidstones", request.getVoidstones());
 
       com.mongodb.client.result.UpdateResult result = playersCollection.updateOne(
           eq("playerId", request.getPlayerId()),
@@ -1226,14 +1256,13 @@ public class SinglePlayerResource {
   public Response setCurrency2(SetCurrency2Request request) {
     try {
       if (request == null || request.getPlayerId() == null ||
-          request.getPlayerName() == null || request.getCurrency2() == null) {
+          request.getPlayerName() == null) {
         return Response.status(Response.Status.BAD_REQUEST)
-            .entity("playerId, playerName, and currency2 are required")
+            .entity("playerId and playerName are required")
             .build();
       }
 
       String playerName = request.getPlayerName().toLowerCase();
-      Currency2 c2 = request.getCurrency2();
 
       MongoCollection<Document> playersCollection = mongoDBService.getPlayersCollection();
 
@@ -1245,18 +1274,18 @@ public class SinglePlayerResource {
       }
 
       Document currency2Doc = new Document();
-      currency2Doc.put("domainPoints", c2.getDomainPoints());
-      currency2Doc.put("eschaBeads", c2.getEschaBeads());
-      currency2Doc.put("eschaSilt", c2.getEschaSilt());
-      currency2Doc.put("gallantry", c2.getGallantry());
-      currency2Doc.put("gallimaufry", c2.getGallimaufry());
-      currency2Doc.put("hallmarks", c2.getHallmarks());
-      currency2Doc.put("mogSegments", c2.getMogSegments());
-      currency2Doc.put("mweyaPlasmCorpuscles", c2.getMweyaPlasmCorpuscles());
-      currency2Doc.put("potpourri", c2.getPotpourri());
-      currency2Doc.put("coalitionImprimaturs", c2.getCoalitionImprimaturs());
-      currency2Doc.put("temenosUnits", c2.getTemenosUnits());
-      currency2Doc.put("apollyonUnits", c2.getApollyonUnits());
+      currency2Doc.put("domainPoints", request.getDomainPoints());
+      currency2Doc.put("eschaBeads", request.getEschaBeads());
+      currency2Doc.put("eschaSilt", request.getEschaSilt());
+      currency2Doc.put("gallantry", request.getGallantry());
+      currency2Doc.put("gallimaufry", request.getGallimaufry());
+      currency2Doc.put("hallmarks", request.getHallmarks());
+      currency2Doc.put("mogSegments", request.getMogSegments());
+      currency2Doc.put("mweyaPlasmCorpuscles", request.getMweyaPlasmCorpuscles());
+      currency2Doc.put("potpourri", request.getPotpourri());
+      currency2Doc.put("coalitionImprimaturs", request.getCoalitionImprimaturs());
+      currency2Doc.put("temenosUnits", request.getTemenosUnits());
+      currency2Doc.put("apollyonUnits", request.getApollyonUnits());
 
       com.mongodb.client.result.UpdateResult result = playersCollection.updateOne(
           eq("playerId", request.getPlayerId()),
@@ -1420,7 +1449,6 @@ public class SinglePlayerResource {
   })
   public Response setExpHistory(SetExpHistoryRequest request) {
     try {
-      LOG.info(" (> ^_^)> Received setExpHistory request for playerId: {}", request != null ? request : "null");
       if (request == null || request.getPlayerId() == null ||
           request.getPlayerName() == null || request.getExpType() == null ||
           request.getPoints() == null || request.getChain() == null ||

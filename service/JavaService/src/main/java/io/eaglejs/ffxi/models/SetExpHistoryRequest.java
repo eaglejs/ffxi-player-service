@@ -26,7 +26,7 @@ public class SetExpHistoryRequest {
     public void setPlayerId(Integer playerId) { this.playerId = playerId; }
 
     public String getPlayerName() { return playerName; }
-    public void setPlayerName(String playerName) { this.playerName = playerName != null ? playerName.toLowerCase() : null; }
+    public void setPlayerName(String playerName) { this.playerName = playerName; }
 
     public Integer getExpType() { return expType; }
     public void setExpType(Integer expType) { this.expType = expType; }
@@ -38,5 +38,5 @@ public class SetExpHistoryRequest {
     public void setChain(Integer chain) { this.chain = chain; }
 
     public String getTimestamp() { return timestamp; }
-    public void setTimestamp(String timestamp) { this.timestamp = timestamp != null ? timestamp : null; }
+    public void setTimestamp(String timestamp) { this.timestamp = timestamp; }
 }
