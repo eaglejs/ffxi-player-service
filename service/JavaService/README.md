@@ -46,7 +46,7 @@ JavaService/
 ./gradlew clean jar
 ```
 
-The JAR file will be created at: `build/libs/JavaService.jar`
+The JAR file will be created at: `build/libs/ffxi-player-service-x.x.x.jar`
 
 ## UI Integration
 
@@ -100,13 +100,13 @@ The UI will either be the downloaded package from Nexus or a placeholder page sh
 
 Run directly with Gradle:
 ```bash
-./gradlew run --args="server src/main/resources/config.yml"
+./gradlew runDevWatch --args="server src/main/resources/config.yml"
 ```
 
 Or build and run the JAR:
 ```bash
 ./gradlew clean jar
-java -jar build/libs/JavaService.jar server src/main/resources/config.yml
+java -jar build/libs/ffxi-player-service-x.x.x.jar server src/main/resources/config.yml
 ```
 
 ### Production Mode
@@ -118,23 +118,23 @@ java -jar build/libs/JavaService.jar server src/main/resources/config.yml
 
 2. **Run with production configuration:**
    ```bash
-   java -jar build/libs/JavaService.jar server src/main/resources/config.yml
+   java -jar build/libs/ffxi-player-service-x.x.x.jar server src/main/resources/config.yml
    ```
 
 3. **Run as a background service (production):**
    ```bash
-   nohup java -jar build/libs/JavaService.jar server src/main/resources/config.yml > application.log 2>&1 &
+   nohup java -jar build/libs/ffxi-player-service-x.x.x.jar server src/main/resources/config.yml > application.log 2>&1 &
    ```
 
 4. **Check if it's running:**
    ```bash
-   ps aux | grep JavaService
+   ps aux | grep ffxi-player-service
    ```
 
 5. **Stop the service:**
    ```bash
    # Find the process ID (PID) first
-   ps aux | grep JavaService
+   ps aux | grep ffxi-player-service
    # Then kill the process
    kill <PID>
    ```
@@ -271,6 +271,6 @@ For Eclipse:
 
 ### Run with Debug
 ```bash
-java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 -jar build/libs/JavaService.jar server src/main/resources/config.yml
+java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 -jar build/libs/ffxi-player-service-x.x.x.jar server src/main/resources/config.yml
 ```
 Then attach your debugger to port 5005.
