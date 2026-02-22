@@ -46,7 +46,7 @@ public class Player {
     private Integer status;
 
     @JsonProperty("lastOnline")
-    private Integer lastOnline;
+    private Long lastOnline;
 
     @JsonProperty("gil")
     private Integer gil;
@@ -189,11 +189,11 @@ public class Player {
         this.status = status;
     }
 
-    public Integer getLastOnline() {
+    public Long getLastOnline() {
         return lastOnline;
     }
 
-    public void setLastOnline(Integer lastOnline) {
+    public void setLastOnline(Long lastOnline) {
         this.lastOnline = lastOnline;
     }
 

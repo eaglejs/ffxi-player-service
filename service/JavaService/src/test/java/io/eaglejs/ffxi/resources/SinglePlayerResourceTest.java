@@ -553,7 +553,7 @@ public class SinglePlayerResourceTest {
         SetGilRequest request = new SetGilRequest();
         request.setPlayerId(123);
         request.setPlayerName("TestPlayer");
-        request.setGil(50000L);
+        request.setGil(50000);
 
         Document existingPlayer = new Document("playerId", 123);
         
@@ -578,7 +578,7 @@ public class SinglePlayerResourceTest {
         SetGilRequest request = new SetGilRequest();
         request.setPlayerId(456);
         request.setPlayerName("TestPlayer");
-        request.setGil(100000L);
+        request.setGil(100000);
 
         Document existingPlayer = new Document("playerId", 456);
         ArgumentCaptor<Bson> updateCaptor = ArgumentCaptor.forClass(Bson.class);
@@ -603,7 +603,7 @@ public class SinglePlayerResourceTest {
         SetGilRequest request = new SetGilRequest();
         request.setPlayerId(999);
         request.setPlayerName("NonExistent");
-        request.setGil(50000L);
+        request.setGil(50000);
 
         when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
         when(mockFindIterable.first()).thenReturn(null);
@@ -639,7 +639,7 @@ public class SinglePlayerResourceTest {
         // Arrange
         SetGilRequest request = new SetGilRequest();
         request.setPlayerName("TestPlayer");
-        request.setGil(50000L);
+        request.setGil(50000);
 
         // Act
         Response response = resource.setGil(request);
@@ -654,7 +654,7 @@ public class SinglePlayerResourceTest {
         // Arrange
         SetGilRequest request = new SetGilRequest();
         request.setPlayerId(123);
-        request.setGil(50000L);
+        request.setGil(50000);
 
         // Act
         Response response = resource.setGil(request);
@@ -685,7 +685,7 @@ public class SinglePlayerResourceTest {
         SetGilRequest request = new SetGilRequest();
         request.setPlayerId(123);
         request.setPlayerName("TestPlayer");
-        request.setGil(50000L);
+        request.setGil(50000);
 
         when(mockCollection.find(any(Bson.class))).thenThrow(new RuntimeException("Database connection lost"));
 
@@ -704,7 +704,7 @@ public class SinglePlayerResourceTest {
         SetGilRequest request = new SetGilRequest();
         request.setPlayerId(123);
         request.setPlayerName("TestPlayer");
-        request.setGil(50000L);
+        request.setGil(50000);
 
         Document existingPlayer = new Document("playerId", 123);
         

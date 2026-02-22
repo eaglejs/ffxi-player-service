@@ -19,7 +19,7 @@ public class SetExpHistoryRequest {
     private Integer chain;
 
     @JsonProperty("timestamp")
-    private Integer timestamp;
+    private Long timestamp;
 
     // Getters and Setters
     public Integer getPlayerId() { return playerId; }
@@ -37,6 +37,6 @@ public class SetExpHistoryRequest {
     public Integer getChain() { return chain; }
     public void setChain(Integer chain) { this.chain = chain; }
 
-    public Integer getTimestamp() { return timestamp; }
-    public void setTimestamp(Integer timestamp) { this.timestamp = timestamp; }
+    public Long getTimestamp() { return timestamp; }
+    public void setTimestamp(Long timestamp) { this.timestamp = timestamp; }
 }

@@ -120,7 +120,7 @@ public class PlayerMapper {
         player.setTitle(document.getString("title"));
         player.setNationRank(document.getInteger("nationRank"));
         player.setStatus(document.getInteger("status"));
-        player.setLastOnline(document.getInteger("lastOnline"));
+        player.setLastOnline(document.getLong("lastOnline"));
         player.setGil(document.getInteger("gil"));
         player.setHpp(document.getInteger("hpp"));
         player.setMpp(document.getInteger("mpp"));

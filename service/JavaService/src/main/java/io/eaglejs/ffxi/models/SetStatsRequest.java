@@ -1,6 +1,7 @@
 package io.eaglejs.ffxi.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 
 public class SetStatsRequest {
     @JsonProperty("playerId")
@@ -36,7 +37,7 @@ public class SetStatsRequest {
     @JsonProperty("requiredExemplar")
     private Integer requiredExemplar;
 
-    @JsonProperty("stats")
+    @JsonUnwrapped
     private Stats stats;
 
     // Getters and Setters
