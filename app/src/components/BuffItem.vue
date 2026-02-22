@@ -58,7 +58,7 @@ function isLowTimer(): boolean {
 function isTimerPositive(): boolean {
   const now = new Date().getTime()
   const duration = props.utcTime ? Date.parse(props.utcTime) : new Date().getTime()
-  return duration - now > 0
+  return duration - (now - 1) > 0
 }
 
 function durationReadable(): string {
@@ -78,16 +78,6 @@ function durationReadable(): string {
     return `${seconds}s`
   }
 }
-
-onMounted(() => {
-  durationIntTime.value = durationReadable()
-  intervalId.value = setInterval(() => {
-    durationIntTime.value = durationReadable()
-    // if (!isTimerPositive()) {
-    //   playerStore.refreshBuffs(props?.player)
-    // }
-  }, 1000)
-})
 
 onUnmounted(() => {
   clearInterval(intervalId.value)
