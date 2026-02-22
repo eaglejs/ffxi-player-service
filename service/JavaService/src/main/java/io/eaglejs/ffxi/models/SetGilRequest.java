@@ -11,7 +11,7 @@ public class SetGilRequest {
     private String playerName;
 
     @JsonProperty("gil")
-    private Long gil;
+    private Integer gil;
 
     public SetGilRequest() {
     }
@@ -32,11 +32,11 @@ public class SetGilRequest {
         this.playerName = playerName;
     }
 
-    public Long getGil() {
+    public Integer getGil() {
         return gil;
     }
 
-    public void setGil(Long gil) {
+    public void setGil(Integer gil) {
         this.gil = gil;
     }
 }

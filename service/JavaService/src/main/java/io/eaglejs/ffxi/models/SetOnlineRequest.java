@@ -11,7 +11,7 @@ public class SetOnlineRequest {
     private String playerName;
 
     @JsonProperty("lastOnline")
-    private Long lastOnline;
+    private Integer lastOnline;
 
     public SetOnlineRequest() {
     }
@@ -32,11 +32,11 @@ public class SetOnlineRequest {
         this.playerName = playerName;
     }
 
-    public Long getLastOnline() {
+    public Integer getLastOnline() {
         return lastOnline;
     }
 
-    public void setLastOnline(Long lastOnline) {
+    public void setLastOnline(Integer lastOnline) {
         this.lastOnline = lastOnline;
     }
 }
