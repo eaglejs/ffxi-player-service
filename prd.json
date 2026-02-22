@@ -65,7 +65,7 @@
   },
   {
     "category": "Restful API",
-    "description": "Set current jobs for an individual player.",
+    "description": "Set current jobs for an individual player in the database, and pipe the status through the websocket to the frontend.",
     "steps": [
       "Create a POST endpoint /player/set_jobs that accepts a playerId, playerName, mainJob, subJob in the request body.",
       "Implement a method to update the player's current jobs in the database using the provided playerId and list of current jobs.",
@@ -74,5 +74,135 @@
       "Write unit tests for the endpoint to ensure it correctly updates the player's current jobs."
     ],
     "passes": true
+  },
+  {
+    "category": "Restful API",
+    "description": "Set individual players gil amount in the database, and pipe the status through the websocket to the frontend.",
+    "steps": [
+      "Create a POST endpoint /player/set_gil that accepts a `playerId`, `playerName`(formatted lowercase) and `gil` amount in the request body.",
+      "Implement a method to update the player's current gil in the database using the provided playerId, playerName, and gil amount.",
+      "After updating the database, broadcast the player's current gil by sending playerId, playerName, and gil as JSON through the WebSocket connection.",
+      "Return a string response 'Gil: OK' indicating the success of the operation.",
+      "Handle error cases where the playerId does not exist or the database update fails, returning appropriate HTTP status codes and error messages.",
+      "Write unit tests for the endpoint to ensure it correctly updates the player's gil and broadcasts the update through the WebSocket."
+    ],
+    "passes": false
+  },
+  {
+    "category": "Restful API",
+    "description": "Set individual players engagement status in the database, and pipe the status through the websocket to the frontend.",
+    "steps": [
+      "Create a POST endpoint /player/set_status that accepts a `playerId`, `playerName`(formatted lowercase) and `status` status in the request body.",
+      "Implement a method to update the player's engagement status in the database using the provided playerId, playerName, and status.",
+      "After updating the database, broadcast the player's engagement status by sending playerId, playerName, and status as JSON through the WebSocket connection.",
+      "Return a string response 'Status: OK' indicating the success of the operation.",
+      "Handle error cases where the playerId does not exist or the database update fails, returning appropriate HTTP status codes and error messages.",
+      "Write unit tests for the endpoint to ensure it correctly updates the player's engagement status and broadcasts the update through the WebSocket."
+    ],
+    "passes": false
+  },
+  {
+    "category": "Restful API",
+    "description": "Set individual players hpp in the database, and pipe the status through the websocket to the frontend.",
+    "steps": [
+      "Create a POST endpoint /player/set_hpp that accepts a `playerId`, `playerName`(formatted lowercase) and `hpp` amount in the request body.",
+      "Implement a method to update the player's current hpp in the database using the provided playerId, playerName, and hpp amount.",
+      "After updating the database, broadcast the player's current hpp by sending playerId, playerName, and hpp as JSON through the WebSocket connection.",
+      "Return a string response 'HP: OK' indicating the success of the operation.",
+      "Handle error cases where the playerId does not exist or the database update fails, returning appropriate HTTP status codes and error messages.",
+      "Write unit tests for the endpoint to ensure it correctly updates the player's hpp and broadcasts the update through the WebSocket."
+    ],
+    "passes": false
+  },
+  {
+    "category": "Restful API",
+    "description": "Set individual players mpp in the database, and pipe the status through the websocket to the frontend.",
+    "steps": [
+      "Create a POST endpoint /player/set_mpp that accepts a `playerId`, `playerName`(formatted lowercase) and `mpp` amount in the request body.",
+      "Implement a method to update the player's current mpp in the database using the provided playerId, playerName, and mpp amount.",
+      "After updating the database, broadcast the player's current mpp by sending playerId, playerName, and mpp as JSON through the WebSocket connection.",
+      "Return a string response 'MP: OK' indicating the success of the operation.",
+      "Handle error cases where the playerId does not exist or the database update fails, returning appropriate HTTP status codes and error messages.",
+      "Write unit tests for the endpoint to ensure it correctly updates the player's mpp and broadcasts the update through the WebSocket."
+    ],
+    "passes": false
+  },
+  {
+    "category": "Restful API",
+    "description": "Set individual players tp in the database, and pipe the status through the websocket to the frontend.",
+    "steps": [
+      "Create a POST endpoint /player/set_tp that accepts a `playerId`, `playerName`(formatted lowercase) and `tp` amount in the request body.",
+      "Implement a method to update the player's current tp in the database using the provided playerId, playerName, and tp amount.",
+      "After updating the database, broadcast the player's current tp by sending playerId, playerName, and tp as JSON through the WebSocket connection.",
+      "Return a string response 'TP: OK' indicating the success of the operation.",
+      "Handle error cases where the playerId does not exist or the database update fails, returning appropriate HTTP status codes and error messages.",
+      "Write unit tests for the endpoint to ensure it correctly updates the player's tp and broadcasts the update through the WebSocket."
+    ],
+    "passes": false
+  },
+  {
+    "category": "Restful API",
+    "description": "Set individual players stats in the database, and pipe the status through the websocket to the frontend.",
+    "steps": [
+      "Create a POST endpoint /player/set_stats that accepts a `playerId`, `playerName`(formatted lowercase) and a `stats` object in the request body.",
+      "Implement a method to update the player's stats in the database using the provided playerId, playerName, updates the masterLevel, mainJobLevel, subJobLevel, attack, defense, title, nationRank, currentExemplar, requiredExemplar, at the root of the document and the stats object which contains: baseSTR, baseAGI, baseDEX, baseVIT, baseINT, baseMND, baseCHR, addedSTR, addedAGI, addedDEX, addedVIT, addedINT, addedMND, addedCHR, fireResistance, iceResistance, windResistance, earthResistance, lightningResistance, waterResistance, lightResistance, darkResistance",
+      "After updating the database, broadcast the player's current stats by sending playerId, playerName, and stats as JSON through the WebSocket connection.",
+      "Return a string response 'Stats: OK' indicating the success of the operation.",
+      "Handle error cases where the playerId does not exist or the database update fails, returning appropriate HTTP status codes and error messages.",
+      "Write unit tests for the endpoint to ensure it correctly updates the player's stats and broadcasts the update through the WebSocket."
+    ],
+    "passes": false
+  },
+  {
+    "category": "Restful API",
+    "description": "Set individual players currency1 in the database, and pipe the status through the websocket to the frontend.",
+    "steps": [
+      "Create a POST endpoint /player/set_currency1 that accepts a `playerId`, `playerName`(formatted lowercase) and `currency1` object which contains: conquestPointsBastok, conquestPointsSandoria, conquestPointsWindurst, deeds, dominionNotes, imperialStanding, loginPoints, nyzulTokens, sparksOfEminence, therionIchor, unityAccolades, and voidstones in the request body.",
+      "Implement a method to update the player's current currency1 in the database using the provided playerId, playerName, and currency1 object.",
+      "After updating the database, broadcast the player's current currency1 by sending playerId, playerName, and currency1 as JSON through the WebSocket connection.",
+      "Return a string response 'Currency1: OK' indicating the success of the operation.",
+      "Handle error cases where the playerId does not exist or the database update fails, returning appropriate HTTP status codes and error messages.",
+      "Write unit tests for the endpoint to ensure it correctly updates the player's currency1 and broadcasts the update through the WebSocket."
+    ],
+    "passes": false
+  },
+  {
+    "category": "Restful API",
+    "description": "Set individual players currency2 in the database, and pipe the status through the websocket to the frontend.",
+    "steps": [
+      "Create a POST endpoint /player/set_currency2 that accepts a `playerId`, `playerName`(formatted lowercase) and `currency2` object which contains: domainPoints, eschaBeads, eschaSilt, gallantry, gallimaufry, hallmarks, mogSegments, mweyaPlasmCorpuscles, potpourri, coalitionImprimaturs, temenosUnits, and apollyonUnits in the request body.",
+      "Implement a method to update the player's current currency2 in the database using the provided playerId, playerName, and currency2 object.",
+      "After updating the database, broadcast the player's current currency2 by sending playerId, playerName, and currency2 as JSON through the WebSocket connection.",
+      "Return a string response 'Currency2: OK' indicating the success of the operation.",
+      "Handle error cases where the playerId does not exist or the database update fails, returning appropriate HTTP status codes and error messages.",
+      "Write unit tests for the endpoint to ensure it correctly updates the player's currency2 and broadcasts the update through the WebSocket."
+    ],
+    "passes": false
+  },
+  {
+    "category": "Restful API",
+    "description": "Set individual players merits in the database, and pipe the status through the websocket to the frontend.",
+    "steps": [
+      "Create a POST endpoint /player/set_merits that accepts a `playerId`, `playerName`(formatted lowercase), `total` and `max` in the request body.",
+      "Implement a method to update the player's current merits in the database using the provided playerId, playerName, total and max. the merits object should be stored in the database as { total: total, max: max }.",
+      "After updating the database, broadcast the player's current merits by sending playerId, playerName, and merits as JSON through the WebSocket connection.",
+      "Return a string response 'Merits: OK' indicating the success of the operation.",
+      "Handle error cases where the playerId does not exist or the database update fails, returning appropriate HTTP status codes and error messages.",
+      "Write unit tests for the endpoint to ensure it correctly updates the player's merits and broadcasts the update through the WebSocket."
+    ],
+    "passes": false
+  },
+  {
+    "category": "Restful API",
+    "description": "Set individual players capacity points in the database, and pipe the status through the websocket to the frontend.",
+    "steps": [
+      "Create a POST endpoint /player/set_capacity_points that accepts a `playerId`, `playerName`(formatted lowercase), and `total` in the request body.",
+      "Implement a method to update the player's current capacity points in the database using the provided playerId, playerName, and total. the capacity points object should be stored in the database as { total: total }.",
+      "After updating the database, broadcast the player's current capacity points by sending playerId, playerName, and capacity points as JSON through the WebSocket connection.",
+      "Return a string response 'Capacity points: OK' indicating the success of the operation.",
+      "Handle error cases where the playerId does not exist or the database update fails, returning appropriate HTTP status codes and error messages.",
+      "Write unit tests for the endpoint to ensure it correctly updates the player's capacity points and broadcasts the update through the WebSocket."
+    ],
+    "passes": false
   }
 ]
