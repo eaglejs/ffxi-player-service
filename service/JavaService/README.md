@@ -1,6 +1,6 @@
 # FFXI Player Service - Java Service
 
-A Dropwizard-based Java service for managing FFXI player data with WebSocket support and MongoDB integration.
+A Dropwizard-based Java service for managing FFXI player data with WebSocket support and MongoDB integration. This service acts as the backend for tracking real-time player statistics, inventory, and chat logs.
 
 ## Prerequisites
 
@@ -18,11 +18,72 @@ JavaService/
 │   │       └── config.yml           # Configuration file
 │   └── test/
 │       └── java/io/eaglejs/ffxi/    # Test files
-├── build.gradle                      # Gradle build configuration
+├── build.gradle                     # Gradle build configuration
 ├── gradlew                          # Gradle wrapper script (Unix/Mac)
 ├── gradlew.bat                      # Gradle wrapper script (Windows)
 └── README.md                        # This file
 ```
+
+## Features
+
+- **REST API**: Comprehensive endpoints for updating and retrieving player state (stats, jobs, currency, etc.).
+- **Real-time Updates**: WebSocket support for broadcasting player changes to connected clients.
+- **MongoDB Persistence**: Stores player data, chat logs, and history.
+- **UI Integration**: Automatically fetches and serves the frontend UI from a Nexus repository.
+- **Swagger/OpenAPI**: Auto-generated API documentation.
+
+## API Endpoints
+
+The service exposes the following main resources via REST:
+
+### Player Management (`/player`)
+Used primarily for data ingestion (setting state) and specific data retrieval.
+
+- **Initialization**: `POST /player/initialize_player`
+- **Status Updates**:
+  - `POST /player/set_online`
+  - `POST /player/set_status` (Engagement status)
+  - `POST /player/set_zone`
+- **Stats & Attributes**:
+  - `POST /player/set_stats` (STR, DEX, Attack, Defense, etc.)
+  - `POST /player/set_hpp` / `POST /player/set_mpp` / `POST /player/set_tp`
+  - `POST /player/set_jobs` (Main/Sub levels)
+  - `POST /player/set_merits`
+  - `POST /player/set_capacity_points` (Job Points)
+- **Inventory & Buffs**:
+  - `POST /player/set_gil`
+  - `POST /player/set_currency1` / `POST /player/set_currency2`
+  - `GET /player/get_buffs`
+  - `POST /player/set_buffs`
+  - `POST /player/refresh_buffs` (Clear buffs)
+- **Chat & History**:
+  - `GET /player/get_chat_log`
+  - `GET /player/get_chat_log_by_type`
+  - `POST /player/set_messages`
+  - `POST /player/set_exp_history`
+  - `POST /player/reset_exp_history`
+
+### Player Lists (`/players`)
+- `GET /players/get_players`: List all online players (active in last 60s).
+- `GET /players/get_player?playerId={id}`: Retrieve full details for a specific player.
+
+## WebSocket Protocol
+
+**Endpoint**: `ws://localhost/ws/players` (or configured port)
+
+Clients can connect to receive real-time updates. By default, clients receive all broadcasts. To filter updates, clients can send JSON subscription messages.
+
+### Client-to-Server Messages
+| Action | Payload | Description |
+|--------|---------|-------------|
+| `subscribe` | `{"action": "subscribe", "playerId": 123}` | Subscribe to updates for a specific player ID. |
+| `unsubscribe` | `{"action": "unsubscribe", "playerId": 123}` | Unsubscribe from a specific player ID. |
+| `unsubscribe_all` | `{"action": "unsubscribe_all"}` | Clear all subscriptions (reverts to receiving all broadcasts?). *Note: Implementation clears list, behavior depends on logic.* |
+| `ping` | `{"action": "ping"}` | Heartbeat check. Server responds with `pong`. |
+
+### Server-to-Client Messages
+- **Updates**: JSON objects containing the updated fields (e.g., `{"playerId": 123, "hpp": 85}`).
+- **Heartbeat**: Server sends `ping` frames or text messages to keep connections alive.
 
 ## Building the Application
 
@@ -53,57 +114,30 @@ The JAR file will be created at: `build/libs/ffxi-player-service-x.x.x.jar`
 The build process automatically attempts to fetch and integrate the UI from a Nexus npm repository.
 
 ### Configuration
+UI package settings can be configured in `gradle.properties` or passed as command line arguments:
+- `uiPackageName` (default: `ffxi-stats`)
+- `uiPackageVersion`
+- `nexusHost` / `nexusPort` / `nexusNpmRepo`
 
-UI package settings can be configured in `build.gradle`:
-
-```gradle
-ext {
-    uiPackageName = 'ffxi-stats'
-    uiPackageVersion = '1.0.0'
-    nexusNpmUrl = 'http://eaglejs-mac-mini.local:8091/repository/npm-hosted'
-}
-```
-
-### Build Process
-
-During the build:
-
-1. **Download Task** (`downloadUI`): Attempts to download `ffxi-stats` npm package (.tgz) from the Nexus repository
-2. **Extract Task** (`extractUI`): Extracts the npm package and copies UI files to `build/resources/main/assets/`
-3. **Fallback** (`createPlaceholderUI`): Creates a placeholder UI if the download fails
-
-### Manual Testing
-
-To manually test UI integration when Nexus is available:
-
+### Manual UI Tasks
 ```bash
-# Clean build with UI download attempt
-./gradlew clean build
-
-# Check extracted UI files
-ls -la build/resources/main/assets/
-
-# Run just the UI tasks
+# Run just the UI download and extract tasks
 ./gradlew downloadUI extractUI
 ```
-
-### Accessing the UI
-
-Once the application is running, access the UI at:
-- http://localhost:8080/
-
-The UI will either be the downloaded package from Nexus or a placeholder page showing service status and available endpoints.
 
 ## Running the Application
 
 ### Development Mode
 
-Run directly with Gradle:
+**Option 1: Standard Run**
+Run directly with Gradle.
 ```bash
 ./gradlew runDevWatch --args="server src/main/resources/config.yml"
 ```
+*Connect debugger to port 5005.*
 
-Or build and run the JAR:
+**Option 2: Watch Mode (Auto-Reload)**
+Watches for changes in `src/main/java` and `src/main/resources` and automatically restarts the server.
 ```bash
 ./gradlew clean jar
 java -jar build/libs/ffxi-player-service-x.x.x.jar server src/main/resources/config.yml
@@ -116,7 +150,7 @@ java -jar build/libs/ffxi-player-service-x.x.x.jar server src/main/resources/con
    ./gradlew clean jar
    ```
 
-2. **Run with production configuration:**
+2. **Run:**
    ```bash
    java -jar build/libs/ffxi-player-service-x.x.x.jar server src/main/resources/config.yml
    ```
@@ -143,103 +177,28 @@ java -jar build/libs/ffxi-player-service-x.x.x.jar server src/main/resources/con
 
 Edit `src/main/resources/config.yml` to configure:
 
-- **Server ports:**
-  - Application: 80 (configured)
-  - Admin: 8081 (default)
-  - API Root Path: `/api/*` (API endpoints accessible at `/api/...`)
-- **MongoDB URI:** `mongodb://localhost:27017` (default)
-- **CORS Settings:**
-  - `enabled`: Enable/disable CORS support
-  - `allowedOrigins`: Comma-separated list of allowed origins (use `"*"` for dev, specific origins for production)
-  - `allowedHeaders`: Allowed request headers
-  - `allowedMethods`: Allowed HTTP methods
-  - `allowCredentials`: Allow credentials in CORS requests
-  - `exposedHeaders`: Headers exposed to the client
+- **Server ports**: Application (default 80/8080) and Admin (8081).
+- **MongoDB URI**: `mongodb://localhost:27017` (default).
+- **CORS Settings**: Allowed origins, headers, and methods.
 
-### Example Development Configuration
-```yaml
-server:
-  rootPath: /api/*
-  applicationConnectors:
-    - type: http
-      port: 80
+## Endpoints Summary
 
-cors:
-  enabled: true
-  allowedOrigins: "*"  # Allow all origins for local development
-  allowedHeaders: "*"
-  allowedMethods: "GET,POST,PUT,DELETE,OPTIONS,HEAD"
-  allowCredentials: true
-  exposedHeaders: "Content-Type,Authorization,X-Requested-With"
+Once running locally:
 
-mongoUri: mongodb://localhost:27017
-```
-
-### Example Production Configuration
-```yaml
-server:
-  rootPath: /api/*
-  applicationConnectors:
-    - type: http
-      port: 8080
-
-cors:
-  enabled: true
-  allowedOrigins: "https://yourdomain.com,https://www.yourdomain.com"  # Specific origins only
-  allowedHeaders: "Content-Type,Authorization,X-Requested-With"
-  allowedMethods: "GET,POST,PUT,DELETE,OPTIONS"
-  allowCredentials: true
-  exposedHeaders: "Content-Type,Authorization,X-Requested-With"
-
-mongoUri: mongodb://production-host:27017/ffxi
-```
-
-To disable CORS entirely, set `cors.enabled: false`.
-
-## Endpoints
-
-Once running, the following endpoints are available:
-
-- **UI (Root):** http://localhost/
-- **API Health Check:** http://localhost/api/health
-- **API OpenAPI Spec:** http://localhost/api/openapi.json
-- **WebSocket:** ws://localhost/ws/players
-- **Admin Health Check:** http://localhost:8081/healthcheck
-- **Admin UI:** http://localhost:8081
-
-## Development Tips
-
-### Watch for Changes and Auto-Rebuild
-```bash
-./gradlew build --continuous
-```
-
-### View All Available Tasks
-```bash
-./gradlew tasks
-```
-
-### Clean Generated Files
-```bash
-./gradlew clean
-```
-
-### Check Dependencies
-```bash
-./gradlew dependencies
-```
+- **UI (Root):** http://localhost:8080/
+- **API Health Check:** http://localhost:8080/api/health
+- **API OpenAPI Spec:** http://localhost:8080/api/openapi.json
+- **WebSocket:** ws://localhost:8080/ws/players
+- **Admin Interface:** http://localhost:8081/
 
 ## Troubleshooting
 
 ### Port Already in Use
-If you see "Address already in use" error, either:
-1. Stop the process using that port
-2. Change the port in `config.yml`
+If you see "Address already in use", check if another instance or service is using port 80, 8080, or 8081.
+Modify `config.yml` or the `runDev` task configuration in `build.gradle` to change ports.
 
-### MongoDB Connection Issues
-- Ensure MongoDB is running: `brew services list` or `systemctl status mongod`
-- Start MongoDB if needed: `brew services start mongodb-community` (Mac)
-- Verify connection: `mongosh mongodb://localhost:27017`
+### MongoDB Connection
+Ensure MongoDB is running locally. The service expects a standard connection at `mongodb://localhost:27017`.
 
 ### Java Version Issues
 Check your Java version:
