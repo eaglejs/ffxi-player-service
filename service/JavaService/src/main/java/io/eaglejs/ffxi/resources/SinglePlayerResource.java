@@ -968,12 +968,6 @@ public class SinglePlayerResource {
   })
   public Response setMessages(SetMessagesRequest request) {
     try {
-      LOG.info("Received set_messages request: playerId={}, playerName={}, messageType={}, messages={}",
-          request != null ? request.getPlayerId() : null,
-          request != null ? request.getPlayerName() : null,
-          request != null ? request.getMessageType() : null,
-          request != null ? request.getMessages() : null);
-      
       if (request == null) {
         return Response.status(Response.Status.BAD_REQUEST)
             .entity("Request body is null")
@@ -1050,7 +1044,6 @@ public class SinglePlayerResource {
       Document verifyDoc = chatsCollection.find(eq("playerId", request.getPlayerId())).first();
       if (verifyDoc != null) {
         LOG.info("Verified document exists in chats collection for playerId={}", request.getPlayerId());
-        LOG.info("Document contents: {}", verifyDoc.toJson());
       } else {
         LOG.error("CRITICAL: Document not found in chats collection after update for playerId={}", request.getPlayerId());
       }
@@ -1067,9 +1060,6 @@ public class SinglePlayerResource {
       broadcastData.put("chatLog", messagesPackage);
 
       PlayerWebSocket.broadcast(broadcastData);
-
-      LOG.info("Updated messages for player {} ({}): {} messages",
-          request.getPlayerId(), playerName, messagesPackage.size());
 
       return Response.ok("Messages: OK").build();
     } catch (Exception e) {
@@ -1130,9 +1120,6 @@ public class SinglePlayerResource {
       broadcastData.put("buffs", emptyBuffs);
 
       PlayerWebSocket.broadcast(broadcastData);
-
-      LOG.info("Refreshed buffs for player {} ({})",
-          request.getPlayerId(), playerName);
 
       return Response.ok("Buffs refreshed: OK").build();
     } catch (Exception e) {
