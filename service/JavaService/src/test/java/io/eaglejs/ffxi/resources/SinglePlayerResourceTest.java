@@ -5,6 +5,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.result.UpdateResult;
 
 import io.eaglejs.ffxi.models.Player;
+import io.eaglejs.ffxi.models.SetBuffsRequest;
 import io.eaglejs.ffxi.models.SetCapacityPointsRequest;
 import io.eaglejs.ffxi.models.SetGilRequest;
 import io.eaglejs.ffxi.models.SetHppRequest;
@@ -2078,5 +2079,204 @@ public class SinglePlayerResourceTest {
         assertEquals(500, response.getStatus());
         String errorMessage = (String) response.getEntity();
         assertEquals("An error occurred while retrieving player buffs.", errorMessage);
+    }
+
+    @Test
+    public void testSetBuffs_Success() {
+        // Arrange
+        SetBuffsRequest request = new SetBuffsRequest();
+        request.setPlayerId(123);
+        request.setPlayerName("TestPlayer");
+        request.setBuffs(java.util.Arrays.asList(1, 2, 3, 4, 5));
+
+        Document existingPlayer = new Document("playerId", 123);
+        
+        when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
+        when(mockFindIterable.first()).thenReturn(existingPlayer);
+        when(mockCollection.updateOne(any(Bson.class), any(Bson.class))).thenReturn(mockUpdateResult);
+        when(mockUpdateResult.getModifiedCount()).thenReturn(1L);
+
+        // Act
+        Response response = resource.setBuffs(request);
+
+        // Assert
+        assertEquals(200, response.getStatus());
+        assertEquals("Buffs: OK", response.getEntity());
+        verify(mockCollection).find(any(Bson.class));
+        verify(mockCollection).updateOne(any(Bson.class), any(Bson.class));
+    }
+
+    @Test
+    public void testSetBuffs_FormatsPlayerNameToLowercase() {
+        // Arrange
+        SetBuffsRequest request = new SetBuffsRequest();
+        request.setPlayerId(456);
+        request.setPlayerName("TestPlayer");
+        request.setBuffs(java.util.Arrays.asList(10, 20, 30));
+
+        Document existingPlayer = new Document("playerId", 456);
+        ArgumentCaptor<Bson> updateCaptor = ArgumentCaptor.forClass(Bson.class);
+        
+        when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
+        when(mockFindIterable.first()).thenReturn(existingPlayer);
+        when(mockCollection.updateOne(any(Bson.class), updateCaptor.capture())).thenReturn(mockUpdateResult);
+        when(mockUpdateResult.getModifiedCount()).thenReturn(1L);
+
+        // Act
+        resource.setBuffs(request);
+
+        // Assert
+        Bson capturedUpdate = updateCaptor.getValue();
+        assertNotNull(capturedUpdate);
+        assertTrue(capturedUpdate.toString().contains("testplayer"));
+    }
+
+    @Test
+    public void testSetBuffs_EmptyBuffsList() {
+        // Arrange
+        SetBuffsRequest request = new SetBuffsRequest();
+        request.setPlayerId(789);
+        request.setPlayerName("TestPlayer");
+        request.setBuffs(new java.util.ArrayList<>());
+
+        Document existingPlayer = new Document("playerId", 789);
+        
+        when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
+        when(mockFindIterable.first()).thenReturn(existingPlayer);
+        when(mockCollection.updateOne(any(Bson.class), any(Bson.class))).thenReturn(mockUpdateResult);
+        when(mockUpdateResult.getModifiedCount()).thenReturn(1L);
+
+        // Act
+        Response response = resource.setBuffs(request);
+
+        // Assert
+        assertEquals(200, response.getStatus());
+        assertEquals("Buffs: OK", response.getEntity());
+    }
+
+    @Test
+    public void testSetBuffs_PlayerNotFound() {
+        // Arrange
+        SetBuffsRequest request = new SetBuffsRequest();
+        request.setPlayerId(999);
+        request.setPlayerName("NonExistent");
+        request.setBuffs(java.util.Arrays.asList(1, 2, 3));
+
+        when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
+        when(mockFindIterable.first()).thenReturn(null);
+
+        // Act
+        Response response = resource.setBuffs(request);
+
+        // Assert
+        assertEquals(404, response.getStatus());
+        String errorMessage = (String) response.getEntity();
+        assertTrue(errorMessage.contains("Player not found"));
+        assertTrue(errorMessage.contains("999"));
+        verify(mockCollection, never()).updateOne(any(Bson.class), any(Bson.class));
+    }
+
+    @Test
+    public void testSetBuffs_NullRequest() {
+        // Arrange
+        SetBuffsRequest request = null;
+
+        // Act
+        Response response = resource.setBuffs(request);
+
+        // Assert
+        assertEquals(400, response.getStatus());
+        String errorMessage = (String) response.getEntity();
+        assertEquals("playerId, playerName, and buffs are required", errorMessage);
+        verify(mockCollection, never()).updateOne(any(Bson.class), any(Bson.class));
+    }
+
+    @Test
+    public void testSetBuffs_MissingPlayerId() {
+        // Arrange
+        SetBuffsRequest request = new SetBuffsRequest();
+        request.setPlayerName("TestPlayer");
+        request.setBuffs(java.util.Arrays.asList(1, 2, 3));
+
+        // Act
+        Response response = resource.setBuffs(request);
+
+        // Assert
+        assertEquals(400, response.getStatus());
+        assertEquals("playerId, playerName, and buffs are required", response.getEntity());
+    }
+
+    @Test
+    public void testSetBuffs_MissingPlayerName() {
+        // Arrange
+        SetBuffsRequest request = new SetBuffsRequest();
+        request.setPlayerId(123);
+        request.setBuffs(java.util.Arrays.asList(1, 2, 3));
+
+        // Act
+        Response response = resource.setBuffs(request);
+
+        // Assert
+        assertEquals(400, response.getStatus());
+        assertEquals("playerId, playerName, and buffs are required", response.getEntity());
+    }
+
+    @Test
+    public void testSetBuffs_MissingBuffs() {
+        // Arrange
+        SetBuffsRequest request = new SetBuffsRequest();
+        request.setPlayerId(123);
+        request.setPlayerName("TestPlayer");
+
+        // Act
+        Response response = resource.setBuffs(request);
+
+        // Assert
+        assertEquals(400, response.getStatus());
+        assertEquals("playerId, playerName, and buffs are required", response.getEntity());
+    }
+
+    @Test
+    public void testSetBuffs_DatabaseError() {
+        // Arrange
+        SetBuffsRequest request = new SetBuffsRequest();
+        request.setPlayerId(123);
+        request.setPlayerName("TestPlayer");
+        request.setBuffs(java.util.Arrays.asList(5, 10, 15));
+
+        when(mockCollection.find(any(Bson.class))).thenThrow(new RuntimeException("Database connection lost"));
+
+        // Act
+        Response response = resource.setBuffs(request);
+
+        // Assert
+        assertEquals(500, response.getStatus());
+        String errorMessage = (String) response.getEntity();
+        assertEquals("An error occurred while updating player buffs.", errorMessage);
+    }
+
+    @Test
+    public void testSetBuffs_UpdateFailure() {
+        // Arrange
+        SetBuffsRequest request = new SetBuffsRequest();
+        request.setPlayerId(123);
+        request.setPlayerName("TestPlayer");
+        request.setBuffs(java.util.Arrays.asList(7, 14, 21));
+
+        Document existingPlayer = new Document("playerId", 123);
+        
+        when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
+        when(mockFindIterable.first()).thenReturn(existingPlayer);
+        when(mockCollection.updateOne(any(Bson.class), any(Bson.class))).thenReturn(mockUpdateResult);
+        when(mockUpdateResult.getModifiedCount()).thenReturn(0L);
+        when(mockUpdateResult.getMatchedCount()).thenReturn(0L);
+
+        // Act
+        Response response = resource.setBuffs(request);
+
+        // Assert
+        assertEquals(500, response.getStatus());
+        String errorMessage = (String) response.getEntity();
+        assertEquals("Failed to update player buffs", errorMessage);
     }
 }

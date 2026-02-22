@@ -234,3 +234,17 @@ Feature: Get individual player buffs
 - Updated prd.json to mark feature as passes: true
 
 This is the first GET endpoint in SinglePlayerResource that retrieves data rather than updating it, introducing a different pattern from the POST endpoints we've been implementing.
+
+--- 2026-02-22 Implementation Update ---
+Feature: Set individual player buffs
+- Created SetBuffsRequest DTO with playerId, playerName, and buffs (List<Integer>) fields
+- Implemented POST /player/set_buffs endpoint in SinglePlayerResource
+- Endpoint updates player's buffs array in MongoDB database
+- Broadcasts buffs update via WebSocket to all connected clients
+- Returns "Buffs: OK" on success
+- Handles empty buffs array as valid input
+- Added 10 comprehensive unit tests covering success, lowercase formatting, empty buffs list, player not found, null request, missing fields (playerId, playerName, buffs), database error, and update failure scenarios
+- All 139 tests passing
+- Updated prd.json to mark feature as passes: true
+
+This feature complements the get_buffs endpoint we implemented previously and follows the standard pattern of other array-based field updates.

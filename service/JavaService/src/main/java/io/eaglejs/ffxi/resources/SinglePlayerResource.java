@@ -3,6 +3,7 @@ package io.eaglejs.ffxi.resources;
 import com.mongodb.client.MongoCollection;
 import io.eaglejs.ffxi.mapper.PlayerMapper;
 import io.eaglejs.ffxi.models.Player;
+import io.eaglejs.ffxi.models.SetBuffsRequest;
 import io.eaglejs.ffxi.models.SetCapacityPointsRequest;
 import io.eaglejs.ffxi.models.SetGilRequest;
 import io.eaglejs.ffxi.models.SetHppRequest;
@@ -812,6 +813,73 @@ public class SinglePlayerResource {
             LOG.error("Error retrieving buffs for playerId: " + playerId, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity("An error occurred while retrieving player buffs.")
+                    .build();
+        }
+    }
+
+    @POST
+    @Path("/set_buffs")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.TEXT_PLAIN)
+    @Operation(
+        summary = "Set Player Buffs",
+        description = "Updates a player's buffs in the database and broadcasts the update via WebSocket.",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Buffs updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request data"),
+            @ApiResponse(responseCode = "404", description = "Player not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+        }
+    )
+    public Response setBuffs(SetBuffsRequest request) {
+        try {
+            if (request == null || request.getPlayerId() == null || 
+                request.getPlayerName() == null || request.getBuffs() == null) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity("playerId, playerName, and buffs are required")
+                        .build();
+            }
+
+            String playerName = request.getPlayerName().toLowerCase();
+            
+            MongoCollection<Document> playersCollection = mongoDBService.getPlayersCollection();
+            
+            Document existingPlayer = playersCollection.find(eq("playerId", request.getPlayerId())).first();
+            if (existingPlayer == null) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity("Player not found with playerId: " + request.getPlayerId())
+                        .build();
+            }
+
+            com.mongodb.client.result.UpdateResult result = playersCollection.updateOne(
+                eq("playerId", request.getPlayerId()),
+                combine(
+                    set("playerName", playerName),
+                    set("buffs", request.getBuffs())
+                )
+            );
+
+            if (result.getModifiedCount() == 0 && result.getMatchedCount() == 0) {
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                        .entity("Failed to update player buffs")
+                        .build();
+            }
+
+            Map<String, Object> broadcastData = new HashMap<>();
+            broadcastData.put("playerId", request.getPlayerId());
+            broadcastData.put("playerName", playerName);
+            broadcastData.put("buffs", request.getBuffs());
+            
+            PlayerWebSocket.broadcast(broadcastData);
+            
+            LOG.info("Updated buffs for player {} ({}): {} buffs", 
+                request.getPlayerId(), playerName, request.getBuffs().size());
+            
+            return Response.ok("Buffs: OK").build();
+        } catch (Exception e) {
+            LOG.error("Error setting player buffs for playerId: " + request.getPlayerId(), e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("An error occurred while updating player buffs.")
                     .build();
         }
     }
