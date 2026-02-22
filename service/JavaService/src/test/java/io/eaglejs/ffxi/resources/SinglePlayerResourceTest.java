@@ -8,6 +8,7 @@ import io.eaglejs.ffxi.models.Player;
 import io.eaglejs.ffxi.models.SetGilRequest;
 import io.eaglejs.ffxi.models.SetHppRequest;
 import io.eaglejs.ffxi.models.SetJobsRequest;
+import io.eaglejs.ffxi.models.SetMeritsRequest;
 import io.eaglejs.ffxi.models.SetMppRequest;
 import io.eaglejs.ffxi.models.SetOnlineRequest;
 import io.eaglejs.ffxi.models.SetStatusRequest;
@@ -1586,5 +1587,205 @@ public class SinglePlayerResourceTest {
         assertEquals(500, response.getStatus());
         String errorMessage = (String) response.getEntity();
         assertEquals("Failed to update player zone", errorMessage);
+    }
+
+    @Test
+    public void testSetMerits_Success() {
+        // Arrange
+        SetMeritsRequest request = new SetMeritsRequest();
+        request.setPlayerId(123);
+        request.setPlayerName("TestPlayer");
+        request.setTotal(50);
+        request.setMax(75);
+
+        Document existingPlayer = new Document("playerId", 123);
+        
+        when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
+        when(mockFindIterable.first()).thenReturn(existingPlayer);
+        when(mockCollection.updateOne(any(Bson.class), any(Bson.class))).thenReturn(mockUpdateResult);
+        when(mockUpdateResult.getModifiedCount()).thenReturn(1L);
+
+        // Act
+        Response response = resource.setMerits(request);
+
+        // Assert
+        assertEquals(200, response.getStatus());
+        assertEquals("Merits: OK", response.getEntity());
+        verify(mockCollection).find(any(Bson.class));
+        verify(mockCollection).updateOne(any(Bson.class), any(Bson.class));
+    }
+
+    @Test
+    public void testSetMerits_FormatsPlayerNameToLowercase() {
+        // Arrange
+        SetMeritsRequest request = new SetMeritsRequest();
+        request.setPlayerId(456);
+        request.setPlayerName("TestPlayer");
+        request.setTotal(30);
+        request.setMax(60);
+
+        Document existingPlayer = new Document("playerId", 456);
+        ArgumentCaptor<Bson> updateCaptor = ArgumentCaptor.forClass(Bson.class);
+        
+        when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
+        when(mockFindIterable.first()).thenReturn(existingPlayer);
+        when(mockCollection.updateOne(any(Bson.class), updateCaptor.capture())).thenReturn(mockUpdateResult);
+        when(mockUpdateResult.getModifiedCount()).thenReturn(1L);
+
+        // Act
+        resource.setMerits(request);
+
+        // Assert
+        Bson capturedUpdate = updateCaptor.getValue();
+        assertNotNull(capturedUpdate);
+        assertTrue(capturedUpdate.toString().contains("testplayer"));
+    }
+
+    @Test
+    public void testSetMerits_PlayerNotFound() {
+        // Arrange
+        SetMeritsRequest request = new SetMeritsRequest();
+        request.setPlayerId(999);
+        request.setPlayerName("NonExistent");
+        request.setTotal(10);
+        request.setMax(20);
+
+        when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
+        when(mockFindIterable.first()).thenReturn(null);
+
+        // Act
+        Response response = resource.setMerits(request);
+
+        // Assert
+        assertEquals(404, response.getStatus());
+        String errorMessage = (String) response.getEntity();
+        assertTrue(errorMessage.contains("Player not found"));
+        assertTrue(errorMessage.contains("999"));
+        verify(mockCollection, never()).updateOne(any(Bson.class), any(Bson.class));
+    }
+
+    @Test
+    public void testSetMerits_NullRequest() {
+        // Arrange
+        SetMeritsRequest request = null;
+
+        // Act
+        Response response = resource.setMerits(request);
+
+        // Assert
+        assertEquals(400, response.getStatus());
+        String errorMessage = (String) response.getEntity();
+        assertEquals("playerId, playerName, total, and max are required", errorMessage);
+        verify(mockCollection, never()).updateOne(any(Bson.class), any(Bson.class));
+    }
+
+    @Test
+    public void testSetMerits_MissingPlayerId() {
+        // Arrange
+        SetMeritsRequest request = new SetMeritsRequest();
+        request.setPlayerName("TestPlayer");
+        request.setTotal(25);
+        request.setMax(50);
+
+        // Act
+        Response response = resource.setMerits(request);
+
+        // Assert
+        assertEquals(400, response.getStatus());
+        assertEquals("playerId, playerName, total, and max are required", response.getEntity());
+    }
+
+    @Test
+    public void testSetMerits_MissingPlayerName() {
+        // Arrange
+        SetMeritsRequest request = new SetMeritsRequest();
+        request.setPlayerId(123);
+        request.setTotal(25);
+        request.setMax(50);
+
+        // Act
+        Response response = resource.setMerits(request);
+
+        // Assert
+        assertEquals(400, response.getStatus());
+        assertEquals("playerId, playerName, total, and max are required", response.getEntity());
+    }
+
+    @Test
+    public void testSetMerits_MissingTotal() {
+        // Arrange
+        SetMeritsRequest request = new SetMeritsRequest();
+        request.setPlayerId(123);
+        request.setPlayerName("TestPlayer");
+        request.setMax(50);
+
+        // Act
+        Response response = resource.setMerits(request);
+
+        // Assert
+        assertEquals(400, response.getStatus());
+        assertEquals("playerId, playerName, total, and max are required", response.getEntity());
+    }
+
+    @Test
+    public void testSetMerits_MissingMax() {
+        // Arrange
+        SetMeritsRequest request = new SetMeritsRequest();
+        request.setPlayerId(123);
+        request.setPlayerName("TestPlayer");
+        request.setTotal(25);
+
+        // Act
+        Response response = resource.setMerits(request);
+
+        // Assert
+        assertEquals(400, response.getStatus());
+        assertEquals("playerId, playerName, total, and max are required", response.getEntity());
+    }
+
+    @Test
+    public void testSetMerits_DatabaseError() {
+        // Arrange
+        SetMeritsRequest request = new SetMeritsRequest();
+        request.setPlayerId(123);
+        request.setPlayerName("TestPlayer");
+        request.setTotal(40);
+        request.setMax(80);
+
+        when(mockCollection.find(any(Bson.class))).thenThrow(new RuntimeException("Database connection lost"));
+
+        // Act
+        Response response = resource.setMerits(request);
+
+        // Assert
+        assertEquals(500, response.getStatus());
+        String errorMessage = (String) response.getEntity();
+        assertEquals("An error occurred while updating player merits.", errorMessage);
+    }
+
+    @Test
+    public void testSetMerits_UpdateFailure() {
+        // Arrange
+        SetMeritsRequest request = new SetMeritsRequest();
+        request.setPlayerId(123);
+        request.setPlayerName("TestPlayer");
+        request.setTotal(35);
+        request.setMax(70);
+
+        Document existingPlayer = new Document("playerId", 123);
+        
+        when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
+        when(mockFindIterable.first()).thenReturn(existingPlayer);
+        when(mockCollection.updateOne(any(Bson.class), any(Bson.class))).thenReturn(mockUpdateResult);
+        when(mockUpdateResult.getModifiedCount()).thenReturn(0L);
+        when(mockUpdateResult.getMatchedCount()).thenReturn(0L);
+
+        // Act
+        Response response = resource.setMerits(request);
+
+        // Assert
+        assertEquals(500, response.getStatus());
+        String errorMessage = (String) response.getEntity();
+        assertEquals("Failed to update player merits", errorMessage);
     }
 }

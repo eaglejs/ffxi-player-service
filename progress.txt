@@ -194,3 +194,16 @@ Feature: Set individual player zone
 - Updated prd.json to mark feature as passes: true
 
 This follows the same pattern as previous field update endpoints (set_gil, set_status, set_hpp, set_mpp, set_tp) with consistent error handling and WebSocket broadcasting.
+
+--- 2026-02-22 Implementation Update ---
+Feature: Set individual player merits
+- Created SetMeritsRequest DTO with playerId, playerName, total, and max fields
+- Implemented POST /player/set_merits endpoint in SinglePlayerResource
+- Endpoint updates player's merit points (total and max) in MongoDB as a nested document { total, max }
+- Broadcasts merits update via WebSocket to all connected clients
+- Returns "Merits: OK" on success
+- Added 10 comprehensive unit tests covering success, lowercase formatting, player not found, null request, missing fields (playerId, playerName, total, max), database error, and update failure scenarios
+- All 114 tests passing
+- Updated prd.json to mark feature as passes: true
+
+This feature differs slightly from previous simple field updates as it stores the data as a nested document with two properties (total and max) rather than a single value.
