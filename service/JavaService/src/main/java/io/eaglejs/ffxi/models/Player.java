@@ -1,6 +1,5 @@
 package io.eaglejs.ffxi.models;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
@@ -9,7 +8,6 @@ import java.util.Map;
 /**
  * Player data transfer object representing a player from the database.
  */
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Player {
 
     @JsonProperty("playerId")

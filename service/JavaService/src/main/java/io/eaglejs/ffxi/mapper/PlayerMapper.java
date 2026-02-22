@@ -3,6 +3,7 @@ package io.eaglejs.ffxi.mapper;
 import io.eaglejs.ffxi.models.Player;
 import org.bson.Document;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Utility class for mapping MongoDB Documents to domain objects.
@@ -204,8 +205,37 @@ public class PlayerMapper {
 
     private static Player.ExpHistory mapExpHistory(Document expHistoryDoc) {
         Player.ExpHistory expHistory = new Player.ExpHistory();
-        // Note: For simplicity, keeping as generic lists
-        // You could add more detailed mapping here if needed
+        
+        // Map experience entries
+        List<Document> experienceDocs = expHistoryDoc.getList("experience", Document.class);
+        if (experienceDocs != null) {
+            expHistory.setExperience(mapExpEntries(experienceDocs));
+        }
+        
+        // Map capacity entries
+        List<Document> capacityDocs = expHistoryDoc.getList("capacity", Document.class);
+        if (capacityDocs != null) {
+            expHistory.setCapacity(mapExpEntries(capacityDocs));
+        }
+        
+        // Map exemplar entries
+        List<Document> exemplarDocs = expHistoryDoc.getList("exemplar", Document.class);
+        if (exemplarDocs != null) {
+            expHistory.setExemplar(mapExpEntries(exemplarDocs));
+        }
+        
         return expHistory;
+    }
+    
+    private static List<Player.ExpEntry> mapExpEntries(List<Document> docs) {
+        return docs.stream()
+            .map(doc -> {
+                Player.ExpEntry entry = new Player.ExpEntry();
+                entry.setPoints(doc.getInteger("points"));
+                entry.setChain(doc.getInteger("chain"));
+                entry.setTimestamp(doc.getString("timestamp"));
+                return entry;
+            })
+            .collect(Collectors.toList());
     }
 }
