@@ -6,6 +6,7 @@ import com.mongodb.client.result.UpdateResult;
 
 import io.eaglejs.ffxi.models.Player;
 import io.eaglejs.ffxi.models.SetGilRequest;
+import io.eaglejs.ffxi.models.SetHppRequest;
 import io.eaglejs.ffxi.models.SetJobsRequest;
 import io.eaglejs.ffxi.models.SetOnlineRequest;
 import io.eaglejs.ffxi.models.SetStatusRequest;
@@ -878,5 +879,181 @@ public class SinglePlayerResourceTest {
         assertEquals(500, response.getStatus());
         String errorMessage = (String) response.getEntity();
         assertEquals("Failed to update player status", errorMessage);
+    }
+
+    @Test
+    public void testSetHpp_Success() {
+        // Arrange
+        SetHppRequest request = new SetHppRequest();
+        request.setPlayerId(123);
+        request.setPlayerName("TestPlayer");
+        request.setHpp(75);
+
+        Document existingPlayer = new Document("playerId", 123);
+        
+        when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
+        when(mockFindIterable.first()).thenReturn(existingPlayer);
+        when(mockCollection.updateOne(any(Bson.class), any(Bson.class))).thenReturn(mockUpdateResult);
+        when(mockUpdateResult.getModifiedCount()).thenReturn(1L);
+
+        // Act
+        Response response = resource.setHpp(request);
+
+        // Assert
+        assertEquals(200, response.getStatus());
+        assertEquals("HP: OK", response.getEntity());
+        verify(mockCollection).find(any(Bson.class));
+        verify(mockCollection).updateOne(any(Bson.class), any(Bson.class));
+    }
+
+    @Test
+    public void testSetHpp_FormatsPlayerNameToLowercase() {
+        // Arrange
+        SetHppRequest request = new SetHppRequest();
+        request.setPlayerId(456);
+        request.setPlayerName("TestPlayer");
+        request.setHpp(100);
+
+        Document existingPlayer = new Document("playerId", 456);
+        ArgumentCaptor<Bson> updateCaptor = ArgumentCaptor.forClass(Bson.class);
+        
+        when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
+        when(mockFindIterable.first()).thenReturn(existingPlayer);
+        when(mockCollection.updateOne(any(Bson.class), updateCaptor.capture())).thenReturn(mockUpdateResult);
+        when(mockUpdateResult.getModifiedCount()).thenReturn(1L);
+
+        // Act
+        resource.setHpp(request);
+
+        // Assert
+        Bson capturedUpdate = updateCaptor.getValue();
+        assertNotNull(capturedUpdate);
+        assertTrue(capturedUpdate.toString().contains("testplayer"));
+    }
+
+    @Test
+    public void testSetHpp_PlayerNotFound() {
+        // Arrange
+        SetHppRequest request = new SetHppRequest();
+        request.setPlayerId(999);
+        request.setPlayerName("NonExistent");
+        request.setHpp(50);
+
+        when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
+        when(mockFindIterable.first()).thenReturn(null);
+
+        // Act
+        Response response = resource.setHpp(request);
+
+        // Assert
+        assertEquals(404, response.getStatus());
+        String errorMessage = (String) response.getEntity();
+        assertTrue(errorMessage.contains("Player not found"));
+        assertTrue(errorMessage.contains("999"));
+        verify(mockCollection, never()).updateOne(any(Bson.class), any(Bson.class));
+    }
+
+    @Test
+    public void testSetHpp_NullRequest() {
+        // Arrange
+        SetHppRequest request = null;
+
+        // Act
+        Response response = resource.setHpp(request);
+
+        // Assert
+        assertEquals(400, response.getStatus());
+        String errorMessage = (String) response.getEntity();
+        assertEquals("playerId, playerName, and hpp are required", errorMessage);
+        verify(mockCollection, never()).updateOne(any(Bson.class), any(Bson.class));
+    }
+
+    @Test
+    public void testSetHpp_MissingPlayerId() {
+        // Arrange
+        SetHppRequest request = new SetHppRequest();
+        request.setPlayerName("TestPlayer");
+        request.setHpp(75);
+
+        // Act
+        Response response = resource.setHpp(request);
+
+        // Assert
+        assertEquals(400, response.getStatus());
+        assertEquals("playerId, playerName, and hpp are required", response.getEntity());
+    }
+
+    @Test
+    public void testSetHpp_MissingPlayerName() {
+        // Arrange
+        SetHppRequest request = new SetHppRequest();
+        request.setPlayerId(123);
+        request.setHpp(75);
+
+        // Act
+        Response response = resource.setHpp(request);
+
+        // Assert
+        assertEquals(400, response.getStatus());
+        assertEquals("playerId, playerName, and hpp are required", response.getEntity());
+    }
+
+    @Test
+    public void testSetHpp_MissingHpp() {
+        // Arrange
+        SetHppRequest request = new SetHppRequest();
+        request.setPlayerId(123);
+        request.setPlayerName("TestPlayer");
+
+        // Act
+        Response response = resource.setHpp(request);
+
+        // Assert
+        assertEquals(400, response.getStatus());
+        assertEquals("playerId, playerName, and hpp are required", response.getEntity());
+    }
+
+    @Test
+    public void testSetHpp_DatabaseError() {
+        // Arrange
+        SetHppRequest request = new SetHppRequest();
+        request.setPlayerId(123);
+        request.setPlayerName("TestPlayer");
+        request.setHpp(75);
+
+        when(mockCollection.find(any(Bson.class))).thenThrow(new RuntimeException("Database connection lost"));
+
+        // Act
+        Response response = resource.setHpp(request);
+
+        // Assert
+        assertEquals(500, response.getStatus());
+        String errorMessage = (String) response.getEntity();
+        assertEquals("An error occurred while updating player hpp.", errorMessage);
+    }
+
+    @Test
+    public void testSetHpp_UpdateFailure() {
+        // Arrange
+        SetHppRequest request = new SetHppRequest();
+        request.setPlayerId(123);
+        request.setPlayerName("TestPlayer");
+        request.setHpp(75);
+
+        Document existingPlayer = new Document("playerId", 123);
+        
+        when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
+        when(mockFindIterable.first()).thenReturn(existingPlayer);
+        when(mockCollection.updateOne(any(Bson.class), any(Bson.class))).thenReturn(mockUpdateResult);
+        when(mockUpdateResult.getModifiedCount()).thenReturn(0L);
+        when(mockUpdateResult.getMatchedCount()).thenReturn(0L);
+
+        // Act
+        Response response = resource.setHpp(request);
+
+        // Assert
+        assertEquals(500, response.getStatus());
+        String errorMessage = (String) response.getEntity();
+        assertEquals("Failed to update player hpp", errorMessage);
     }
 }
