@@ -1037,7 +1037,7 @@ public class SinglePlayerResource {
             String timeStamp = java.time.Instant.now().toString();
 
             List<Document> messagesPackage = new ArrayList<>();
-            for (Object value : request.getMessages()) {
+            for (Object value : request.getMessages().values()) {
                 String messageString = (value instanceof String) ? (String) value : String.valueOf(value);
                 Document entry = new Document();
                 entry.put("messageType", messageType);
