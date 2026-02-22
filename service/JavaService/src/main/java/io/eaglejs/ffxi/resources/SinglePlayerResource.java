@@ -842,15 +842,44 @@ public class SinglePlayerResource {
       Document document = chatsCollection.find(eq("playerId", playerId)).first();
 
       if (document == null) {
-        return Response.status(Response.Status.NOT_FOUND)
-            .entity("Player not found with playerId: " + playerId)
-            .build();
+        LOG.info("No chat document found for playerId={}, returning empty array", playerId);
+        return Response.ok(new ArrayList<>()).build();
       }
 
-      // Extract chatLog array from the document, return empty array if not present
-      List<Document> chatLog = getDocumentList(document, "chatLog");
+      // chatLog is stored as a Map with messageType as keys (e.g., chatLog.DROPS, chatLog.OBTAINED)
+      // We need to flatten all messages from all types into a single array
+      List<Document> allMessages = new ArrayList<>();
+      Object chatLogRaw = document.get("chatLog");
+      
+      if (chatLogRaw instanceof Document) {
+        Document chatLogMap = (Document) chatLogRaw;
+        // Iterate through each messageType key
+        for (String messageType : chatLogMap.keySet()) {
+          Object typeMessages = chatLogMap.get(messageType);
+          if (typeMessages instanceof List<?>) {
+            for (Object item : (List<?>) typeMessages) {
+              if (item instanceof Document) {
+                allMessages.add((Document) item);
+              }
+            }
+          }
+        }
+      }
 
-      return Response.ok(chatLog).build();
+      // Sort by timestamp ascending
+      allMessages.sort((a, b) -> {
+        String tsA = a.getString("timeStamp");
+        String tsB = b.getString("timeStamp");
+        if (tsA == null || tsB == null) return 0;
+        return tsA.compareTo(tsB);
+      });
+
+      // Return last 5000 messages
+      int startIndex = Math.max(0, allMessages.size() - 5000);
+      List<Document> limitedMessages = allMessages.subList(startIndex, allMessages.size());
+
+      LOG.info("Returning {} messages for playerId={}", limitedMessages.size(), playerId);
+      return Response.ok(limitedMessages).build();
     } catch (Exception e) {
       LOG.error("Error retrieving chat log for playerId: " + playerId, e);
       return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
@@ -1000,14 +1029,31 @@ public class SinglePlayerResource {
 
       MongoCollection<Document> chatsCollection = mongoDBService.getChatsCollection();
 
+      LOG.info("Attempting to update chatsCollection for playerId={}, messageType={}, messageCount={}", 
+          request.getPlayerId(), messageType, messagesPackage.size());
+      LOG.info("Messages being pushed: {}", messagesPackage);
+
+      // Use single atomic upsert operation with push, matching Node.js implementation
+      // setOnInsert ensures playerId is set when creating a new document
       com.mongodb.client.result.UpdateResult result = chatsCollection.updateOne(
           eq("playerId", request.getPlayerId()),
           combine(
-              set("playerName", playerName),
-              set("playerId", request.getPlayerId()),
+              com.mongodb.client.model.Updates.setOnInsert("playerId", request.getPlayerId()),
               com.mongodb.client.model.Updates.pushEach("chatLog." + messageType, messagesPackage,
                   new PushOptions().slice(-5000))),
           new com.mongodb.client.model.UpdateOptions().upsert(true));
+
+      LOG.info("Update result: modified={}, matched={}, upserted={}", 
+          result.getModifiedCount(), result.getMatchedCount(), result.getUpsertedId());
+
+      // Verify the document was actually saved
+      Document verifyDoc = chatsCollection.find(eq("playerId", request.getPlayerId())).first();
+      if (verifyDoc != null) {
+        LOG.info("Verified document exists in chats collection for playerId={}", request.getPlayerId());
+        LOG.info("Document contents: {}", verifyDoc.toJson());
+      } else {
+        LOG.error("CRITICAL: Document not found in chats collection after update for playerId={}", request.getPlayerId());
+      }
 
       if (result.getModifiedCount() == 0 && result.getMatchedCount() == 0 && result.getUpsertedId() == null) {
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
@@ -1027,7 +1073,7 @@ public class SinglePlayerResource {
 
       return Response.ok("Messages: OK").build();
     } catch (Exception e) {
-      LOG.error("Error setting player messages for playerId: " + request.getPlayerId(), e);
+      LOG.error("Error setting player messages for playerId: " + (request != null ? request.getPlayerId() : "unknown"), e);
       return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
           .entity("An error occurred while updating player messages.")
           .build();
