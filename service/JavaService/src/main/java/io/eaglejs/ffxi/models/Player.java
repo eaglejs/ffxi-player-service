@@ -88,7 +88,7 @@ public class Player {
     private Map<String, Object> currency2;
 
     @JsonProperty("buffs")
-    private Map<String, Object> buffs;
+    private List<Object> buffs;
 
     @JsonProperty("abilities")
     private List<Object> abilities;
@@ -301,11 +301,11 @@ public class Player {
         this.currency2 = currency2;
     }
 
-    public Map<String, Object> getBuffs() {
+    public List<Object> getBuffs() {
         return buffs;
     }
 
-    public void setBuffs(Map<String, Object> buffs) {
+    public void setBuffs(List<Object> buffs) {
         this.buffs = buffs;
     }
 

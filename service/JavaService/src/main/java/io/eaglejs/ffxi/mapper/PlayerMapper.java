@@ -2,6 +2,7 @@ package io.eaglejs.ffxi.mapper;
 
 import io.eaglejs.ffxi.models.Player;
 import org.bson.Document;
+import java.util.List;
 
 /**
  * Utility class for mapping MongoDB Documents to domain objects.
@@ -160,9 +161,9 @@ public class PlayerMapper {
         if (currency2Doc != null) {
             player.setCurrency2(currency2Doc);
         }
-        Document buffsDoc = document.get("buffs", Document.class);
-        if (buffsDoc != null) {
-            player.setBuffs(buffsDoc);
+        List<Object> buffsList = document.getList("buffs", Object.class);
+        if (buffsList != null) {
+            player.setBuffs(buffsList);
         }
         player.setAbilities(document.getList("abilities", Object.class));
         
