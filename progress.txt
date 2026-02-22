@@ -346,3 +346,15 @@ Feature: Set individual player currency2
 - Updated prd.json to mark feature as passes: true
 
 This endpoint mirrors the currency1 implementation, handling another complex nested object with 12 different currency types.
+
+## 2026-02-22 04:34:00 - Set Player Stats Feature Complete
+- Created Stats model class with 22 stat fields (base and added stats, elemental resistances)
+- Created SetStatsRequest DTO with root-level fields (masterLevel, mainJobLevel, subJobLevel, attack, defense, title, nationRank, currentExemplar, requiredExemplar) and nested stats object
+- Implemented POST /player/set_stats endpoint that updates both root-level fields and nested stats object
+- Updates player stats in MongoDB using combine() to set multiple fields in single update operation
+- Broadcasts update via WebSocket with all fields
+- Returns "Stats: OK" on success
+- Added 9 comprehensive unit tests covering success, lowercase formatting, player not found, null/missing fields, database errors, update failure
+- Updated prd.json marking stats feature as complete
+- Test suite now at 205 tests passing
+- Committed changes with proper git trailer

@@ -20,9 +20,11 @@ import io.eaglejs.ffxi.models.SetMeritsRequest;
 import io.eaglejs.ffxi.models.SetMessagesRequest;
 import io.eaglejs.ffxi.models.SetMppRequest;
 import io.eaglejs.ffxi.models.SetOnlineRequest;
+import io.eaglejs.ffxi.models.SetStatsRequest;
 import io.eaglejs.ffxi.models.SetStatusRequest;
 import io.eaglejs.ffxi.models.SetTpRequest;
 import io.eaglejs.ffxi.models.SetZoneRequest;
+import io.eaglejs.ffxi.models.Stats;
 import io.eaglejs.ffxi.service.MongoDBService;
 import io.eaglejs.ffxi.websocket.PlayerWebSocket;
 import org.bson.Document;
@@ -3446,5 +3448,195 @@ public class SinglePlayerResourceTest {
         assertEquals(500, response.getStatus());
         String errorMessage = (String) response.getEntity();
         assertEquals("Failed to update player currency2", errorMessage);
+    }
+
+    @Test
+    public void testSetStats_Success() {
+        // Arrange
+        SetStatsRequest request = new SetStatsRequest();
+        request.setPlayerId(123);
+        request.setPlayerName("TestPlayer");
+        request.setMasterLevel(50);
+        request.setMainJobLevel(99);
+        request.setSubJobLevel(49);
+        request.setAttack(500);
+        request.setDefense(400);
+        request.setTitle("Master of All");
+        request.setNationRank(10);
+        request.setCurrentExemplar(100);
+        request.setRequiredExemplar(200);
+        
+        Stats stats = new Stats();
+        stats.setBaseSTR(50);
+        stats.setBaseAGI(45);
+        request.setStats(stats);
+
+        Document existingPlayer = new Document("playerId", 123);
+        
+        when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
+        when(mockFindIterable.first()).thenReturn(existingPlayer);
+        when(mockCollection.updateOne(any(Bson.class), any(Bson.class))).thenReturn(mockUpdateResult);
+        when(mockUpdateResult.getModifiedCount()).thenReturn(1L);
+
+        // Act
+        Response response = resource.setStats(request);
+
+        // Assert
+        assertEquals(200, response.getStatus());
+        assertEquals("Stats: OK", response.getEntity());
+        verify(mockCollection).find(any(Bson.class));
+        verify(mockCollection).updateOne(any(Bson.class), any(Bson.class));
+    }
+
+    @Test
+    public void testSetStats_FormatsPlayerNameToLowercase() {
+        // Arrange
+        SetStatsRequest request = new SetStatsRequest();
+        request.setPlayerId(456);
+        request.setPlayerName("TestPlayer");
+        request.setMasterLevel(30);
+        request.setStats(new Stats());
+
+        Document existingPlayer = new Document("playerId", 456);
+        ArgumentCaptor<Bson> updateCaptor = ArgumentCaptor.forClass(Bson.class);
+        
+        when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
+        when(mockFindIterable.first()).thenReturn(existingPlayer);
+        when(mockCollection.updateOne(any(Bson.class), updateCaptor.capture())).thenReturn(mockUpdateResult);
+        when(mockUpdateResult.getModifiedCount()).thenReturn(1L);
+
+        // Act
+        resource.setStats(request);
+
+        // Assert
+        Bson capturedUpdate = updateCaptor.getValue();
+        assertNotNull(capturedUpdate);
+        assertTrue(capturedUpdate.toString().contains("testplayer"));
+    }
+
+    @Test
+    public void testSetStats_PlayerNotFound() {
+        // Arrange
+        SetStatsRequest request = new SetStatsRequest();
+        request.setPlayerId(999);
+        request.setPlayerName("NonExistent");
+        request.setStats(new Stats());
+
+        when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
+        when(mockFindIterable.first()).thenReturn(null);
+
+        // Act
+        Response response = resource.setStats(request);
+
+        // Assert
+        assertEquals(404, response.getStatus());
+        String errorMessage = (String) response.getEntity();
+        assertTrue(errorMessage.contains("Player not found"));
+        assertTrue(errorMessage.contains("999"));
+        verify(mockCollection, never()).updateOne(any(Bson.class), any(Bson.class));
+    }
+
+    @Test
+    public void testSetStats_NullRequest() {
+        // Arrange
+        SetStatsRequest request = null;
+
+        // Act
+        Response response = resource.setStats(request);
+
+        // Assert
+        assertEquals(400, response.getStatus());
+        String errorMessage = (String) response.getEntity();
+        assertEquals("playerId, playerName, and stats are required", errorMessage);
+        verify(mockCollection, never()).updateOne(any(Bson.class), any(Bson.class));
+    }
+
+    @Test
+    public void testSetStats_MissingPlayerId() {
+        // Arrange
+        SetStatsRequest request = new SetStatsRequest();
+        request.setPlayerName("TestPlayer");
+        request.setStats(new Stats());
+
+        // Act
+        Response response = resource.setStats(request);
+
+        // Assert
+        assertEquals(400, response.getStatus());
+        assertEquals("playerId, playerName, and stats are required", response.getEntity());
+    }
+
+    @Test
+    public void testSetStats_MissingPlayerName() {
+        // Arrange
+        SetStatsRequest request = new SetStatsRequest();
+        request.setPlayerId(123);
+        request.setStats(new Stats());
+
+        // Act
+        Response response = resource.setStats(request);
+
+        // Assert
+        assertEquals(400, response.getStatus());
+        assertEquals("playerId, playerName, and stats are required", response.getEntity());
+    }
+
+    @Test
+    public void testSetStats_MissingStats() {
+        // Arrange
+        SetStatsRequest request = new SetStatsRequest();
+        request.setPlayerId(123);
+        request.setPlayerName("TestPlayer");
+
+        // Act
+        Response response = resource.setStats(request);
+
+        // Assert
+        assertEquals(400, response.getStatus());
+        assertEquals("playerId, playerName, and stats are required", response.getEntity());
+    }
+
+    @Test
+    public void testSetStats_DatabaseError() {
+        // Arrange
+        SetStatsRequest request = new SetStatsRequest();
+        request.setPlayerId(123);
+        request.setPlayerName("TestPlayer");
+        request.setStats(new Stats());
+
+        when(mockCollection.find(any(Bson.class))).thenThrow(new RuntimeException("Database connection lost"));
+
+        // Act
+        Response response = resource.setStats(request);
+
+        // Assert
+        assertEquals(500, response.getStatus());
+        String errorMessage = (String) response.getEntity();
+        assertEquals("An error occurred while updating player stats.", errorMessage);
+    }
+
+    @Test
+    public void testSetStats_UpdateFailure() {
+        // Arrange
+        SetStatsRequest request = new SetStatsRequest();
+        request.setPlayerId(123);
+        request.setPlayerName("TestPlayer");
+        request.setStats(new Stats());
+
+        Document existingPlayer = new Document("playerId", 123);
+        
+        when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
+        when(mockFindIterable.first()).thenReturn(existingPlayer);
+        when(mockCollection.updateOne(any(Bson.class), any(Bson.class))).thenReturn(mockUpdateResult);
+        when(mockUpdateResult.getModifiedCount()).thenReturn(0L);
+        when(mockUpdateResult.getMatchedCount()).thenReturn(0L);
+
+        // Act
+        Response response = resource.setStats(request);
+
+        // Assert
+        assertEquals(500, response.getStatus());
+        String errorMessage = (String) response.getEntity();
+        assertEquals("Failed to update player stats", errorMessage);
     }
 }

@@ -18,9 +18,11 @@ import io.eaglejs.ffxi.models.SetMeritsRequest;
 import io.eaglejs.ffxi.models.SetMessagesRequest;
 import io.eaglejs.ffxi.models.SetMppRequest;
 import io.eaglejs.ffxi.models.SetOnlineRequest;
+import io.eaglejs.ffxi.models.SetStatsRequest;
 import io.eaglejs.ffxi.models.SetStatusRequest;
 import io.eaglejs.ffxi.models.SetTpRequest;
 import io.eaglejs.ffxi.models.SetZoneRequest;
+import io.eaglejs.ffxi.models.Stats;
 import io.eaglejs.ffxi.service.MongoDBService;
 import io.eaglejs.ffxi.websocket.PlayerWebSocket;
 import io.swagger.v3.oas.annotations.Operation;
@@ -1371,6 +1373,118 @@ public class SinglePlayerResource {
             LOG.error("Error setting player currency2 for playerId: " + request.getPlayerId(), e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity("An error occurred while updating player currency2.")
+                    .build();
+        }
+    }
+
+    @POST
+    @Path("/set_stats")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.TEXT_PLAIN)
+    @Operation(
+        summary = "Set Player Stats",
+        description = "Updates a player's stats (both root-level fields and nested stats object) in the database and broadcasts the update via WebSocket.",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Stats updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request data"),
+            @ApiResponse(responseCode = "404", description = "Player not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+        }
+    )
+    public Response setStats(SetStatsRequest request) {
+        try {
+            if (request == null || request.getPlayerId() == null || 
+                request.getPlayerName() == null || request.getStats() == null) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity("playerId, playerName, and stats are required")
+                        .build();
+            }
+
+            String playerName = request.getPlayerName().toLowerCase();
+            Stats s = request.getStats();
+            
+            MongoCollection<Document> playersCollection = mongoDBService.getPlayersCollection();
+            
+            Document existingPlayer = playersCollection.find(eq("playerId", request.getPlayerId())).first();
+            if (existingPlayer == null) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity("Player not found with playerId: " + request.getPlayerId())
+                        .build();
+            }
+
+            // Create stats document
+            Document statsDoc = new Document();
+            statsDoc.put("baseSTR", s.getBaseSTR());
+            statsDoc.put("baseAGI", s.getBaseAGI());
+            statsDoc.put("baseDEX", s.getBaseDEX());
+            statsDoc.put("baseVIT", s.getBaseVIT());
+            statsDoc.put("baseINT", s.getBaseINT());
+            statsDoc.put("baseMND", s.getBaseMND());
+            statsDoc.put("baseCHR", s.getBaseCHR());
+            statsDoc.put("addedSTR", s.getAddedSTR());
+            statsDoc.put("addedAGI", s.getAddedAGI());
+            statsDoc.put("addedDEX", s.getAddedDEX());
+            statsDoc.put("addedVIT", s.getAddedVIT());
+            statsDoc.put("addedINT", s.getAddedINT());
+            statsDoc.put("addedMND", s.getAddedMND());
+            statsDoc.put("addedCHR", s.getAddedCHR());
+            statsDoc.put("fireResistance", s.getFireResistance());
+            statsDoc.put("iceResistance", s.getIceResistance());
+            statsDoc.put("windResistance", s.getWindResistance());
+            statsDoc.put("earthResistance", s.getEarthResistance());
+            statsDoc.put("lightningResistance", s.getLightningResistance());
+            statsDoc.put("waterResistance", s.getWaterResistance());
+            statsDoc.put("lightResistance", s.getLightResistance());
+            statsDoc.put("darkResistance", s.getDarkResistance());
+
+            // Update both root-level fields and nested stats object
+            com.mongodb.client.result.UpdateResult result = playersCollection.updateOne(
+                eq("playerId", request.getPlayerId()),
+                combine(
+                    set("playerName", playerName),
+                    set("masterLevel", request.getMasterLevel()),
+                    set("mainJobLevel", request.getMainJobLevel()),
+                    set("subJobLevel", request.getSubJobLevel()),
+                    set("attack", request.getAttack()),
+                    set("defense", request.getDefense()),
+                    set("title", request.getTitle()),
+                    set("nationRank", request.getNationRank()),
+                    set("currentExemplar", request.getCurrentExemplar()),
+                    set("requiredExemplar", request.getRequiredExemplar()),
+                    set("stats", statsDoc)
+                )
+            );
+
+            if (result.getModifiedCount() == 0 && result.getMatchedCount() == 0) {
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                        .entity("Failed to update player stats")
+                        .build();
+            }
+
+            Map<String, Object> broadcastData = new HashMap<>();
+            broadcastData.put("playerId", request.getPlayerId());
+            broadcastData.put("playerName", playerName);
+            broadcastData.put("masterLevel", request.getMasterLevel());
+            broadcastData.put("mainJobLevel", request.getMainJobLevel());
+            broadcastData.put("subJobLevel", request.getSubJobLevel());
+            broadcastData.put("attack", request.getAttack());
+            broadcastData.put("defense", request.getDefense());
+            broadcastData.put("title", request.getTitle());
+            broadcastData.put("nationRank", request.getNationRank());
+            broadcastData.put("currentExemplar", request.getCurrentExemplar());
+            broadcastData.put("requiredExemplar", request.getRequiredExemplar());
+            broadcastData.put("stats", statsDoc);
+            
+            PlayerWebSocket.broadcast(broadcastData);
+            
+            LOG.info("Updated stats for player {} ({})", 
+                request.getPlayerId(), playerName);
+            
+            return Response.ok("Stats: OK").build();
+        } catch (Exception e) {
+            LOG.error("Error setting player stats for playerId: " + request.getPlayerId(), e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("An error occurred while updating player stats.")
                     .build();
         }
     }
