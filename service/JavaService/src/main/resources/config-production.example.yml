@@ -1,5 +1,5 @@
 server:
-  rootPath: /api/*
+  rootPath: /*
   applicationConnectors:
     - type: http
       port: 8080

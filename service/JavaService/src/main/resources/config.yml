@@ -1,8 +1,8 @@
 server:
-  rootPath: /api/*
+  rootPath: /*
   applicationConnectors:
     - type: http
-      port: 80
+      port: 8080
 
 # CORS configuration
 cors:
