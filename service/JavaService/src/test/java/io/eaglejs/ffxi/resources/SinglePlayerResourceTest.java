@@ -8,6 +8,7 @@ import io.eaglejs.ffxi.models.Player;
 import io.eaglejs.ffxi.models.SetGilRequest;
 import io.eaglejs.ffxi.models.SetHppRequest;
 import io.eaglejs.ffxi.models.SetJobsRequest;
+import io.eaglejs.ffxi.models.SetMppRequest;
 import io.eaglejs.ffxi.models.SetOnlineRequest;
 import io.eaglejs.ffxi.models.SetStatusRequest;
 import io.eaglejs.ffxi.service.MongoDBService;
@@ -1055,5 +1056,181 @@ public class SinglePlayerResourceTest {
         assertEquals(500, response.getStatus());
         String errorMessage = (String) response.getEntity();
         assertEquals("Failed to update player hpp", errorMessage);
+    }
+
+    @Test
+    public void testSetMpp_Success() {
+        // Arrange
+        SetMppRequest request = new SetMppRequest();
+        request.setPlayerId(123);
+        request.setPlayerName("TestPlayer");
+        request.setMpp(50);
+
+        Document existingPlayer = new Document("playerId", 123);
+        
+        when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
+        when(mockFindIterable.first()).thenReturn(existingPlayer);
+        when(mockCollection.updateOne(any(Bson.class), any(Bson.class))).thenReturn(mockUpdateResult);
+        when(mockUpdateResult.getModifiedCount()).thenReturn(1L);
+
+        // Act
+        Response response = resource.setMpp(request);
+
+        // Assert
+        assertEquals(200, response.getStatus());
+        assertEquals("MP: OK", response.getEntity());
+        verify(mockCollection).find(any(Bson.class));
+        verify(mockCollection).updateOne(any(Bson.class), any(Bson.class));
+    }
+
+    @Test
+    public void testSetMpp_FormatsPlayerNameToLowercase() {
+        // Arrange
+        SetMppRequest request = new SetMppRequest();
+        request.setPlayerId(456);
+        request.setPlayerName("TestPlayer");
+        request.setMpp(100);
+
+        Document existingPlayer = new Document("playerId", 456);
+        ArgumentCaptor<Bson> updateCaptor = ArgumentCaptor.forClass(Bson.class);
+        
+        when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
+        when(mockFindIterable.first()).thenReturn(existingPlayer);
+        when(mockCollection.updateOne(any(Bson.class), updateCaptor.capture())).thenReturn(mockUpdateResult);
+        when(mockUpdateResult.getModifiedCount()).thenReturn(1L);
+
+        // Act
+        resource.setMpp(request);
+
+        // Assert
+        Bson capturedUpdate = updateCaptor.getValue();
+        assertNotNull(capturedUpdate);
+        assertTrue(capturedUpdate.toString().contains("testplayer"));
+    }
+
+    @Test
+    public void testSetMpp_PlayerNotFound() {
+        // Arrange
+        SetMppRequest request = new SetMppRequest();
+        request.setPlayerId(999);
+        request.setPlayerName("NonExistent");
+        request.setMpp(25);
+
+        when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
+        when(mockFindIterable.first()).thenReturn(null);
+
+        // Act
+        Response response = resource.setMpp(request);
+
+        // Assert
+        assertEquals(404, response.getStatus());
+        String errorMessage = (String) response.getEntity();
+        assertTrue(errorMessage.contains("Player not found"));
+        assertTrue(errorMessage.contains("999"));
+        verify(mockCollection, never()).updateOne(any(Bson.class), any(Bson.class));
+    }
+
+    @Test
+    public void testSetMpp_NullRequest() {
+        // Arrange
+        SetMppRequest request = null;
+
+        // Act
+        Response response = resource.setMpp(request);
+
+        // Assert
+        assertEquals(400, response.getStatus());
+        String errorMessage = (String) response.getEntity();
+        assertEquals("playerId, playerName, and mpp are required", errorMessage);
+        verify(mockCollection, never()).updateOne(any(Bson.class), any(Bson.class));
+    }
+
+    @Test
+    public void testSetMpp_MissingPlayerId() {
+        // Arrange
+        SetMppRequest request = new SetMppRequest();
+        request.setPlayerName("TestPlayer");
+        request.setMpp(50);
+
+        // Act
+        Response response = resource.setMpp(request);
+
+        // Assert
+        assertEquals(400, response.getStatus());
+        assertEquals("playerId, playerName, and mpp are required", response.getEntity());
+    }
+
+    @Test
+    public void testSetMpp_MissingPlayerName() {
+        // Arrange
+        SetMppRequest request = new SetMppRequest();
+        request.setPlayerId(123);
+        request.setMpp(50);
+
+        // Act
+        Response response = resource.setMpp(request);
+
+        // Assert
+        assertEquals(400, response.getStatus());
+        assertEquals("playerId, playerName, and mpp are required", response.getEntity());
+    }
+
+    @Test
+    public void testSetMpp_MissingMpp() {
+        // Arrange
+        SetMppRequest request = new SetMppRequest();
+        request.setPlayerId(123);
+        request.setPlayerName("TestPlayer");
+
+        // Act
+        Response response = resource.setMpp(request);
+
+        // Assert
+        assertEquals(400, response.getStatus());
+        assertEquals("playerId, playerName, and mpp are required", response.getEntity());
+    }
+
+    @Test
+    public void testSetMpp_DatabaseError() {
+        // Arrange
+        SetMppRequest request = new SetMppRequest();
+        request.setPlayerId(123);
+        request.setPlayerName("TestPlayer");
+        request.setMpp(50);
+
+        when(mockCollection.find(any(Bson.class))).thenThrow(new RuntimeException("Database connection lost"));
+
+        // Act
+        Response response = resource.setMpp(request);
+
+        // Assert
+        assertEquals(500, response.getStatus());
+        String errorMessage = (String) response.getEntity();
+        assertEquals("An error occurred while updating player mpp.", errorMessage);
+    }
+
+    @Test
+    public void testSetMpp_UpdateFailure() {
+        // Arrange
+        SetMppRequest request = new SetMppRequest();
+        request.setPlayerId(123);
+        request.setPlayerName("TestPlayer");
+        request.setMpp(50);
+
+        Document existingPlayer = new Document("playerId", 123);
+        
+        when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
+        when(mockFindIterable.first()).thenReturn(existingPlayer);
+        when(mockCollection.updateOne(any(Bson.class), any(Bson.class))).thenReturn(mockUpdateResult);
+        when(mockUpdateResult.getModifiedCount()).thenReturn(0L);
+        when(mockUpdateResult.getMatchedCount()).thenReturn(0L);
+
+        // Act
+        Response response = resource.setMpp(request);
+
+        // Assert
+        assertEquals(500, response.getStatus());
+        String errorMessage = (String) response.getEntity();
+        assertEquals("Failed to update player mpp", errorMessage);
     }
 }

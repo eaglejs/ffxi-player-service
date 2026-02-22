@@ -6,6 +6,7 @@ import io.eaglejs.ffxi.models.Player;
 import io.eaglejs.ffxi.models.SetGilRequest;
 import io.eaglejs.ffxi.models.SetHppRequest;
 import io.eaglejs.ffxi.models.SetJobsRequest;
+import io.eaglejs.ffxi.models.SetMppRequest;
 import io.eaglejs.ffxi.models.SetOnlineRequest;
 import io.eaglejs.ffxi.models.SetStatusRequest;
 import io.eaglejs.ffxi.service.MongoDBService;
@@ -408,6 +409,73 @@ public class SinglePlayerResource {
             LOG.error("Error setting player hpp for playerId: " + request.getPlayerId(), e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity("An error occurred while updating player hpp.")
+                    .build();
+        }
+    }
+
+    @POST
+    @Path("/set_mpp")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.TEXT_PLAIN)
+    @Operation(
+        summary = "Set Player MP Percentage",
+        description = "Updates a player's MP percentage in the database and broadcasts the update via WebSocket.",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "MPP updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request data"),
+            @ApiResponse(responseCode = "404", description = "Player not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+        }
+    )
+    public Response setMpp(SetMppRequest request) {
+        try {
+            if (request == null || request.getPlayerId() == null || 
+                request.getPlayerName() == null || request.getMpp() == null) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity("playerId, playerName, and mpp are required")
+                        .build();
+            }
+
+            String playerName = request.getPlayerName().toLowerCase();
+            
+            MongoCollection<Document> playersCollection = mongoDBService.getPlayersCollection();
+            
+            Document existingPlayer = playersCollection.find(eq("playerId", request.getPlayerId())).first();
+            if (existingPlayer == null) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity("Player not found with playerId: " + request.getPlayerId())
+                        .build();
+            }
+
+            com.mongodb.client.result.UpdateResult result = playersCollection.updateOne(
+                eq("playerId", request.getPlayerId()),
+                combine(
+                    set("playerName", playerName),
+                    set("mpp", request.getMpp())
+                )
+            );
+
+            if (result.getModifiedCount() == 0 && result.getMatchedCount() == 0) {
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                        .entity("Failed to update player mpp")
+                        .build();
+            }
+
+            Map<String, Object> broadcastData = new HashMap<>();
+            broadcastData.put("playerId", request.getPlayerId());
+            broadcastData.put("playerName", playerName);
+            broadcastData.put("mpp", request.getMpp());
+            
+            PlayerWebSocket.broadcast(broadcastData);
+            
+            LOG.info("Updated mpp for player {} ({}): {}", 
+                request.getPlayerId(), playerName, request.getMpp());
+            
+            return Response.ok("MP: OK").build();
+        } catch (Exception e) {
+            LOG.error("Error setting player mpp for playerId: " + request.getPlayerId(), e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("An error occurred while updating player mpp.")
                     .build();
         }
     }

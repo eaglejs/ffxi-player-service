@@ -147,3 +147,20 @@
 - Added unit tests: SinglePlayerResourceTest (9 new tests) covering success, lowercase formatting, not found, null/missing fields, database error, and update failure scenarios
 - All 77 tests passing (68 + 9 new)
 - PRD "Set individual players hpp" feature marked as passes: true
+
+2026-02-22: Implemented Set Player MP Percentage endpoint (Restful API)
+- Created SetMppRequest DTO model for request data validation (playerId, playerName, mpp)
+- Created POST endpoint /player/set_mpp accepting playerId, playerName, and mpp in request body
+- Implemented method to update player's MP percentage in MongoDB using playerId filter
+- Automatically formats playerName to lowercase as specified in PRD requirements
+- Validates all required fields (playerId, playerName, mpp) and returns HTTP 400 if any are missing
+- Checks player exists before updating (returns HTTP 404 if not found)
+- Updates playerName and mpp fields in database using MongoDB updateOne with combine and set
+- Broadcasts mpp update via WebSocket using PlayerWebSocket.broadcast() with playerId, playerName, and mpp
+- Returns "MP: OK" text response with HTTP 200 on success
+- Returns HTTP 404 when player not found
+- Returns HTTP 500 on database errors or update failures
+- Added Swagger/OpenAPI annotations for API documentation
+- Added unit tests: SinglePlayerResourceTest (9 new tests) covering success, lowercase formatting, not found, null/missing fields, database error, and update failure scenarios
+- All 86 tests passing (77 + 9 new)
+- PRD "Set individual players mpp" feature marked as passes: true
