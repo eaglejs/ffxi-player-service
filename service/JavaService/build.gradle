@@ -17,7 +17,7 @@ repositories {
 // Otherwise, index.html and public/ folder will be extracted from source.
 ext {
     uiPackageName = properties.getOrDefault('uiPackageName', 'ffxi-stats')
-    uiPackageVersion = properties.getOrDefault('uiPackageVersion', '1.0.0')
+    uiPackageVersion = properties.getOrDefault('uiPackageVersion', '1.1.0')
     nexusNpmUrl = "http://${nexusHost}:${nexusPort}/repository/${nexusNpmRepo}/" // Use IP address to avoid IPv6 issues
 }
 
