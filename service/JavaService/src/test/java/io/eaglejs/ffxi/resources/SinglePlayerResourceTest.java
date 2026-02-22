@@ -11,6 +11,7 @@ import io.eaglejs.ffxi.models.SetJobsRequest;
 import io.eaglejs.ffxi.models.SetMppRequest;
 import io.eaglejs.ffxi.models.SetOnlineRequest;
 import io.eaglejs.ffxi.models.SetStatusRequest;
+import io.eaglejs.ffxi.models.SetTpRequest;
 import io.eaglejs.ffxi.service.MongoDBService;
 import io.eaglejs.ffxi.websocket.PlayerWebSocket;
 import org.bson.Document;
@@ -1232,5 +1233,181 @@ public class SinglePlayerResourceTest {
         assertEquals(500, response.getStatus());
         String errorMessage = (String) response.getEntity();
         assertEquals("Failed to update player mpp", errorMessage);
+    }
+
+    @Test
+    public void testSetTp_Success() {
+        // Arrange
+        SetTpRequest request = new SetTpRequest();
+        request.setPlayerId(123);
+        request.setPlayerName("TestPlayer");
+        request.setTp(1000);
+
+        Document existingPlayer = new Document("playerId", 123);
+        
+        when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
+        when(mockFindIterable.first()).thenReturn(existingPlayer);
+        when(mockCollection.updateOne(any(Bson.class), any(Bson.class))).thenReturn(mockUpdateResult);
+        when(mockUpdateResult.getModifiedCount()).thenReturn(1L);
+
+        // Act
+        Response response = resource.setTp(request);
+
+        // Assert
+        assertEquals(200, response.getStatus());
+        assertEquals("TP: OK", response.getEntity());
+        verify(mockCollection).find(any(Bson.class));
+        verify(mockCollection).updateOne(any(Bson.class), any(Bson.class));
+    }
+
+    @Test
+    public void testSetTp_FormatsPlayerNameToLowercase() {
+        // Arrange
+        SetTpRequest request = new SetTpRequest();
+        request.setPlayerId(456);
+        request.setPlayerName("TestPlayer");
+        request.setTp(2500);
+
+        Document existingPlayer = new Document("playerId", 456);
+        ArgumentCaptor<Bson> updateCaptor = ArgumentCaptor.forClass(Bson.class);
+        
+        when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
+        when(mockFindIterable.first()).thenReturn(existingPlayer);
+        when(mockCollection.updateOne(any(Bson.class), updateCaptor.capture())).thenReturn(mockUpdateResult);
+        when(mockUpdateResult.getModifiedCount()).thenReturn(1L);
+
+        // Act
+        resource.setTp(request);
+
+        // Assert
+        Bson capturedUpdate = updateCaptor.getValue();
+        assertNotNull(capturedUpdate);
+        assertTrue(capturedUpdate.toString().contains("testplayer"));
+    }
+
+    @Test
+    public void testSetTp_PlayerNotFound() {
+        // Arrange
+        SetTpRequest request = new SetTpRequest();
+        request.setPlayerId(999);
+        request.setPlayerName("NonExistent");
+        request.setTp(500);
+
+        when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
+        when(mockFindIterable.first()).thenReturn(null);
+
+        // Act
+        Response response = resource.setTp(request);
+
+        // Assert
+        assertEquals(404, response.getStatus());
+        String errorMessage = (String) response.getEntity();
+        assertTrue(errorMessage.contains("Player not found"));
+        assertTrue(errorMessage.contains("999"));
+        verify(mockCollection, never()).updateOne(any(Bson.class), any(Bson.class));
+    }
+
+    @Test
+    public void testSetTp_NullRequest() {
+        // Arrange
+        SetTpRequest request = null;
+
+        // Act
+        Response response = resource.setTp(request);
+
+        // Assert
+        assertEquals(400, response.getStatus());
+        String errorMessage = (String) response.getEntity();
+        assertEquals("playerId, playerName, and tp are required", errorMessage);
+        verify(mockCollection, never()).updateOne(any(Bson.class), any(Bson.class));
+    }
+
+    @Test
+    public void testSetTp_MissingPlayerId() {
+        // Arrange
+        SetTpRequest request = new SetTpRequest();
+        request.setPlayerName("TestPlayer");
+        request.setTp(1000);
+
+        // Act
+        Response response = resource.setTp(request);
+
+        // Assert
+        assertEquals(400, response.getStatus());
+        assertEquals("playerId, playerName, and tp are required", response.getEntity());
+    }
+
+    @Test
+    public void testSetTp_MissingPlayerName() {
+        // Arrange
+        SetTpRequest request = new SetTpRequest();
+        request.setPlayerId(123);
+        request.setTp(1000);
+
+        // Act
+        Response response = resource.setTp(request);
+
+        // Assert
+        assertEquals(400, response.getStatus());
+        assertEquals("playerId, playerName, and tp are required", response.getEntity());
+    }
+
+    @Test
+    public void testSetTp_MissingTp() {
+        // Arrange
+        SetTpRequest request = new SetTpRequest();
+        request.setPlayerId(123);
+        request.setPlayerName("TestPlayer");
+
+        // Act
+        Response response = resource.setTp(request);
+
+        // Assert
+        assertEquals(400, response.getStatus());
+        assertEquals("playerId, playerName, and tp are required", response.getEntity());
+    }
+
+    @Test
+    public void testSetTp_DatabaseError() {
+        // Arrange
+        SetTpRequest request = new SetTpRequest();
+        request.setPlayerId(123);
+        request.setPlayerName("TestPlayer");
+        request.setTp(1000);
+
+        when(mockCollection.find(any(Bson.class))).thenThrow(new RuntimeException("Database connection lost"));
+
+        // Act
+        Response response = resource.setTp(request);
+
+        // Assert
+        assertEquals(500, response.getStatus());
+        String errorMessage = (String) response.getEntity();
+        assertEquals("An error occurred while updating player tp.", errorMessage);
+    }
+
+    @Test
+    public void testSetTp_UpdateFailure() {
+        // Arrange
+        SetTpRequest request = new SetTpRequest();
+        request.setPlayerId(123);
+        request.setPlayerName("TestPlayer");
+        request.setTp(1000);
+
+        Document existingPlayer = new Document("playerId", 123);
+        
+        when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
+        when(mockFindIterable.first()).thenReturn(existingPlayer);
+        when(mockCollection.updateOne(any(Bson.class), any(Bson.class))).thenReturn(mockUpdateResult);
+        when(mockUpdateResult.getModifiedCount()).thenReturn(0L);
+        when(mockUpdateResult.getMatchedCount()).thenReturn(0L);
+
+        // Act
+        Response response = resource.setTp(request);
+
+        // Assert
+        assertEquals(500, response.getStatus());
+        String errorMessage = (String) response.getEntity();
+        assertEquals("Failed to update player tp", errorMessage);
     }
 }

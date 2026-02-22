@@ -9,6 +9,7 @@ import io.eaglejs.ffxi.models.SetJobsRequest;
 import io.eaglejs.ffxi.models.SetMppRequest;
 import io.eaglejs.ffxi.models.SetOnlineRequest;
 import io.eaglejs.ffxi.models.SetStatusRequest;
+import io.eaglejs.ffxi.models.SetTpRequest;
 import io.eaglejs.ffxi.service.MongoDBService;
 import io.eaglejs.ffxi.websocket.PlayerWebSocket;
 import io.swagger.v3.oas.annotations.Operation;
@@ -476,6 +477,73 @@ public class SinglePlayerResource {
             LOG.error("Error setting player mpp for playerId: " + request.getPlayerId(), e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity("An error occurred while updating player mpp.")
+                    .build();
+        }
+    }
+
+    @POST
+    @Path("/set_tp")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.TEXT_PLAIN)
+    @Operation(
+        summary = "Set Player TP",
+        description = "Updates a player's TP (Tactical Points) in the database and broadcasts the update via WebSocket.",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "TP updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request data"),
+            @ApiResponse(responseCode = "404", description = "Player not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+        }
+    )
+    public Response setTp(SetTpRequest request) {
+        try {
+            if (request == null || request.getPlayerId() == null || 
+                request.getPlayerName() == null || request.getTp() == null) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity("playerId, playerName, and tp are required")
+                        .build();
+            }
+
+            String playerName = request.getPlayerName().toLowerCase();
+            
+            MongoCollection<Document> playersCollection = mongoDBService.getPlayersCollection();
+            
+            Document existingPlayer = playersCollection.find(eq("playerId", request.getPlayerId())).first();
+            if (existingPlayer == null) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity("Player not found with playerId: " + request.getPlayerId())
+                        .build();
+            }
+
+            com.mongodb.client.result.UpdateResult result = playersCollection.updateOne(
+                eq("playerId", request.getPlayerId()),
+                combine(
+                    set("playerName", playerName),
+                    set("tp", request.getTp())
+                )
+            );
+
+            if (result.getModifiedCount() == 0 && result.getMatchedCount() == 0) {
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                        .entity("Failed to update player tp")
+                        .build();
+            }
+
+            Map<String, Object> broadcastData = new HashMap<>();
+            broadcastData.put("playerId", request.getPlayerId());
+            broadcastData.put("playerName", playerName);
+            broadcastData.put("tp", request.getTp());
+            
+            PlayerWebSocket.broadcast(broadcastData);
+            
+            LOG.info("Updated tp for player {} ({}): {}", 
+                request.getPlayerId(), playerName, request.getTp());
+            
+            return Response.ok("TP: OK").build();
+        } catch (Exception e) {
+            LOG.error("Error setting player tp for playerId: " + request.getPlayerId(), e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("An error occurred while updating player tp.")
                     .build();
         }
     }

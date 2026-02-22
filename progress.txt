@@ -164,3 +164,20 @@
 - Added unit tests: SinglePlayerResourceTest (9 new tests) covering success, lowercase formatting, not found, null/missing fields, database error, and update failure scenarios
 - All 86 tests passing (77 + 9 new)
 - PRD "Set individual players mpp" feature marked as passes: true
+
+2026-02-22: Implemented Set Player TP endpoint (Restful API)
+- Created SetTpRequest DTO model for request data validation (playerId, playerName, tp)
+- Created POST endpoint /player/set_tp accepting playerId, playerName, and tp in request body
+- Implemented method to update player's TP (Tactical Points) in MongoDB using playerId filter
+- Automatically formats playerName to lowercase as specified in PRD requirements
+- Validates all required fields (playerId, playerName, tp) and returns HTTP 400 if any are missing
+- Checks player exists before updating (returns HTTP 404 if not found)
+- Updates playerName and tp fields in database using MongoDB updateOne with combine and set
+- Broadcasts tp update via WebSocket using PlayerWebSocket.broadcast() with playerId, playerName, and tp
+- Returns "TP: OK" text response with HTTP 200 on success
+- Returns HTTP 404 when player not found
+- Returns HTTP 500 on database errors or update failures
+- Added Swagger/OpenAPI annotations for API documentation
+- Added unit tests: SinglePlayerResourceTest (9 new tests) covering success, lowercase formatting, not found, null/missing fields, database error, and update failure scenarios
+- All 95 tests passing (86 + 9 new)
+- PRD "Set individual players tp" feature marked as passes: true
