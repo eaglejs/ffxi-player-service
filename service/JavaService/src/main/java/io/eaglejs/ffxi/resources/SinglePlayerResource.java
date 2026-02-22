@@ -910,6 +910,7 @@ public class SinglePlayerResource {
     )
     public Response getChatLog(@QueryParam("playerId") Integer playerId) {
         try {
+            LOG.info("8=====D Player {} requested chat log", playerId); 
             if (playerId == null) {
                 return Response.status(Response.Status.BAD_REQUEST)
                         .entity("playerId query parameter is required")
