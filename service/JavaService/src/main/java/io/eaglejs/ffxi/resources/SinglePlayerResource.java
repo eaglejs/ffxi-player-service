@@ -928,4 +928,66 @@ public class SinglePlayerResource {
                     .build();
         }
     }
+
+    @GET
+    @Path("/get_chat_log_by_type")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(
+        summary = "Get Player Chat Log by Type",
+        description = "Retrieves a player's chat log filtered by message type from the database by playerId.",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Filtered chat log retrieved successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request data"),
+            @ApiResponse(responseCode = "404", description = "Player not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+        }
+    )
+    public Response getChatLogByType(
+            @QueryParam("playerId") Integer playerId,
+            @QueryParam("messageType") Integer messageType) {
+        try {
+            if (playerId == null) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity("playerId query parameter is required")
+                        .build();
+            }
+
+            if (messageType == null) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity("messageType query parameter is required")
+                        .build();
+            }
+
+            MongoCollection<Document> playersCollection = mongoDBService.getPlayersCollection();
+            Document document = playersCollection.find(eq("playerId", playerId)).first();
+
+            if (document == null) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity("Player not found with playerId: " + playerId)
+                        .build();
+            }
+
+            // Extract chatLog array from the document
+            List<Document> chatLog = document.get("chatLog", List.class);
+            if (chatLog == null) {
+                chatLog = new ArrayList<>();
+            }
+
+            // Filter by messageType
+            List<Document> filteredChatLog = new ArrayList<>();
+            for (Document message : chatLog) {
+                Integer msgType = message.getInteger("messageType");
+                if (msgType != null && msgType.equals(messageType)) {
+                    filteredChatLog.add(message);
+                }
+            }
+
+            return Response.ok(filteredChatLog).build();
+        } catch (Exception e) {
+            LOG.error("Error retrieving chat log by type for playerId: " + playerId, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("An error occurred while retrieving player chat log by type.")
+                    .build();
+        }
+    }
 }

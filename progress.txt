@@ -262,3 +262,18 @@ Feature: Get individual player chat log
 - Updated prd.json to mark feature as passes: true
 
 This is another GET endpoint similar to get_buffs, retrieving an array field from the player document.
+
+--- 2026-02-22 Implementation Update ---
+Feature: Get individual player chat log by type
+- Implemented GET /player/get_chat_log_by_type endpoint in SinglePlayerResource
+- Accepts playerId and messageType as query parameters
+- Retrieves player's chatLog array from MongoDB database
+- Filters chat log messages by messageType field
+- Returns filtered chatLog as JSON array response
+- Returns empty array if no messages match the type or chatLog field is not present
+- Handles error cases: null playerId (400), null messageType (400), player not found (404), database errors (500)
+- Added 7 comprehensive unit tests covering success with filtering, no matching messages, no chatLog field, player not found, null playerId, null messageType, and database error scenarios
+- All 152 tests passing
+- Updated prd.json to mark feature as passes: true
+
+This endpoint extends the get_chat_log functionality with server-side filtering by message type, reducing data transfer for clients that only need specific message types.
