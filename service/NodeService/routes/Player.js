@@ -452,7 +452,7 @@ router.post('/player/set_currency2', async (req, res) => {
 
 });
 
-router.post('/player/update_merits', async (req, res) => {
+router.post('/player/set_merits', async (req, res) => {
   try {
     const data = req.body;
     const playerId = parseInt(data.playerId);
@@ -477,12 +477,12 @@ router.post('/player/update_merits', async (req, res) => {
 
     res.send(`Merits: OK`);
   } catch (error) {
-    console.error('update_merits', error);
+    console.error('set_merits', error);
     res.status(500).send('An error occurred while updating the merits.');
   }
 });
 
-router.post('/player/update_capacity_points', async (req, res) => {
+router.post('/player/set_capacity_points', async (req, res) => {
   try {
     const data = req.body;
     const playerId = parseInt(data.playerId);
@@ -516,12 +516,12 @@ router.post('/player/update_capacity_points', async (req, res) => {
     res.send(`Capacity points: OK`);
   }
   catch (error) {
-    console.error('update_capacity_points', error);
+    console.error('set_capacity_points', error);
     res.status(500).send('An error occurred while updating the capacity points.');
   }
 });
 
-router.post('/player/update_exp_history', async (req, res) => {
+router.post('/player/set_exp_history', async (req, res) => {
   try {
     // (8|253) = exp, (371|372) = limit, (718|735) = capacity, (809|810) = exemplar
     const expIds = [8, 253, 371, 372, 718, 735, 809, 810];
@@ -583,7 +583,7 @@ router.post('/player/update_exp_history', async (req, res) => {
     res.send(`Experience history: OK`);
 
   } catch (error) {
-    console.error('update_exp_history', error);
+    console.error('set_exp_history', error);
     res.status(500).send('An error occurred while updating the experience history.');
   }
 

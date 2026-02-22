@@ -475,7 +475,7 @@ function PlayerService.incoming_chunk_handler(id, original, modified, injected, 
         total = packet['Merit Points'],
         max = packet['Max Merit Points']
       }
-      coroutine.schedule(function() PSUI.post('player/update_merits', PSUI.toJSON(meritPackage)) end, .5)
+      coroutine.schedule(function() PSUI.post('player/set_merits', PSUI.toJSON(meritPackage)) end, .5)
     elseif packet['Order'] == 5 then
       local player = windower.ffxi.get_player()
       if player then
@@ -486,7 +486,7 @@ function PlayerService.incoming_chunk_handler(id, original, modified, injected, 
           numberOfJobPoints = packet[job .. ' Job Points']
         }
 
-        coroutine.schedule(function() PSUI.post('player/update_capacity_points', PSUI.toJSON(cpPackage)) end, 1)
+        coroutine.schedule(function() PSUI.post('player/set_capacity_points', PSUI.toJSON(cpPackage)) end, 1)
       end
     end
   elseif id == 0x02D then
@@ -505,7 +505,7 @@ function PlayerService.incoming_chunk_handler(id, original, modified, injected, 
         ["chain"] = packet['Param 2'],
         ["timestamp"] = formatted_utc_time
       }
-      coroutine.schedule(function() PSUI.post('player/update_exp_history', PSUI.toJSON(expPackage)) end, 2)
+      coroutine.schedule(function() PSUI.post('player/set_exp_history', PSUI.toJSON(expPackage)) end, 2)
     end
   end
 
