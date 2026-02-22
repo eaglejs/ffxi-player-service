@@ -976,15 +976,26 @@ public class SinglePlayerResource {
                         .build();
             }
 
-            // Extract chatLog array from the document
-            List<Document> chatLog = getDocumentList(document, "chatLog");
-
-            // Filter by messageType
+            // Node.js stores chatLog as a map keyed by messageType string (e.g. chatLog["1"][]).
+            // Look up the type key directly for efficiency.
             List<Document> filteredChatLog = new ArrayList<>();
-            for (Document message : chatLog) {
-                Integer msgType = message.getInteger("messageType");
-                if (msgType != null && msgType.equals(messageType)) {
-                    filteredChatLog.add(message);
+            String typeKey = String.valueOf(messageType);
+            Object chatLogRaw = document.get("chatLog");
+            if (chatLogRaw instanceof Document) {
+                Object typeEntries = ((Document) chatLogRaw).get(typeKey);
+                if (typeEntries instanceof List<?>) {
+                    for (Object item : (List<?>) typeEntries) {
+                        if (item instanceof Document) filteredChatLog.add((Document) item);
+                    }
+                }
+            } else {
+                // Flat list format (Java-written): filter by messageType field
+                List<Document> chatLog = getDocumentList(document, "chatLog");
+                for (Document message : chatLog) {
+                    Object msgType = message.get("messageType");
+                    if (typeKey.equals(String.valueOf(msgType))) {
+                        filteredChatLog.add(message);
+                    }
                 }
             }
 
@@ -1048,7 +1059,7 @@ public class SinglePlayerResource {
                 eq("playerId", request.getPlayerId()),
                 combine(
                     set("playerName", playerName),
-                    com.mongodb.client.model.Updates.pushEach("chatLog", messagesPackage, new PushOptions().slice(-5000))
+                    com.mongodb.client.model.Updates.pushEach("chatLog." + messageType, messagesPackage, new PushOptions().slice(-5000))
                 )
             );
 
@@ -1629,14 +1640,24 @@ public class SinglePlayerResource {
 
     private List<Document> getDocumentList(Document source, String key) {
         Object value = source.get(key);
-        if (!(value instanceof List<?>)) {
-            return new ArrayList<>();
-        }
-
         List<Document> result = new ArrayList<>();
-        for (Object item : (List<?>) value) {
-            if (item instanceof Document) {
-                result.add((Document) item);
+        if (value instanceof List<?>) {
+            // Java-written format: flat array of Documents
+            for (Object item : (List<?>) value) {
+                if (item instanceof Document) {
+                    result.add((Document) item);
+                }
+            }
+        } else if (value instanceof Document) {
+            // Node.js Mongoose Map format: keyed by messageType, each value is an array
+            for (Object typeEntries : ((Document) value).values()) {
+                if (typeEntries instanceof List<?>) {
+                    for (Object item : (List<?>) typeEntries) {
+                        if (item instanceof Document) {
+                            result.add((Document) item);
+                        }
+                    }
+                }
             }
         }
         return result;

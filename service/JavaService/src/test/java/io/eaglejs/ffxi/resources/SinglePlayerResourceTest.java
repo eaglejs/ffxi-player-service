@@ -2100,7 +2100,7 @@ public class SinglePlayerResourceTest {
         SetBuffsRequest request = new SetBuffsRequest();
         request.setPlayerId(123);
         request.setPlayerName("TestPlayer");
-        Map<String, Integer> buffsMap = new java.util.HashMap<>();
+        Map<String, Object> buffsMap = new java.util.HashMap<>();
         buffsMap.put("buff1", 1);
         buffsMap.put("buff2", 2);
         buffsMap.put("buff3", 3);
@@ -2131,7 +2131,7 @@ public class SinglePlayerResourceTest {
         SetBuffsRequest request = new SetBuffsRequest();
         request.setPlayerId(456);
         request.setPlayerName("TestPlayer");
-        Map<String, Integer> buffsMap = new java.util.HashMap<>();
+        Map<String, Object> buffsMap = new java.util.HashMap<>();
         buffsMap.put("buff1", 10);
         buffsMap.put("buff2", 20);
         buffsMap.put("buff3", 30);
@@ -2160,7 +2160,7 @@ public class SinglePlayerResourceTest {
         SetBuffsRequest request = new SetBuffsRequest();
         request.setPlayerId(789);
         request.setPlayerName("TestPlayer");
-        request.setBuffs(new java.util.HashMap<String, Integer>());
+        request.setBuffs(new java.util.HashMap<String, Object>());
 
         Document existingPlayer = new Document("playerId", 789);
         
@@ -2183,7 +2183,7 @@ public class SinglePlayerResourceTest {
         SetBuffsRequest request = new SetBuffsRequest();
         request.setPlayerId(999);
         request.setPlayerName("NonExistent");
-        Map<String, Integer> buffsMap = new java.util.HashMap<>();
+        Map<String, Object> buffsMap = new java.util.HashMap<>();
         buffsMap.put("buff1", 1);
         buffsMap.put("buff2", 2);
         buffsMap.put("buff3", 3);
@@ -2223,7 +2223,7 @@ public class SinglePlayerResourceTest {
         // Arrange
         SetBuffsRequest request = new SetBuffsRequest();
         request.setPlayerName("TestPlayer");
-        Map<String, Integer> buffsMap = new java.util.HashMap<>();
+        Map<String, Object> buffsMap = new java.util.HashMap<>();
         buffsMap.put("buff1", 1);
         buffsMap.put("buff2", 2);
         buffsMap.put("buff3", 3);
@@ -2242,7 +2242,7 @@ public class SinglePlayerResourceTest {
         // Arrange
         SetBuffsRequest request = new SetBuffsRequest();
         request.setPlayerId(123);
-        Map<String, Integer> buffsMap = new java.util.HashMap<>();
+        Map<String, Object> buffsMap = new java.util.HashMap<>();
         buffsMap.put("buff1", 1);
         buffsMap.put("buff2", 2);
         buffsMap.put("buff3", 3);
@@ -2277,7 +2277,7 @@ public class SinglePlayerResourceTest {
         SetBuffsRequest request = new SetBuffsRequest();
         request.setPlayerId(123);
         request.setPlayerName("TestPlayer");
-        Map<String, Integer> buffsMap = new java.util.HashMap<>();
+        Map<String, Object> buffsMap = new java.util.HashMap<>();
         buffsMap.put("buff1", 5);
         buffsMap.put("buff2", 10);
         buffsMap.put("buff3", 15);
@@ -2300,7 +2300,7 @@ public class SinglePlayerResourceTest {
         SetBuffsRequest request = new SetBuffsRequest();
         request.setPlayerId(123);
         request.setPlayerName("TestPlayer");
-        Map<String, Integer> buffsMap = new java.util.HashMap<>();
+        Map<String, Object> buffsMap = new java.util.HashMap<>();
         buffsMap.put("buff1", 7);
         buffsMap.put("buff2", 14);
         buffsMap.put("buff3", 21);
@@ -2327,10 +2327,15 @@ public class SinglePlayerResourceTest {
     public void testGetChatLog_Success() {
         // Arrange
         Integer playerId = 123;
-        List<Document> chatLog = new java.util.ArrayList<>();
-        chatLog.add(new Document("messageType", 1).append("message", "Hello world"));
-        chatLog.add(new Document("messageType", 2).append("message", "Test message"));
-        Document existingPlayer = new Document("playerId", playerId).append("chatLog", chatLog);
+        // Node.js stores chatLog as a Document keyed by messageType string
+        Document chatLogDoc = new Document();
+        List<Document> type1Messages = new java.util.ArrayList<>();
+        type1Messages.add(new Document("messageType", 1).append("message", "Hello world"));
+        List<Document> type2Messages = new java.util.ArrayList<>();
+        type2Messages.add(new Document("messageType", 2).append("message", "Test message"));
+        chatLogDoc.put("1", type1Messages);
+        chatLogDoc.put("2", type2Messages);
+        Document existingPlayer = new Document("playerId", playerId).append("chatLog", chatLogDoc);
         
         when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
         when(mockFindIterable.first()).thenReturn(existingPlayer);
@@ -2351,8 +2356,8 @@ public class SinglePlayerResourceTest {
     public void testGetChatLog_EmptyChatLog() {
         // Arrange
         Integer playerId = 456;
-        List<Document> chatLog = new java.util.ArrayList<>();
-        Document existingPlayer = new Document("playerId", playerId).append("chatLog", chatLog);
+        Document chatLogDoc = new Document(); // empty map, no type buckets
+        Document existingPlayer = new Document("playerId", playerId).append("chatLog", chatLogDoc);
         
         when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
         when(mockFindIterable.first()).thenReturn(existingPlayer);
@@ -2442,11 +2447,16 @@ public class SinglePlayerResourceTest {
         // Arrange
         Integer playerId = 123;
         Integer messageType = 1;
-        List<Document> chatLog = new java.util.ArrayList<>();
-        chatLog.add(new Document("messageType", 1).append("message", "Type 1 message 1"));
-        chatLog.add(new Document("messageType", 2).append("message", "Type 2 message"));
-        chatLog.add(new Document("messageType", 1).append("message", "Type 1 message 2"));
-        Document existingPlayer = new Document("playerId", playerId).append("chatLog", chatLog);
+        // Node.js stores chatLog as a Document keyed by messageType string
+        Document chatLogDoc = new Document();
+        List<Document> type1Messages = new java.util.ArrayList<>();
+        type1Messages.add(new Document("messageType", 1).append("message", "Type 1 message 1"));
+        type1Messages.add(new Document("messageType", 1).append("message", "Type 1 message 2"));
+        List<Document> type2Messages = new java.util.ArrayList<>();
+        type2Messages.add(new Document("messageType", 2).append("message", "Type 2 message"));
+        chatLogDoc.put("1", type1Messages);
+        chatLogDoc.put("2", type2Messages);
+        Document existingPlayer = new Document("playerId", playerId).append("chatLog", chatLogDoc);
         
         when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
         when(mockFindIterable.first()).thenReturn(existingPlayer);
@@ -2470,10 +2480,14 @@ public class SinglePlayerResourceTest {
         // Arrange
         Integer playerId = 456;
         Integer messageType = 99;
-        List<Document> chatLog = new java.util.ArrayList<>();
-        chatLog.add(new Document("messageType", 1).append("message", "Type 1 message"));
-        chatLog.add(new Document("messageType", 2).append("message", "Type 2 message"));
-        Document existingPlayer = new Document("playerId", playerId).append("chatLog", chatLog);
+        Document chatLogDoc = new Document();
+        List<Document> type1Messages = new java.util.ArrayList<>();
+        type1Messages.add(new Document("messageType", 1).append("message", "Type 1 message"));
+        List<Document> type2Messages = new java.util.ArrayList<>();
+        type2Messages.add(new Document("messageType", 2).append("message", "Type 2 message"));
+        chatLogDoc.put("1", type1Messages);
+        chatLogDoc.put("2", type2Messages);
+        Document existingPlayer = new Document("playerId", playerId).append("chatLog", chatLogDoc);
         
         when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
         when(mockFindIterable.first()).thenReturn(existingPlayer);
