@@ -30,6 +30,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.bson.Document;
+import org.eclipse.jetty.util.log.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -1385,6 +1386,19 @@ public class SinglePlayerResource {
     )
     public Response setStats(SetStatsRequest request) {
         try {
+          LOG.info("Received setStats request for playerId: {}", request != null ? request.getPlayerId() : "null");
+          LOG.info("Request details: playerName={}, masterLevel={}, mainJobLevel={}, subJobLevel={}, attack={}, defense={}, title={}, nationRank={}, currentExemplar={}, requiredExemplar={}", 
+              request != null ? request.getPlayerName() : "null",
+              request != null ? request.getMasterLevel() : "null",
+              request != null ? request.getMainJobLevel() : "null",
+              request != null ? request.getSubJobLevel() : "null",
+              request != null ? request.getAttack() : "null",
+              request != null ? request.getDefense() : "null",
+              request != null ? request.getTitle() : "null",
+              request != null ? request.getNationRank() : "null",
+              request != null ? request.getCurrentExemplar() : "null",
+              request != null ? request.getRequiredExemplar() : "null"
+          );
             if (request == null || request.getPlayerId() == null || 
                 request.getPlayerName() == null || request.getStats() == null) {
                 return Response.status(Response.Status.BAD_REQUEST)
@@ -1393,7 +1407,7 @@ public class SinglePlayerResource {
             }
 
             String playerName = request.getPlayerName().toLowerCase();
-            Stats s = request.getStats();
+            Stats stats = request.getStats();
             
             MongoCollection<Document> playersCollection = mongoDBService.getPlayersCollection();
             
@@ -1406,28 +1420,28 @@ public class SinglePlayerResource {
 
             // Create stats document
             Document statsDoc = new Document();
-            statsDoc.put("baseSTR", s.getBaseSTR());
-            statsDoc.put("baseAGI", s.getBaseAGI());
-            statsDoc.put("baseDEX", s.getBaseDEX());
-            statsDoc.put("baseVIT", s.getBaseVIT());
-            statsDoc.put("baseINT", s.getBaseINT());
-            statsDoc.put("baseMND", s.getBaseMND());
-            statsDoc.put("baseCHR", s.getBaseCHR());
-            statsDoc.put("addedSTR", s.getAddedSTR());
-            statsDoc.put("addedAGI", s.getAddedAGI());
-            statsDoc.put("addedDEX", s.getAddedDEX());
-            statsDoc.put("addedVIT", s.getAddedVIT());
-            statsDoc.put("addedINT", s.getAddedINT());
-            statsDoc.put("addedMND", s.getAddedMND());
-            statsDoc.put("addedCHR", s.getAddedCHR());
-            statsDoc.put("fireResistance", s.getFireResistance());
-            statsDoc.put("iceResistance", s.getIceResistance());
-            statsDoc.put("windResistance", s.getWindResistance());
-            statsDoc.put("earthResistance", s.getEarthResistance());
-            statsDoc.put("lightningResistance", s.getLightningResistance());
-            statsDoc.put("waterResistance", s.getWaterResistance());
-            statsDoc.put("lightResistance", s.getLightResistance());
-            statsDoc.put("darkResistance", s.getDarkResistance());
+            statsDoc.put("baseSTR", stats.getBaseSTR());
+            statsDoc.put("baseAGI", stats.getBaseAGI());
+            statsDoc.put("baseDEX", stats.getBaseDEX());
+            statsDoc.put("baseVIT", stats.getBaseVIT());
+            statsDoc.put("baseINT", stats.getBaseINT());
+            statsDoc.put("baseMND", stats.getBaseMND());
+            statsDoc.put("baseCHR", stats.getBaseCHR());
+            statsDoc.put("addedSTR", stats.getAddedSTR());
+            statsDoc.put("addedAGI", stats.getAddedAGI());
+            statsDoc.put("addedDEX", stats.getAddedDEX());
+            statsDoc.put("addedVIT", stats.getAddedVIT());
+            statsDoc.put("addedINT", stats.getAddedINT());
+            statsDoc.put("addedMND", stats.getAddedMND());
+            statsDoc.put("addedCHR", stats.getAddedCHR());
+            statsDoc.put("fireResistance", stats.getFireResistance());
+            statsDoc.put("iceResistance", stats.getIceResistance());
+            statsDoc.put("windResistance", stats.getWindResistance());
+            statsDoc.put("earthResistance", stats.getEarthResistance());
+            statsDoc.put("lightningResistance", stats.getLightningResistance());
+            statsDoc.put("waterResistance", stats.getWaterResistance());
+            statsDoc.put("lightResistance", stats.getLightResistance());
+            statsDoc.put("darkResistance", stats.getDarkResistance());
 
             // Update both root-level fields and nested stats object
             com.mongodb.client.result.UpdateResult result = playersCollection.updateOne(
