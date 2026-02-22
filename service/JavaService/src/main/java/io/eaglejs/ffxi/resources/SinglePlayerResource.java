@@ -1463,7 +1463,7 @@ public class SinglePlayerResource {
 
       return Response.ok("Stats: OK").build();
     } catch (Exception e) {
-      LOG.error("Error setting player stats for playerId: " + request.getPlayerId(), e);
+      LOG.error("Error setting player stats for playerId: " + (request != null ? request.getPlayerId() : "unknown"), e);
       return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
           .entity("An error occurred while updating player stats.")
           .build();
