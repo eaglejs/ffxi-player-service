@@ -220,5 +220,5 @@ task copyWebApp(type: Copy) {
     into "$buildDir/resources/main/webapp"
 }
 
-// Try to fetch and extract UI from Nexus first, then fall back to placeholder
+// Try to fetch and extract UI from Nexus before processing resources
 processResources.dependsOn copyWebApp, extractUI
