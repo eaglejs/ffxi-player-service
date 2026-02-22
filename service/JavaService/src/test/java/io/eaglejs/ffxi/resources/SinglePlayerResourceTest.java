@@ -3703,7 +3703,7 @@ public class SinglePlayerResourceTest {
         request.setExpType(8); // experience type
         request.setPoints(100);
         request.setChain(5);
-        request.setTimestamp(1234567890L);
+        request.setTimestamp("2024-02-22T12:00:00Z");
 
         Document existingPlayer = new Document("playerId", 123);
         existingPlayer.put("expHistory", new Document("experience", new ArrayList<>()));
@@ -3732,7 +3732,7 @@ public class SinglePlayerResourceTest {
         request.setExpType(718); // capacity type
         request.setPoints(50);
         request.setChain(3);
-        request.setTimestamp(1234567890L);
+        request.setTimestamp("2024-02-22T12:00:00Z");
 
         Document existingPlayer = new Document("playerId", 123);
         existingPlayer.put("expHistory", new Document());
@@ -3759,7 +3759,7 @@ public class SinglePlayerResourceTest {
         request.setExpType(809); // exemplar type
         request.setPoints(75);
         request.setChain(2);
-        request.setTimestamp(1234567890L);
+        request.setTimestamp("2024-02-22T12:00:00Z");
 
         Document existingPlayer = new Document("playerId", 123);
         existingPlayer.put("expHistory", new Document());
@@ -3786,7 +3786,7 @@ public class SinglePlayerResourceTest {
         request.setExpType(999); // invalid type
         request.setPoints(100);
         request.setChain(5);
-        request.setTimestamp(1234567890L);
+        request.setTimestamp("2024-02-22T12:00:00Z");
 
         Document existingPlayer = new Document("playerId", 123);
         
@@ -3812,7 +3812,7 @@ public class SinglePlayerResourceTest {
         request.setExpType(8);
         request.setPoints(100);
         request.setChain(5);
-        request.setTimestamp(1234567890L);
+        request.setTimestamp("2024-02-22T12:00:00Z");
 
         when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
         when(mockFindIterable.first()).thenReturn(null);
@@ -3868,7 +3868,7 @@ public class SinglePlayerResourceTest {
         request.setExpType(8);
         request.setPoints(100);
         request.setChain(5);
-        request.setTimestamp(1234567890L);
+        request.setTimestamp("2024-02-22T12:00:00Z");
 
         when(mockCollection.find(any(Bson.class))).thenThrow(new RuntimeException("Database connection lost"));
 
@@ -3890,7 +3890,7 @@ public class SinglePlayerResourceTest {
         request.setExpType(8);
         request.setPoints(100);
         request.setChain(5);
-        request.setTimestamp(1234567890L);
+        request.setTimestamp("2024-02-22T12:00:00Z");
 
         Document existingPlayer = new Document("playerId", 123);
         existingPlayer.put("expHistory", new Document());
@@ -3919,7 +3919,7 @@ public class SinglePlayerResourceTest {
         request.setExpType(8);
         request.setPoints(100);
         request.setChain(5);
-        request.setTimestamp(1234567890L);
+        request.setTimestamp("2024-02-22T12:00:00Z");
 
         // Create existing history with 50 entries
         List<Document> existingHistory = new ArrayList<>();
