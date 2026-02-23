@@ -219,13 +219,19 @@ task extractUI {
     }
 }
 
+task showArtifactLocation {
+    doLast {
+        logger.lifecycle("JAR artifact will be created at: ${buildDir}/libs/${base.archivesName.get()}-${version}.jar")
+    }
+}
+
 task copyWebApp(type: Copy) {
     from 'src/main/webapp'
     into "$buildDir/resources/main/webapp"
 }
 
 // Try to fetch and extract UI from Nexus before processing resources
-processResources.dependsOn copyWebApp, extractUI
+processResources.dependsOn copyWebApp, extractUI, showArtifactLocation
 
 // Development task with auto-restart on file changes
 task runDev(type: JavaExec) {
