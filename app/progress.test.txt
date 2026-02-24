@@ -43,3 +43,56 @@ Test files created:
 - src/tests/GenOnlineDot.test.ts
 
 Updated prd.test.json marking unit testing feature as complete.
+
+## 2026-02-24 23:32:00 - Unit Tests for All Components Complete
+
+Created comprehensive unit tests for all remaining components in src/components/:
+
+### BuffItem.vue Tests (13 tests)
+- Tested component rendering and GenTooltip integration
+- Tested timer functionality (isTimerPositive, isLowTimer)
+- Tested buff icon display with correct paths
+- Tested low timer visual indicator (buff-icon class for <= 15s)
+- Tested data attributes and cleanup on unmount
+
+### BuffList.vue Tests (17 tests)
+- Tested component rendering and structure
+- Tested Map to Array conversion for buff data
+- Tested BuffItem prop passing (player, buffId, buffName, duration, utcTime)
+- Tested edge cases: empty data, undefined data, single buff, many buffs
+- Tested key generation using buff_id, utc_time, and uuid
+
+### ChatLog.vue Tests (10 tests)
+- Tested card and dropdown rendering
+- Tested timestamp toggle functionality
+- Tested message formatting with translation markers (・ characters)
+- Tested chat filter functionality and color mapping
+- Tested scrolling behavior and event handlers
+- Tested UTC to local time conversion
+
+### Simple Component Tests (4 tests)  
+- PlayerCurrencies.vue - tested basic rendering with currency data
+- PlayerNavigation.vue - tested navigation component structure
+- PlayerResistances.vue - tested resistance display
+- PlayerStats.vue - tested stats display
+
+### Test Coverage Summary
+- Total: 114 tests passing across 7 test files
+- All 10 non-gen components have test coverage
+- Used shallow mounting for complex nested components
+- Mocked localStorage, WebSocket, config, and helper functions
+- Used createRouter for components requiring routing
+
+### Test Infrastructure Updates
+- Added proper mocks for @/helpers/config (iconsPath, fullWsUrl, gilIcon)
+- Mock window.location for pathname-dependent components
+- Used shallowMount for components with complex child dependencies
+- Fixed Bootstrap Tooltip title validation issues
+
+Test files created/updated:
+- src/tests/BuffItem.test.ts
+- src/tests/BuffList.test.ts
+- src/tests/ChatLog.test.ts
+- src/tests/PlayerComponentsSimple.test.ts
+
+All tests passing with proper mocking and isolation. Updated prd.test.json marking all features complete.

@@ -2,4 +2,9 @@
 **/*.tar.gz
 **/*.zip
 **/*.log
-
+**/prd.json
+**/progress.txt
+**/ralph.sh
+**/prd.test.json
+**/progress.test.txt
+**/ralph.test.sh
