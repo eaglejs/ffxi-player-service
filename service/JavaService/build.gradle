@@ -1,9 +1,11 @@
 plugins {
     id 'java'
     id 'application'
+    id 'maven-publish'
 }
 
 // Set the project version and JAR base name
+group = 'io.eaglejs.ffxi'
 version = '1.0.0'
 base.archivesName = 'ffxi-player-service'
 
@@ -12,6 +14,35 @@ repositories {
     maven {
         url "http://${nexusHost}:${nexusPort}/"
         allowInsecureProtocol = true
+    }
+}
+
+// Nexus Maven repo (for publishing the JAR artifact)
+ext {
+    nexusMavenRepo = properties.getOrDefault('nexusMavenRepo', 'maven-releases')
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId = project.group
+            artifactId = base.archivesName.get()
+            version = project.version
+            artifact jar
+        }
+    }
+    repositories {
+        maven {
+            name = 'nexus'
+            url = "http://${nexusHost}:${nexusPort}/repository/${findProperty('nexusMavenRepo') ?: 'maven-releases'}/"
+            allowInsecureProtocol = true
+            if (project.hasProperty('nexusUsername') && project.hasProperty('nexusPassword')) {
+                credentials {
+                    username = nexusUsername
+                    password = nexusPassword
+                }
+            }
+        }
     }
 }
 
