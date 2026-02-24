@@ -1,0 +1,45 @@
+## 2026-02-24 23:12:00 - Unit Tests for Gen-Components Complete
+
+Created comprehensive unit tests for all three gen-components in src/components/gen-components/:
+
+### GenIcon.vue Tests (17 tests)
+- Tested SVG structure and attributes (viewBox, role, fill, preserveAspectRatio)
+- Tested all 5 icon sizes: sm (16px), md (20px), lg (24px), xl (30px), 2xl (40px)
+- Tested theme color integration with useThemeStore (dark/light themes)
+- Tested edge cases: empty icon path, undefined icon, accessibility attributes
+- Tested component structure and CSS class hierarchy
+- All size validation cases covered
+
+### GenTooltip.vue Tests (24 tests)
+- Tested slot content rendering and preservation of attributes
+- Tested all tooltip placements: top, bottom, left, right
+- Tested tooltip tip content with various cases (empty, multiline, special characters)
+- Tested Bootstrap Tooltip lifecycle: initialization, updates, disposal
+- Tested reactive updates when props change
+- Tested edge cases: rapid updates, placement changes, no slot content
+- Mocked Bootstrap Tooltip to verify proper initialization and cleanup
+
+### GenOnlineDot.vue Tests (25 tests)
+- Tested online/offline status detection (60-second threshold)
+- Tested tooltip text updates ("Online" vs "Offline")
+- Tested GenTooltip integration and prop passing
+- Tested automatic status checking with 5-second intervals using fake timers
+- Tested player store integration with watch functionality
+- Tested edge cases: undefined player, null/undefined/zero lastOnline, future timestamps
+- Tested status dot styling and CSS classes (online-dot, offline-dot)
+- Tested component initialization and interval setup
+
+### Test Infrastructure
+- Added localStorage mock to support theme store in tests
+- Used Vitest with jsdom environment for Vue component testing
+- Used @vue/test-utils for component mounting and assertions
+- Used Pinia createPinia() and setActivePinia() for store testing
+- Used vi.useFakeTimers() for time-based tests in GenOnlineDot
+- All 66 tests passing successfully
+
+Test files created:
+- src/tests/GenIcon.test.ts
+- src/tests/GenTooltip.test.ts
+- src/tests/GenOnlineDot.test.ts
+
+Updated prd.test.json marking unit testing feature as complete.
