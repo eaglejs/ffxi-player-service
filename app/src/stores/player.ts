@@ -1,4 +1,4 @@
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import axios from 'axios'
 import { useServerStore } from '@/stores/server'
@@ -94,19 +94,8 @@ export const usePlayerStore = defineStore('player', () => {
     }
   }
 
-  onMounted(() => {
-    window.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') {
-        serverStore.connectWebSocket()
-        if (
-          serverStore.websocket.readyState === serverStore.websocket.OPEN &&
-          serverStore.websocket.onmessage === null
-        ) {
-          serverStore.websocket.onmessage = wsOnMessage
-        }
-      }
-    })
-    window.addEventListener('online', () => {
+  window.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
       serverStore.connectWebSocket()
       if (
         serverStore.websocket.readyState === serverStore.websocket.OPEN &&
@@ -114,15 +103,24 @@ export const usePlayerStore = defineStore('player', () => {
       ) {
         serverStore.websocket.onmessage = wsOnMessage
       }
-    })
-    setInterval(() => {
-      console.log('PlayerStore: Checking WebSocket connection...')
-      if (serverStore.websocket.readyState !== serverStore.websocket.OPEN) {
-        serverStore.connectWebSocket()
-      }
-    }, 5000)
-    serverStore.websocket.onmessage = wsOnMessage
+    }
   })
+  window.addEventListener('online', () => {
+    serverStore.connectWebSocket()
+    if (
+      serverStore.websocket.readyState === serverStore.websocket.OPEN &&
+      serverStore.websocket.onmessage === null
+    ) {
+      serverStore.websocket.onmessage = wsOnMessage
+    }
+  })
+  setInterval(() => {
+    console.log('PlayerStore: Checking WebSocket connection...')
+    if (serverStore.websocket.readyState !== serverStore.websocket.OPEN) {
+      serverStore.connectWebSocket()
+    }
+  }, 5000)
+  serverStore.websocket.onmessage = wsOnMessage
 
   return {
     players,
