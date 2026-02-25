@@ -50,6 +50,7 @@
     </div>
   </nav>
   <RouterView />
+  <GenAppVersion :themeColor="themeColor" class="position-fixed bottom-0 end-0 m-2" />
 </template>
 
 <script setup lang="ts">
@@ -68,6 +69,7 @@ import { useThemeStore } from '@/stores/theme'
 import { imagesPath } from '@/helpers/config'
 import GenTooltip from '@/components/gen-components/GenTooltip.vue'
 import GenIcon from '@/components/gen-components/GenIcon.vue'
+import GenAppVersion from '@/components/gen-components/GenAppVersion.vue'
 
 const themeStore = useThemeStore()
 const router = useRouter()

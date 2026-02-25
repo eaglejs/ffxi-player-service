@@ -21,4 +21,6 @@ const imagesPath = import.meta.env.MODE === 'staging' || import.meta.env.PROD
   ? `/assets/`
   : `/src/assets/images/`;
 
-export { fullUrl, fullWsUrl, iconsPath, imagesPath }
+const uiPackageVersion = __APP_VERSION__;
+
+export { fullUrl, fullWsUrl, iconsPath, imagesPath, uiPackageVersion }
