@@ -255,12 +255,6 @@ cd app
 npm run type-check
 ```
 
-## 📝 Version History
-
-- **App**: v0.1.2
-- **JavaService**: v1.1.4
-- **PlayerService Lua Addon**: v1.2024.5.19
-
 ## 🔒 Security
 
 - IP filtering on protected routes (192.168.0.0/16)
