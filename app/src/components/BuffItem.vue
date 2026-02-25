@@ -79,6 +79,13 @@ function durationReadable(): string {
   }
 }
 
+onMounted(() => {
+  durationIntTime.value = durationReadable()
+  intervalId.value = setInterval(() => {
+    durationIntTime.value = durationReadable()
+  }, 1000)
+})
+
 onUnmounted(() => {
   clearInterval(intervalId.value)
 })

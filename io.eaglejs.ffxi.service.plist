@@ -9,7 +9,7 @@
     <array>
       <string>/Users/eaglejs/.sdkman/candidates/java/21.0.1-zulu/zulu-21.jdk/Contents/Home/bin/java</string>
       <string>-jar</string>
-      <string>/Users/eaglejs/repos/ffxi-player-service/service/JavaService/build/libs/ffxi-player-service-1.1.4.jar</string>
+      <string>/Users/eaglejs/repos/ffxi-player-service/service/JavaService/build/libs/ffxi-player-service-1.1.5.jar</string>
       <string>server</string>
       <string>/Users/eaglejs/repos/ffxi-player-service/service/JavaService/src/main/resources/config-production.yml</string>
     </array>
