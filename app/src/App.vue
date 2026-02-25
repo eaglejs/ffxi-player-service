@@ -50,7 +50,7 @@
     </div>
   </nav>
   <RouterView />
-  <GenAppVersion :themeColor="themeColor" class="position-fixed bottom-0 end-0 m-2" />
+  <GenAppVersion :themeColor="themeColor" />
 </template>
 
 <script setup lang="ts">
