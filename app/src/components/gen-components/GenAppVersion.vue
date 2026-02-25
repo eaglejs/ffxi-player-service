@@ -22,7 +22,7 @@ const version = computed(() => uiPackageVersion)
   width: 100%;
   .version-text {
     font-size: 0.75rem;
-    color: v-bind('props.themeColor');
+    color: color-mix(in srgb, v-bind('props.themeColor') 35%, transparent);
   }
 }
 </style>
