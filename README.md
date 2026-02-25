@@ -208,21 +208,6 @@ sudo launchctl load /Library/LaunchDaemons/com.eaglejs.ffxi.nginx.plist
 
 Backend configuration is managed via `service/JavaService/gradle.properties` (see `gradle.example.properties` for reference).
 
-## 📡 API Endpoints
-
-### Player Endpoints
-- `POST /initialize_player` - Initialize player session
-- `POST /set_player_online` - Mark player as online
-- `POST /update_player` - Update player data
-- `POST /add_chat_message` - Add chat log entry
-- `GET /player/:id` - Get player data
-
-### Health Check
-- `GET /health` - Service health status
-
-### WebSocket
-- `ws://localhost:8081` - Real-time data streaming
-
 ## 🎮 Usage
 
 1. **Start FFXI** with Windower
@@ -236,17 +221,25 @@ Backend configuration is managed via `service/JavaService/gradle.properties` (se
 ### Frontend Development
 ```bash
 cd app
-npm run dev      # Start dev server
-npm run build    # Build for production
-npm run lint     # Lint code
-npm run format   # Format code with Prettier
+npm run dev           # Start dev server
+npm run build         # Build for production
+npm run test:unit:ci  # Execute unit tests via Vitest
+npm run lint          # Lint code
+npm run format        # Format code with Prettier
 ```
 
 ### Backend Development
 ```bash
 cd service/JavaService
-./gradlew run    # Start the Java service
-./gradlew test   # Run tests
+./gradlew run                                                           # Start the Java service
+./gradlew runDevWatch -Pconfig="server src/main/resources/config.yml"   # Start the Java service with autoload on change
+./gradlew test                                                          # Run tests
+```
+
+### Building Jar
+```bash
+cd service/JavaService
+./gradlew clean jar
 ```
 
 ### Type Checking
