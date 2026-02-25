@@ -27,7 +27,9 @@ describe('GenTooltip.vue', () => {
     mockTooltipInstance = {
       dispose: vi.fn()
     }
-    ;(bootstrap.Tooltip as any) = vi.fn(() => mockTooltipInstance)
+    vi.mocked(bootstrap.Tooltip).mockImplementation(function () {
+      return mockTooltipInstance
+    } as any)
     ;(bootstrap.Tooltip as any).getInstance = vi.fn(() => mockTooltipInstance)
   })
 

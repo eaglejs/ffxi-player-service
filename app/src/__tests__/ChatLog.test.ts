@@ -41,6 +41,8 @@ describe('ChatLog.vue', () => {
     setActivePinia(createPinia())
     playerStore = usePlayerStore()
     playerStore.chatLog = []
+    playerStore.fetchChatLog = vi.fn().mockResolvedValue([])
+    playerStore.fetchChatLogByMessageType = vi.fn().mockResolvedValue([])
 
     router = createRouter({
       history: createMemoryHistory(),
