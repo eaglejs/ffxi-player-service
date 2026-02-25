@@ -7,7 +7,7 @@ A comprehensive real-time player statistics and monitoring service for Final Fan
 FFXI Stats is a multi-component system that bridges the gap between the FFXI game client and a modern web interface. It consists of:
 
 - **Windower Lua Addon**: Runs inside FFXI to capture real-time player data
-- **Node.js Backend API**: Receives and stores player data with WebSocket support for live updates
+- **Java Backend API**: Receives and stores player data with WebSocket support for live updates (built with Dropwizard)
 - **Vue.js Web Dashboard**: Interactive frontend for viewing statistics, charts, and player information
 - **MongoDB Database**: Persistent storage for player data and chat logs
 
@@ -24,8 +24,8 @@ FFXI Stats is a multi-component system that bridges the gap between the FFXI gam
          │ HTTP POST
          ▼
 ┌─────────────────┐
-│  Node.js API    │
-│  (Express)      │
+│  Java API       │
+│  (Dropwizard)   │
 │  Port 8080      │◄─── REST API + WebSocket (8081)
 └────────┬────────┘
          │
@@ -77,15 +77,10 @@ ffxi-player-service/
 │   ├── PlayerService.lua   # Main addon logic
 │   ├── PlayerServiceInterface.lua
 │   └── Utils.lua
-├── service/                # Node.js backend
-│   ├── app.js             # Express server
-│   ├── routes.js          # Route configuration
-│   ├── routes/
-│   │   ├── Health.js      # Health check endpoint
-│   │   └── Player.js      # Player data endpoints
-│   └── schemas/
-│       ├── Player.js      # MongoDB player schema
-│       └── Chat.js        # MongoDB chat schema
+├── service/                # Java backend
+│   └── JavaService/
+│       ├── build.gradle   # Gradle build config
+│       └── src/           # Java source files
 ├── app/                   # Vue.js frontend
 │   ├── src/
 │   │   ├── components/    # Vue components
@@ -98,17 +93,18 @@ ffxi-player-service/
 ├── restart-service.sh     # Service restart script
 ├── start-nginx.sh         # Nginx startup script
 ├── ffxi.eaglejs.io-ssl.conf  # Nginx configuration
-├── com.eaglejs.ffxi.node.plist   # Node.js LaunchDaemon
-└── com.eaglejs.ffxi.nginx.plist  # Nginx LaunchDaemon
+├── io.eaglejs.ffxi.service.plist  # Java service LaunchDaemon
+└── com.eaglejs.ffxi.nginx.plist   # Nginx LaunchDaemon
 ```
 
 ## 🔧 Technology Stack
 
 ### Backend
-- **Node.js** with Express 5.x
-- **MongoDB** with Mongoose ODM
-- **WebSocket** (ws) for real-time communication
-- **CORS** enabled for cross-origin requests
+- **Java** with Dropwizard framework
+- **MongoDB** (mongodb-driver-sync)
+- **WebSocket** (javax.websocket + Jetty) for real-time communication
+- **Swagger** (OpenAPI 3) for API documentation
+- **Gradle** as build tool
 - **IP Filtering** for protected routes
 
 ### Frontend
@@ -129,7 +125,8 @@ ffxi-player-service/
 ## 📥 Installation
 
 ### Prerequisites
-- Node.js 20+
+- Java 11+
+- Gradle
 - MongoDB
 - Nginx (optional, for production deployment)
 - FFXI with Windower (for game integration)
@@ -137,9 +134,8 @@ ffxi-player-service/
 ### Backend Setup
 
 ```bash
-cd service
-npm install
-npm start
+cd service/JavaService
+./gradlew run
 ```
 
 The API server will run on port 8080 and WebSocket server on port 8081.
@@ -198,21 +194,19 @@ This script:
 Configure reverse proxy and SSL in `ffxi.eaglejs.io-ssl.conf`
 
 ### LaunchDaemons (macOS)
-- `com.eaglejs.ffxi.node.plist` - Node.js service
+- `io.eaglejs.ffxi.service.plist` - Java service
 - `com.eaglejs.ffxi.nginx.plist` - Nginx service
 
 Install LaunchDaemons:
 ```bash
 sudo cp *.plist /Library/LaunchDaemons/
-sudo launchctl load /Library/LaunchDaemons/com.eaglejs.ffxi.node.plist
+sudo launchctl load /Library/LaunchDaemons/io.eaglejs.ffxi.service.plist
 sudo launchctl load /Library/LaunchDaemons/com.eaglejs.ffxi.nginx.plist
 ```
 
 ### Environment Variables
 
-Backend:
-- `PORT` - API server port (default: 8080)
-- MongoDB connection string in `routes/Player.js`
+Backend configuration is managed via `service/JavaService/gradle.properties` (see `gradle.example.properties` for reference).
 
 ## 📡 API Endpoints
 
@@ -250,8 +244,9 @@ npm run format   # Format code with Prettier
 
 ### Backend Development
 ```bash
-cd service
-npm run dev      # Start with nodemon (auto-reload)
+cd service/JavaService
+./gradlew run    # Start the Java service
+./gradlew test   # Run tests
 ```
 
 ### Type Checking
@@ -263,6 +258,7 @@ npm run type-check
 ## 📝 Version History
 
 - **App**: v0.1.2
+- **JavaService**: v1.1.4
 - **PlayerService Lua Addon**: v1.2024.5.19
 
 ## 🔒 Security
