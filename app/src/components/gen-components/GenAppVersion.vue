@@ -1,6 +1,6 @@
 <template>
   <div class="app-version">
-    <p class="version-text m-0 text-center">Version {{ version }}</p>
+    <p class="version-text my-2 mx-0 text-center">Version {{ version }}</p>
   </div>
 </template>
 

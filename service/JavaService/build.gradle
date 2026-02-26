@@ -6,7 +6,7 @@ plugins {
 
 // Set the project version and JAR base name
 group = 'io.eaglejs.ffxi'
-version = '1.1.5'
+version = '1.1.6'
 base.archivesName = 'ffxi-player-service'
 
 repositories {
