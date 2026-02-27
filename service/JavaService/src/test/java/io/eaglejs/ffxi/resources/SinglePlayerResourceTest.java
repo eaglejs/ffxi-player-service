@@ -2447,15 +2447,15 @@ public class SinglePlayerResourceTest {
         // Arrange
         Integer playerId = 123;
         String messageType = "PARTY";
-        // Node.js stores chatLog as a Document keyed by messageType string
+        // S-tores chatLog as a Document keyed by messageType string
         Document chatLogDoc = new Document();
         List<Document> type1Messages = new java.util.ArrayList<>();
-        type1Messages.add(new Document("messageType", 1).append("message", "Type 1 message 1"));
-        type1Messages.add(new Document("messageType", 1).append("message", "Type 1 message 2"));
+        type1Messages.add(new Document("messageType", "SAY").append("message", "Type 1 message 1"));
+        type1Messages.add(new Document("messageType", "SAY").append("message", "Type 1 message 2"));
         List<Document> type2Messages = new java.util.ArrayList<>();
-        type2Messages.add(new Document("messageType", 2).append("message", "Type 2 message"));
-        chatLogDoc.put("1", type1Messages);
-        chatLogDoc.put("2", type2Messages);
+        type2Messages.add(new Document("messageType", "PARTY").append("message", "Type 2 message"));
+        chatLogDoc.put("SAY", type1Messages);
+        chatLogDoc.put("PARTY", type2Messages);
         Document existingPlayer = new Document("playerId", playerId).append("chatLog", chatLogDoc);
         
         when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
@@ -2469,9 +2469,8 @@ public class SinglePlayerResourceTest {
         @SuppressWarnings("unchecked")
         List<Document> returnedChatLog = (List<Document>) response.getEntity();
         assertNotNull(returnedChatLog);
-        assertEquals(2, returnedChatLog.size());
-        assertEquals(1, returnedChatLog.get(0).getInteger("messageType").intValue());
-        assertEquals(1, returnedChatLog.get(1).getInteger("messageType").intValue());
+        assertEquals(1, returnedChatLog.size());
+        assertEquals("PARTY", returnedChatLog.get(0).getString("messageType"));
         verify(mockCollection).find(any(Bson.class));
     }
 
@@ -2482,11 +2481,11 @@ public class SinglePlayerResourceTest {
         String messageType = "LINKSHELL2";
         Document chatLogDoc = new Document();
         List<Document> type1Messages = new java.util.ArrayList<>();
-        type1Messages.add(new Document("messageType", 1).append("message", "Type 1 message"));
+        type1Messages.add(new Document("messageType", "SAY").append("message", "Type 1 message"));
         List<Document> type2Messages = new java.util.ArrayList<>();
-        type2Messages.add(new Document("messageType", 2).append("message", "Type 2 message"));
-        chatLogDoc.put("1", type1Messages);
-        chatLogDoc.put("2", type2Messages);
+        type2Messages.add(new Document("messageType", "PARTY").append("message", "Type 2 message"));
+        chatLogDoc.put("SAY", type1Messages);
+        chatLogDoc.put("PARTY", type2Messages);
         Document existingPlayer = new Document("playerId", playerId).append("chatLog", chatLogDoc);
         
         when(mockCollection.find(any(Bson.class))).thenReturn(mockFindIterable);
