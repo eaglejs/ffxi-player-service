@@ -120,7 +120,7 @@ def run(config: dict, interval: float, run_once: bool) -> None:
 
     initialize_players(api, players)
 
-    online_interval = config["emulator"].get("online_ping_interval_seconds", 30)
+    online_interval = config["emulator"].get("online_ping_interval_seconds", 15)
     last_ping = 0.0
 
     LOG.info("Starting simulation loop (interval=%.1fs, players=%d)", interval, len(simulators))
