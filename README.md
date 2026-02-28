@@ -263,9 +263,12 @@ The emulator ships with three pre-configured players (defined in `data/players.p
 
 | Player ID | Name | Main Job | Zone |
 |-----------|------|----------|------|
-| 1001 | ralphina | WAR/MNK | Escha - Zi'Tah |
-| 1002 | zulobo | WHM/SCH | Reisenjima |
-| 1003 | darkcloud | BLM/RDM | Dynamis - Buburimu |
+| 664658 | ralphina | WAR/MNK | Escha - Zi'Tah |
+| 297203 | zulobo | WHM/SCH | Reisenjima |
+| 644915 | darkcloud | BLM/RDM | Dynamis - Buburimu |
+| 359030 | valefor | SAM/WAR | Escha - Ru'Aun |
+| 325554 | miriana | RDM/BLM | Walk of Echoes |
+| 269567 | guildenstern | NIN/DNC | Nyzul Isle |
 
 Add more profiles by appending entries to the `PLAYER_PROFILES` list in `data/players.py`.
 
