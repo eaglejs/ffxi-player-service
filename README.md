@@ -10,6 +10,7 @@ FFXI Stats is a multi-component system that bridges the gap between the FFXI gam
 - **Java Backend API**: Receives and stores player data with WebSocket support for live updates (built with Dropwizard)
 - **Vue.js Web Dashboard**: Interactive frontend for viewing statistics, charts, and player information
 - **MongoDB Database**: Persistent storage for player data and chat logs
+- **PlayerServiceEmulator**: Python-based emulator that simulates player stat updates without needing a running FFXI client
 
 ## 🏗️ Architecture
 
@@ -23,12 +24,13 @@ FFXI Stats is a multi-component system that bridges the gap between the FFXI gam
 └────────┬────────┘
          │ HTTP POST
          ▼
-┌─────────────────┐
-│  Java API       │
-│  (Dropwizard)   │
-│  Port 8080      │◄─── REST API + WebSocket (8081)
-└────────┬────────┘
-         │
+┌─────────────────┐        ┌──────────────────────┐
+│  Java API       │        │  PlayerServiceEmulator│
+│  (Dropwizard)   │◄───────│  (Python)             │
+│  Port 8080      │        │  Simulates player     │
+│  WS Port 8081   │        │  stat updates for     │
+└────────┬────────┘        │  dev / testing        │
+         │                 └──────────────────────┘
          ▼
 ┌─────────────────┐     ┌─────────────────┐
 │   MongoDB       │     │   Vue.js App    │
@@ -77,6 +79,17 @@ ffxi-player-service/
 │   ├── PlayerService.lua   # Main addon logic
 │   ├── PlayerServiceInterface.lua
 │   └── Utils.lua
+├── PlayerServiceEmulator/  # Python emulator (dev/testing)
+│   ├── emulator.py         # Entry point (CLI)
+│   ├── config.json         # Endpoint + timing configuration
+│   ├── requirements.txt    # Python dependencies
+│   ├── models/
+│   │   └── player.py       # Player dataclasses mirroring JavaService model
+│   ├── services/
+│   │   ├── api_client.py   # HTTP client for all REST endpoints
+│   │   └── player_simulator.py  # Per-player simulation logic
+│   └── data/
+│       └── players.py      # FFXI game data + seeded player profiles
 ├── service/                # Java backend
 │   └── JavaService/
 │       ├── build.gradle   # Gradle build config
@@ -122,12 +135,17 @@ ffxi-player-service/
 - **Windower** addon framework
 - **Lua** scripting for FFXI integration
 
+### Development Tools
+- **Python 3.8+** for the PlayerServiceEmulator
+- **requests** library for HTTP simulation
+
 ## 📥 Installation
 
 ### Prerequisites
 - Java 11+
 - Gradle
 - MongoDB
+- Python 3.8+ (for PlayerServiceEmulator)
 - Nginx (optional, for production deployment)
 - FFXI with Windower (for game integration)
 
@@ -163,6 +181,93 @@ The development server will run on port 5173 with hot module replacement.
    ```
 
 3. Configure the addon to point to your API endpoint (edit PlayerServiceInterface.lua)
+
+### PlayerServiceEmulator Setup
+
+The emulator lets you develop and test the frontend and backend **without a running FFXI client**. It simulates multiple players sending realistic stat updates to every REST endpoint.
+
+#### Install dependencies
+
+```bash
+cd PlayerServiceEmulator
+python3 -m venv .venv
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+```
+
+#### Configure the emulator
+
+Edit `PlayerServiceEmulator/config.json` to point at your running service:
+
+```json
+{
+  "service": {
+    "base_url": "http://localhost:8080"
+  },
+  "emulator": {
+    "update_interval_seconds": 3,
+    "online_ping_interval_seconds": 30
+  }
+}
+```
+
+| Key | Description |
+|-----|-------------|
+| `base_url` | Base URL of the running JavaService REST API |
+| `update_interval_seconds` | How often (in seconds) each player tick fires |
+| `online_ping_interval_seconds` | How often the emulator sends an `set_online` heartbeat |
+
+#### Run the emulator
+
+```bash
+# Continuous simulation (Ctrl-C to stop)
+python emulator.py
+
+# Run exactly one tick then exit (smoke test / CI)
+python emulator.py --once
+
+# Override update interval from the command line
+python emulator.py --interval 1
+
+# Use a custom config file
+python emulator.py --config /path/to/my-config.json
+```
+
+#### What the emulator simulates
+
+Each simulated player runs a periodic tick that calls the following endpoints:
+
+| Frequency | Endpoints called |
+|-----------|-----------------|
+| Every tick (~3 s) | `set_hpp`, `set_mpp`, `set_tp`, `set_zone`, `set_buffs`, `set_messages` |
+| Every 5 ticks | `set_exp_history`, `set_capacity_points`, `set_merits`, `set_stats` |
+| Every 20 ticks | `set_currency1`, `set_currency2`, `set_gil` |
+| Every 30 s | `set_online` (heartbeat) |
+| On first start | `initialize_player` (skipped if player already exists) |
+
+#### Verifying output
+
+With the Java service running, you should see players appear in the web dashboard within seconds. You can also query the API directly:
+
+```bash
+# List all online players
+curl http://localhost:8080/players/get_players
+
+# Get a specific simulated player
+curl "http://localhost:8080/players/get_player?playerId=1001"
+```
+
+#### Seeded player profiles
+
+The emulator ships with three pre-configured players (defined in `data/players.py`):
+
+| Player ID | Name | Main Job | Zone |
+|-----------|------|----------|------|
+| 1001 | ralphina | WAR/MNK | Escha - Zi'Tah |
+| 1002 | zulobo | WHM/SCH | Reisenjima |
+| 1003 | darkcloud | BLM/RDM | Dynamis - Buburimu |
+
+Add more profiles by appending entries to the `PLAYER_PROFILES` list in `data/players.py`.
 
 ## 🔨 Building for Production
 
@@ -210,11 +315,20 @@ Backend configuration is managed via `service/JavaService/gradle.properties` (se
 
 ## 🎮 Usage
 
+### With FFXI Client (Production)
+
 1. **Start FFXI** with Windower
 2. **Load the addon**: `//lua load PlayerService`
 3. **Start the backend service**: The addon will begin sending data
 4. **Open the web dashboard**: Navigate to your configured domain or localhost
 5. **View your stats**: Real-time data will appear in the dashboard
+
+### Without FFXI Client (Development / Testing)
+
+1. **Start the backend service**: `cd service/JavaService && ./gradlew run`
+2. **Start the emulator**: `cd PlayerServiceEmulator && python emulator.py`
+3. **Open the web dashboard**: Navigate to `http://localhost:5173`
+4. **View simulated stats**: Three player profiles will appear with live updates
 
 ## 🧪 Development
 
@@ -234,6 +348,14 @@ cd service/JavaService
 ./gradlew run                                                           # Start the Java service
 ./gradlew runDevWatch -Pconfig="server src/main/resources/config.yml"   # Start the Java service with autoload on change
 ./gradlew test                                                          # Run tests
+```
+
+### Emulator Development
+```bash
+cd PlayerServiceEmulator
+source .venv/bin/activate
+python emulator.py --once      # Single tick (fast smoke test)
+python emulator.py --interval 1  # Fast continuous mode
 ```
 
 ### Building Jar
