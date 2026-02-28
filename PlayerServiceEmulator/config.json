@@ -1,0 +1,34 @@
+{
+  "service": {
+    "base_url": "http://localhost:8080",
+    "endpoints": {
+      "initialize_player": "/player/initialize_player",
+      "set_online": "/player/set_online",
+      "set_jobs": "/player/set_jobs",
+      "set_gil": "/player/set_gil",
+      "set_status": "/player/set_status",
+      "set_hpp": "/player/set_hpp",
+      "set_mpp": "/player/set_mpp",
+      "set_tp": "/player/set_tp",
+      "set_zone": "/player/set_zone",
+      "set_merits": "/player/set_merits",
+      "set_capacity_points": "/player/set_capacity_points",
+      "set_buffs": "/player/set_buffs",
+      "set_messages": "/player/set_messages",
+      "set_stats": "/player/set_stats",
+      "set_exp_history": "/player/set_exp_history",
+      "set_currency1": "/player/set_currency1",
+      "set_currency2": "/player/set_currency2",
+      "refresh_buffs": "/player/refresh_buffs",
+      "reset_exp_history": "/player/reset_exp_history",
+      "get_players": "/players/get_players",
+      "get_player": "/players/get_player"
+    }
+  },
+  "emulator": {
+    "update_interval_seconds": 3,
+    "online_ping_interval_seconds": 30,
+    "exp_update_interval_seconds": 15,
+    "currency_update_interval_seconds": 60
+  }
+}

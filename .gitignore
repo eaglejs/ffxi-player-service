@@ -8,3 +8,5 @@
 **/prd.test.json
 **/progress.test.txt
 **/ralph.test.sh
+PlayerServiceEmulator/.venv/
+__pycache__/
