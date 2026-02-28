@@ -96,13 +96,20 @@ def initialize_players(api: ApiClient, players: List[Player]) -> None:
         if existing:
             LOG.info("Player %s (id=%d) already initialized – skipping",
                      player.playerName, player.playerId)
-            continue
-        ok = api.initialize_player(player.to_dict())
-        if ok:
-            LOG.info("Initialized player %s (id=%d)", player.playerName, player.playerId)
         else:
-            LOG.warning("Failed to initialize player %s (id=%d) – service may be unavailable",
-                        player.playerName, player.playerId)
+            ok = api.initialize_player(player.to_dict())
+            if ok:
+                LOG.info("Initialized player %s (id=%d)", player.playerName, player.playerId)
+            else:
+                LOG.warning("Failed to initialize player %s (id=%d) – service may be unavailable",
+                            player.playerName, player.playerId)
+                continue
+
+        online_ok = api.set_online(player.playerId, player.playerName)
+        if online_ok:
+            LOG.info("Player %s (id=%d) set online", player.playerName, player.playerId)
+        else:
+            LOG.warning("Failed to set online for player %s (id=%d)", player.playerName, player.playerId)
 
 
 # ---------------------------------------------------------------------------

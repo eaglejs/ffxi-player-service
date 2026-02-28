@@ -50,17 +50,26 @@ class ApiClient:
             LOG.error("Unexpected error on GET %s: %s", path, exc)
         return None
 
+    def _parse_json(self, resp: Optional[requests.Response]) -> Any:
+        if not resp or not resp.ok:
+            return None
+        try:
+            return resp.json()
+        except Exception:
+            LOG.warning("Failed to parse JSON response (status %s): %r", resp.status_code, resp.text[:200])
+            return None
+
     # -------------------------------------------------------------------------
     # PlayersResource endpoints
     # -------------------------------------------------------------------------
 
     def get_players(self) -> Optional[list]:
         resp = self._get("/players/get_players")
-        return resp.json() if resp and resp.ok else None
+        return self._parse_json(resp)
 
     def get_player(self, player_id: int) -> Optional[dict]:
         resp = self._get("/players/get_player", params={"playerId": player_id})
-        return resp.json() if resp and resp.ok else None
+        return self._parse_json(resp)
 
     # -------------------------------------------------------------------------
     # SinglePlayerResource endpoints
@@ -71,7 +80,12 @@ class ApiClient:
         return resp is not None and resp.ok
 
     def set_online(self, player_id: int, player_name: str) -> bool:
-        payload = {"playerId": player_id, "playerName": player_name}
+        import time
+        payload = {
+            "playerId": player_id,
+            "playerName": player_name,
+            "lastOnline": int(time.time() * 1000),
+        }
         resp = self._post("/player/set_online", payload)
         return resp is not None and resp.ok
 
@@ -130,7 +144,7 @@ class ApiClient:
         return resp is not None and resp.ok
 
     def set_capacity_points(self, player_id: int, player_name: str, total: int) -> bool:
-        payload = {"playerId": player_id, "playerName": player_name, "total": total}
+        payload = {"playerId": player_id, "playerName": player_name, "numberOfJobPoints": total}
         resp = self._post("/player/set_capacity_points", payload)
         return resp is not None and resp.ok
 
@@ -155,12 +169,18 @@ class ApiClient:
         resp = self._post("/player/set_stats", payload)
         return resp is not None and resp.ok
 
+    _EXP_TYPE_MAP = {"experience": 8, "capacity": 718, "exemplar": 809}
+
     def set_exp_history(self, player_id: int, player_name: str,
                         exp_type: str, points: int, chain: int, timestamp: str) -> bool:
+        exp_type_int = self._EXP_TYPE_MAP.get(exp_type)
+        if exp_type_int is None:
+            LOG.warning("Unknown expType %r – skipping set_exp_history", exp_type)
+            return False
         payload = {
             "playerId": player_id,
             "playerName": player_name,
-            "expType": exp_type,
+            "expType": exp_type_int,
             "points": points,
             "chain": chain,
             "timestamp": timestamp,

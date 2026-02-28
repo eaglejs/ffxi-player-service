@@ -1,6 +1,6 @@
 {
   "service": {
-    "base_url": "http://localhost:8080",
+    "base_url": "http://localhost:8080/api",
     "endpoints": {
       "initialize_player": "/player/initialize_player",
       "set_online": "/player/set_online",

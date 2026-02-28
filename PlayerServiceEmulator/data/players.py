@@ -45,7 +45,7 @@ BUFFS = {
     "poison": {"iconId": 2, "name": "Poison", "category": "enfeeble"},
 }
 
-CHAT_MESSAGE_TYPES = ["say", "party", "linkshell", "tell", "shout", "emote"]
+CHAT_MESSAGE_TYPES = ["SAY", "PARTY", "LINKSHELL", "TELL", "SHOUT", "YELL", "UNITY"]
 
 CHAT_MESSAGES = [
     "Anyone need a raise?",
