@@ -113,56 +113,56 @@ class PlayerSimulator:
     def simulate_exp(self) -> None:
         """Award all four exp types each tick cycle, with chain-based scaling.
 
+        All four types share the same chain number and timestamp so that the
+        JavaService graphs show each type advancing at identical intervals.
+
         Types sent per tick:
           - merit      (371/372): sampled from example data (chain 0-15, 6000-12000 pts)
-          - experience (8/253):   sampled from example data (chain 0, 650-6220 pts)
+          - experience (8/253):   sampled from example data (chain 0-15, 650-6220 pts)
           - capacity   (718/735): chain-scaled, base 8000, +1500/chain, max 65535
           - exemplar   (809/810): chain-scaled, base 200, +80/chain, max 2000
-
-        Chain is shared across all types for a single kill event.
         """
         p = self.player
 
-        # --- Merit (primary exp type from example data) ---
+        # Single kill-event timestamp and chain shared by all four types
+        kill_ts = _now_iso()
         merit_sample = self.loader.sample_exp_entry("merit")
         chain = merit_sample["chain"]
+
+        # --- Merit ---
         merit_pts = self._scale_points(merit_sample["points"], chain,
                                        chain_bonus=300, max_points=30000)
-        merit_ts = _now_iso()
-        p.expHistory.experience.append(ExpEntry(points=merit_pts, chain=chain, timestamp=merit_ts))
+        p.expHistory.experience.append(ExpEntry(points=merit_pts, chain=chain, timestamp=kill_ts))
         if len(p.expHistory.experience) > 50:
             p.expHistory.experience.pop(0)
-        self.api.set_exp_history(p.playerId, p.playerName, "merit", merit_pts, chain, merit_ts)
+        self.api.set_exp_history(p.playerId, p.playerName, "merit", merit_pts, chain, kill_ts)
 
-        # --- Experience (flat exp, usually unchained, type 8) ---
+        # --- Experience ---
         exp_sample = self.loader.sample_exp_entry("experience")
-        exp_pts = exp_sample["points"]
-        exp_chain = exp_sample["chain"]
-        exp_ts = _now_iso()
-        self.api.set_exp_history(p.playerId, p.playerName, "experience", exp_pts, exp_chain, exp_ts)
+        exp_pts = self._scale_points(exp_sample["points"], chain,
+                                     chain_bonus=200, max_points=30000)
+        self.api.set_exp_history(p.playerId, p.playerName, "experience", exp_pts, chain, kill_ts)
 
-        # --- Capacity points (718/735): chain-scaled ---
-        cap_base = self.loader.sample_exp_entry("capacity")
-        cp_base = cap_base["points"] if cap_base["points"] > 0 else 8000
+        # --- Capacity points (chain-scaled) ---
+        cap_sample = self.loader.sample_exp_entry("capacity")
+        cp_base = cap_sample["points"] if cap_sample["points"] > 0 else 8000
         cp_gained = self._scale_points(cp_base, chain, chain_bonus=1500, max_points=65535)
-        cp_ts = _now_iso()
-        p.expHistory.capacity.append(ExpEntry(points=cp_gained, chain=chain, timestamp=cp_ts))
+        p.expHistory.capacity.append(ExpEntry(points=cp_gained, chain=chain, timestamp=kill_ts))
         if len(p.expHistory.capacity) > 50:
             p.expHistory.capacity.pop(0)
         p.capacityPoints.total += cp_gained
-        self.api.set_exp_history(p.playerId, p.playerName, "capacity", cp_gained, chain, cp_ts)
+        self.api.set_exp_history(p.playerId, p.playerName, "capacity", cp_gained, chain, kill_ts)
         self.api.set_capacity_points(p.playerId, p.playerName, p.capacityPoints.total)
 
-        # --- Exemplar points (809/810): chain-scaled ---
-        ex_base = self.loader.sample_exp_entry("exemplar")
-        ex_base_pts = ex_base["points"] if ex_base["points"] > 0 else 200
+        # --- Exemplar points (chain-scaled) ---
+        ex_sample = self.loader.sample_exp_entry("exemplar")
+        ex_base_pts = ex_sample["points"] if ex_sample["points"] > 0 else 200
         ex_gained = self._scale_points(ex_base_pts, chain, chain_bonus=80, max_points=2000)
-        ex_ts = _now_iso()
-        p.expHistory.exemplar.append(ExpEntry(points=ex_gained, chain=chain, timestamp=ex_ts))
+        p.expHistory.exemplar.append(ExpEntry(points=ex_gained, chain=chain, timestamp=kill_ts))
         if len(p.expHistory.exemplar) > 50:
             p.expHistory.exemplar.pop(0)
         p.currentExemplar = min(p.requiredExemplar, p.currentExemplar + ex_gained)
-        self.api.set_exp_history(p.playerId, p.playerName, "exemplar", ex_gained, chain, ex_ts)
+        self.api.set_exp_history(p.playerId, p.playerName, "exemplar", ex_gained, chain, kill_ts)
 
         # --- Merits: sample from example data ---
         merits = self.loader.sample_merits()

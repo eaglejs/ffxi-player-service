@@ -107,7 +107,7 @@ CURRENCY2_TEMPLATE = {
 PLAYER_PROFILES = [
     {
         "playerId": 664658,
-        "playerName": "sungjinwoo",
+        "playerName": "Sungjinwoo",
         "mainJob": "COR",
         "subJob": "NIN",
         "mainJobLevel": 99,
@@ -126,7 +126,7 @@ PLAYER_PROFILES = [
     },
     {
         "playerId": 297203,
-        "playerName": "empoleon",
+        "playerName": "Empoleon",
         "mainJob": "GEO",
         "subJob": "RDM",
         "mainJobLevel": 99,
@@ -145,7 +145,7 @@ PLAYER_PROFILES = [
     },
     {
         "playerId": 644915,
-        "playerName": "rubydrops",
+        "playerName": "Rubydrops",
         "mainJob": "BRD",
         "subJob": "DNC",
         "mainJobLevel": 99,
@@ -164,7 +164,7 @@ PLAYER_PROFILES = [
     },
     {
         "playerId": 359030,
-        "playerName": "surakusa",
+        "playerName": "Surakusa",
         "mainJob": "WHM",
         "subJob": "SCH",
         "mainJobLevel": 99,
@@ -183,7 +183,7 @@ PLAYER_PROFILES = [
     },
     {
         "playerId": 325554,
-        "playerName": "piplup",
+        "playerName": "Piplup",
         "mainJob": "SAM",
         "subJob": "DRG",
         "mainJobLevel": 99,
@@ -202,7 +202,7 @@ PLAYER_PROFILES = [
     },
     {
         "playerId": 269567,
-        "playerName": "artemuller",
+        "playerName": "Artemuller",
         "mainJob": "RDM",
         "subJob": "BLM",
         "mainJobLevel": 99,
