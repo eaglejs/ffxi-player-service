@@ -5,11 +5,15 @@ Simulates multiple FFXI players sending stat updates to the JavaService REST API
 
 Usage:
     python emulator.py [--config config.json] [--interval SECONDS] [--once]
+    python emulator.py --replay [--speed MULTIPLIER] [--loop]
 
 Options:
     --config PATH         Path to configuration file (default: config.json)
     --interval SECONDS    Override update_interval_seconds from config
     --once                Run exactly one tick then exit (useful for testing)
+    --replay              Replay example_data.jsonl as a recorded session
+    --speed MULTIPLIER    Speed multiplier for replay (default: 1.0 = real-time, 2.0 = 2× faster)
+    --loop                Loop replay indefinitely (only valid with --replay)
 """
 import argparse
 import json
@@ -114,6 +118,64 @@ def initialize_players(api: ApiClient, players: List[Player]) -> None:
 
 
 # ---------------------------------------------------------------------------
+# Replay mode
+# ---------------------------------------------------------------------------
+
+def run_replay(config: dict, speed: float, loop: bool) -> None:
+    """Replay example_data.jsonl to the service, preserving original timing.
+
+    Args:
+        config:  Loaded config dict (provides base_url).
+        speed:   Replay speed multiplier (1.0 = real-time, 2.0 = twice as fast).
+        loop:    When True, restart replay from the beginning after each pass.
+    """
+    base_url = config["service"]["base_url"]
+    api = ApiClient(base_url)
+    loader = ExampleDataLoader()
+
+    if not loader._raw_records:
+        LOG.error("No records found in example_data.jsonl – cannot replay")
+        return
+
+    total = len(loader._raw_records)
+    LOG.info("Replay mode: %d records, speed=%.1fx, loop=%s", total, speed, loop)
+    LOG.info("Connecting to PlayerService at %s", base_url)
+
+    pass_num = 0
+    while _running:
+        pass_num += 1
+        sent = 0
+        prev_rel = 0.0
+        LOG.info("--- Replay pass %d ---", pass_num)
+
+        for rel_seconds, path, body in loader.replay_records():
+            if not _running:
+                break
+
+            # Sleep for the inter-record gap, scaled by speed
+            gap = (rel_seconds - prev_rel) / speed
+            if gap > 0:
+                time.sleep(gap)
+            prev_rel = rel_seconds
+
+            resp = api._post(path, body)
+            sent += 1
+            player_name = body.get("playerName", "?")
+            LOG.debug("[replay] %s %s -> %s",
+                      player_name, path, resp.status_code if resp else "no response")
+
+            if sent % 100 == 0:
+                LOG.info("[replay] %d/%d records sent (%.0f%%)", sent, total, 100 * sent / total)
+
+        LOG.info("[replay] pass %d complete: %d records sent", pass_num, sent)
+
+        if not loop:
+            break
+
+    LOG.info("Replay stopped.")
+
+
+# ---------------------------------------------------------------------------
 # Main loop
 # ---------------------------------------------------------------------------
 
@@ -172,6 +234,12 @@ def main():
                         help="Override update_interval_seconds from config")
     parser.add_argument("--once", action="store_true",
                         help="Run one tick then exit (useful for smoke-testing)")
+    parser.add_argument("--replay", action="store_true",
+                        help="Replay example_data.jsonl as a recorded session")
+    parser.add_argument("--speed", type=float, default=1.0,
+                        help="Replay speed multiplier (default: 1.0 = real-time). Only used with --replay")
+    parser.add_argument("--loop", action="store_true",
+                        help="Loop replay indefinitely. Only used with --replay")
     args = parser.parse_args()
 
     # Resolve config path relative to script location
@@ -180,9 +248,12 @@ def main():
         config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), config_path)
 
     config = load_config(config_path)
-    interval = args.interval or config["emulator"].get("update_interval_seconds", 3)
 
-    run(config, interval, args.once)
+    if args.replay:
+        run_replay(config, speed=args.speed, loop=args.loop)
+    else:
+        interval = args.interval or config["emulator"].get("update_interval_seconds", 3)
+        run(config, interval, args.once)
 
 
 if __name__ == "__main__":

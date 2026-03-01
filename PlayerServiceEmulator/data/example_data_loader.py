@@ -2,6 +2,10 @@
 Loads data/example_data.jsonl and builds per-endpoint sample pools so that
 the PlayerSimulator can draw realistic payloads instead of purely random values.
 
+Also exposes replay_records() for the --replay mode, which yields records sorted
+by timestamp with relative timing offsets so the emulator can recreate a real
+session at configurable speed.
+
 Usage:
     from data.example_data_loader import ExampleDataLoader
     loader = ExampleDataLoader()
@@ -11,12 +15,17 @@ Usage:
     stats         = loader.sample_stats()       # dict of stat field → value
     status        = loader.sample_status()      # int (0, 1, or 4)
     exp_entry     = loader.sample_exp_entry()   # {"expType": int, "points": int, "chain": int}
+
+    # Replay mode:
+    for rel_seconds, path, body in loader.replay_records():
+        ...  # sleep and POST at the right time
 """
 import json
 import logging
 import os
 import random
-from typing import Any, Dict, List, Optional
+from datetime import datetime, timezone
+from typing import Any, Dict, Generator, List, Optional, Tuple
 
 LOG = logging.getLogger(__name__)
 
@@ -28,6 +37,7 @@ class ExampleDataLoader:
 
     def __init__(self, path: str = _DEFAULT_PATH):
         self._pools: Dict[str, List[dict]] = {}
+        self._raw_records: List[dict] = []   # full parsed records, sorted by timestamp
         self._load(path)
 
     # -------------------------------------------------------------------------
@@ -40,25 +50,70 @@ class ExampleDataLoader:
             return
 
         parsed = 0
+        raw: List[dict] = []
         with open(path, encoding="utf-8") as f:
-            for raw in f:
-                raw = raw.strip()
-                if not raw:
+            for line in f:
+                line = line.strip()
+                if not line:
                     continue
                 try:
-                    rec = json.loads(raw)
+                    rec = json.loads(line)
                     endpoint = rec.get("endpoint", "")
                     body_raw = rec.get("body", "{}")
                     body = json.loads(body_raw) if isinstance(body_raw, str) else body_raw
-                    # Strip player-identity fields so samples are reusable
-                    body = {k: v for k, v in body.items() if k not in ("playerId", "playerName")}
-                    self._pools.setdefault(endpoint, []).append(body)
+                    raw.append({
+                        "endpoint":  endpoint,
+                        "timestamp": rec.get("timestamp", ""),
+                        "body":      body,
+                    })
+                    # Strip player-identity fields for sample pools
+                    pool_body = {k: v for k, v in body.items() if k not in ("playerId", "playerName")}
+                    self._pools.setdefault(endpoint, []).append(pool_body)
                     parsed += 1
                 except (json.JSONDecodeError, KeyError):
                     pass
 
+        # Sort records by timestamp for ordered replay
+        def _parse_ts(s: str) -> float:
+            try:
+                return datetime.fromisoformat(s.replace("Z", "+00:00")).timestamp()
+            except ValueError:
+                return 0.0
+
+        self._raw_records = sorted(raw, key=lambda r: _parse_ts(r["timestamp"]))
+
         LOG.info("example_data_loader: loaded %d records across %d endpoints",
                  parsed, len(self._pools))
+
+    # -------------------------------------------------------------------------
+    # Replay
+    # -------------------------------------------------------------------------
+
+    def replay_records(self) -> Generator[Tuple[float, str, dict], None, None]:
+        """Yield (relative_seconds, api_path, body) for every record in timestamp order.
+
+        relative_seconds is the offset from the first record — callers can use this
+        to sleep between sends so the replay mirrors the original session timing.
+        api_path is the endpoint path suitable for ApiClient._post(), e.g. '/player/set_tp'.
+        body is the full payload dict (including playerId / playerName).
+        """
+        if not self._raw_records:
+            LOG.warning("No records available for replay")
+            return
+
+        def _ts(r: dict) -> float:
+            try:
+                return datetime.fromisoformat(
+                    r["timestamp"].replace("Z", "+00:00")
+                ).timestamp()
+            except ValueError:
+                return 0.0
+
+        t0 = _ts(self._raw_records[0])
+        for rec in self._raw_records:
+            rel = _ts(rec) - t0
+            path = "/" + rec["endpoint"].lstrip("/")
+            yield rel, path, rec["body"]
 
     # -------------------------------------------------------------------------
     # Generic sampler
