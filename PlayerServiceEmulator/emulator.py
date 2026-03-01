@@ -95,7 +95,7 @@ def build_player(profile: dict) -> Player:
 
 
 def initialize_players(api: ApiClient, players: List[Player]) -> None:
-    """Send initialize_player for each player, skipping those already in DB."""
+    """Send initialize_player for each player and reset their exp history for a clean slate."""
     for player in players:
         existing = api.get_player(player.playerId)
         if existing:
@@ -109,6 +109,13 @@ def initialize_players(api: ApiClient, players: List[Player]) -> None:
                 LOG.warning("Failed to initialize player %s (id=%d) – service may be unavailable",
                             player.playerName, player.playerId)
                 continue
+
+        # Reset exp history so graphs start from a clean state each run
+        reset_ok = api.reset_exp_history(player.playerId, player.playerName)
+        if reset_ok:
+            LOG.info("Reset exp history for player %s (id=%d)", player.playerName, player.playerId)
+        else:
+            LOG.warning("Failed to reset exp history for player %s (id=%d)", player.playerName, player.playerId)
 
         online_ok = api.set_online(player.playerId, player.playerName)
         if online_ok:
@@ -208,6 +215,14 @@ def run_replay(config: dict, speed: float, loop: bool) -> None:
         prev_rel = 0.0
         replay_wall_start = time.time()
         LOG.info("--- Replay pass %d ---", pass_num)
+
+        # Reset exp history for all players at the start of each pass
+        player_ids = {body.get("playerId"): body.get("playerName")
+                      for _, _, body in loader.replay_records()
+                      if body.get("playerId")}
+        for pid, pname in player_ids.items():
+            ok = api.reset_exp_history(pid, pname or "")
+            LOG.info("[replay] reset_exp_history player %s (id=%d) -> %s", pname, pid, ok)
 
         for rel_seconds, path, body in loader.replay_records():
             if not _running:
