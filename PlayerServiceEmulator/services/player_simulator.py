@@ -105,54 +105,73 @@ class PlayerSimulator:
     # Experience / merit simulation
     # -------------------------------------------------------------------------
 
+    def _scale_points(self, base_points: int, chain: int,
+                      chain_bonus: int, max_points: int) -> int:
+        """Scale points by chain number: base + chain * bonus, clamped to max."""
+        return min(max_points, base_points + chain * chain_bonus)
+
     def simulate_exp(self) -> None:
-        """Award experience, capacity, and exemplar points using realistic values."""
+        """Award all four exp types each tick cycle, with chain-based scaling.
+
+        Types sent per tick:
+          - merit      (371/372): sampled from example data (chain 0-15, 6000-12000 pts)
+          - experience (8/253):   sampled from example data (chain 0, 650-6220 pts)
+          - capacity   (718/735): chain-scaled, base 8000, +1500/chain, max 65535
+          - exemplar   (809/810): chain-scaled, base 200, +80/chain, max 2000
+
+        Chain is shared across all types for a single kill event.
+        """
         p = self.player
 
-        # Draw a realistic exp entry from example data
-        exp_sample = self.loader.sample_exp_entry()
-        exp_type_int = exp_sample["expType"]
-        points = exp_sample["points"]
-        chain = exp_sample["chain"]
-
-        entry = ExpEntry(points=points, chain=chain, timestamp=_now_iso())
-        p.expHistory.experience.append(entry)
+        # --- Merit (primary exp type from example data) ---
+        merit_sample = self.loader.sample_exp_entry("merit")
+        chain = merit_sample["chain"]
+        merit_pts = self._scale_points(merit_sample["points"], chain,
+                                       chain_bonus=300, max_points=30000)
+        merit_ts = _now_iso()
+        p.expHistory.experience.append(ExpEntry(points=merit_pts, chain=chain, timestamp=merit_ts))
         if len(p.expHistory.experience) > 50:
             p.expHistory.experience.pop(0)
-        self.api.set_exp_history(
-            p.playerId, p.playerName, "experience", points, chain, entry.timestamp
-        )
+        self.api.set_exp_history(p.playerId, p.playerName, "merit", merit_pts, chain, merit_ts)
 
-        # Capacity points: random variation on top of sampled base
-        cp_gained = random.randint(100, 500) * max(1, chain)
-        cp_entry = ExpEntry(points=cp_gained, chain=chain, timestamp=_now_iso())
-        p.expHistory.capacity.append(cp_entry)
+        # --- Experience (flat exp, usually unchained, type 8) ---
+        exp_sample = self.loader.sample_exp_entry("experience")
+        exp_pts = exp_sample["points"]
+        exp_chain = exp_sample["chain"]
+        exp_ts = _now_iso()
+        self.api.set_exp_history(p.playerId, p.playerName, "experience", exp_pts, exp_chain, exp_ts)
+
+        # --- Capacity points (718/735): chain-scaled ---
+        cap_base = self.loader.sample_exp_entry("capacity")
+        cp_base = cap_base["points"] if cap_base["points"] > 0 else 8000
+        cp_gained = self._scale_points(cp_base, chain, chain_bonus=1500, max_points=65535)
+        cp_ts = _now_iso()
+        p.expHistory.capacity.append(ExpEntry(points=cp_gained, chain=chain, timestamp=cp_ts))
         if len(p.expHistory.capacity) > 50:
             p.expHistory.capacity.pop(0)
         p.capacityPoints.total += cp_gained
-        self.api.set_exp_history(
-            p.playerId, p.playerName, "capacity", cp_gained, chain, cp_entry.timestamp
-        )
+        self.api.set_exp_history(p.playerId, p.playerName, "capacity", cp_gained, chain, cp_ts)
         self.api.set_capacity_points(p.playerId, p.playerName, p.capacityPoints.total)
 
-        # Exemplar points
-        ex_gained = random.randint(50, 300)
-        ex_entry = ExpEntry(points=ex_gained, chain=chain, timestamp=_now_iso())
-        p.expHistory.exemplar.append(ex_entry)
+        # --- Exemplar points (809/810): chain-scaled ---
+        ex_base = self.loader.sample_exp_entry("exemplar")
+        ex_base_pts = ex_base["points"] if ex_base["points"] > 0 else 200
+        ex_gained = self._scale_points(ex_base_pts, chain, chain_bonus=80, max_points=2000)
+        ex_ts = _now_iso()
+        p.expHistory.exemplar.append(ExpEntry(points=ex_gained, chain=chain, timestamp=ex_ts))
         if len(p.expHistory.exemplar) > 50:
             p.expHistory.exemplar.pop(0)
         p.currentExemplar = min(p.requiredExemplar, p.currentExemplar + ex_gained)
-        self.api.set_exp_history(
-            p.playerId, p.playerName, "exemplar", ex_gained, chain, ex_entry.timestamp
-        )
+        self.api.set_exp_history(p.playerId, p.playerName, "exemplar", ex_gained, chain, ex_ts)
 
-        # Merits: sample from example data
+        # --- Merits: sample from example data ---
         merits = self.loader.sample_merits()
         p.merits.total = min(p.merits.max, merits["total"])
         p.merits.max = merits["max"]
         self.api.set_merits(p.playerId, p.playerName, p.merits.total, p.merits.max)
 
-        LOG.debug("[%s] exp +%d cp +%d ex +%d", p.playerName, points, cp_gained, ex_gained)
+        LOG.debug("[%s] exp merit=%d exp=%d cp=%d ex=%d (chain=%d)",
+                  p.playerName, merit_pts, exp_pts, cp_gained, ex_gained, chain)
 
     # -------------------------------------------------------------------------
     # Buff simulation

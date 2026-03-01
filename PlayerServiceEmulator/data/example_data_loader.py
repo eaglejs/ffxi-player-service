@@ -164,16 +164,57 @@ class ExampleDataLoader:
             return int(sample["status"])
         return 0
 
-    def sample_exp_entry(self) -> dict:
-        """Return a realistic exp entry: {expType, points, chain}."""
-        sample = self._sample("player/set_exp_history")
-        if sample:
-            return {
-                "expType": sample.get("expType", 371),
-                "points":  sample.get("points", 1000),
-                "chain":   sample.get("chain", 0),
-            }
-        return {"expType": 371, "points": 1000, "chain": 0}
+    def sample_exp_entry(self, exp_type: Optional[str] = None) -> dict:
+        """Return a realistic exp entry: {exp_type_name, points, chain}.
+
+        Args:
+            exp_type: one of 'experience', 'merit', 'capacity', 'exemplar'.
+                      If None, samples from any set_exp_history record.
+
+        The returned dict uses the string exp_type name (not the int ID) so
+        callers can pass it directly to ApiClient.set_exp_history().
+        """
+        # Map int expType IDs to string names for the ApiClient
+        _INT_TO_NAME = {8: "experience", 253: "experience",
+                        371: "merit",    372: "merit",
+                        718: "capacity", 735: "capacity",
+                        809: "exemplar", 810: "exemplar"}
+
+        pool = self._pools.get("player/set_exp_history", [])
+        if pool:
+            if exp_type:
+                # Find the int IDs that correspond to the requested type
+                _NAME_TO_INTS = {
+                    "experience": {8, 253},
+                    "merit":      {371, 372},
+                    "capacity":   {718, 735},
+                    "exemplar":   {809, 810},
+                }
+                valid_ids = _NAME_TO_INTS.get(exp_type, set())
+                matching = [s for s in pool if s.get("expType") in valid_ids]
+                if matching:
+                    sample = random.choice(matching)
+                    return {
+                        "exp_type": exp_type,
+                        "points":   sample.get("points", 1000),
+                        "chain":    sample.get("chain", 0),
+                    }
+            else:
+                sample = random.choice(pool)
+                return {
+                    "exp_type": _INT_TO_NAME.get(sample.get("expType"), "merit"),
+                    "points":   sample.get("points", 1000),
+                    "chain":    sample.get("chain", 0),
+                }
+        # Fallback defaults per type
+        defaults = {
+            "experience": {"exp_type": "experience", "points": 3000, "chain": 0},
+            "merit":      {"exp_type": "merit",      "points": 7500, "chain": 1},
+            "capacity":   {"exp_type": "capacity",   "points": 12000, "chain": 1},
+            "exemplar":   {"exp_type": "exemplar",   "points": 500,  "chain": 0},
+        }
+        return defaults.get(exp_type or "merit",
+                            {"exp_type": "merit", "points": 7500, "chain": 1})
 
     def sample_hpp(self) -> int:
         """Return a realistic hpp value."""

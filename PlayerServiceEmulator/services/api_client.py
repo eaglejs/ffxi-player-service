@@ -169,14 +169,22 @@ class ApiClient:
         resp = self._post("/player/set_stats", payload)
         return resp is not None and resp.ok
 
-    _EXP_TYPE_MAP = {"experience": 8, "capacity": 718, "exemplar": 809}
+    # Paired exp type IDs: (no_chain_type_id, chained_type_id)
+    # chain == 0 → use first id; chain > 0 → use second id
+    _EXP_TYPE_MAP = {
+        "experience": (8,   253),
+        "merit":      (371, 372),
+        "capacity":   (718, 735),
+        "exemplar":   (809, 810),
+    }
 
     def set_exp_history(self, player_id: int, player_name: str,
                         exp_type: str, points: int, chain: int, timestamp: str) -> bool:
-        exp_type_int = self._EXP_TYPE_MAP.get(exp_type)
-        if exp_type_int is None:
+        pair = self._EXP_TYPE_MAP.get(exp_type)
+        if pair is None:
             LOG.warning("Unknown expType %r – skipping set_exp_history", exp_type)
             return False
+        exp_type_int = pair[0] if chain == 0 else pair[1]
         payload = {
             "playerId": player_id,
             "playerName": player_name,
