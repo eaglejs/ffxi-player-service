@@ -121,8 +121,58 @@ def initialize_players(api: ApiClient, players: List[Player]) -> None:
 # Replay mode
 # ---------------------------------------------------------------------------
 
+def _rewrite_timestamps(body: dict, wall_offset: float) -> dict:
+    """Return a shallow copy of body with all timestamp fields shifted by wall_offset seconds.
+
+    wall_offset = current_wall_time - recording_start_wall_time
+
+    Fields rewritten:
+      - lastOnline (int, Unix epoch)
+      - timestamp  (str, ISO 8601) in top-level body
+      - buffs[*].timestamp  (int, Unix epoch)
+      - buffs[*].utc_time   (str, ISO 8601)
+    """
+    from datetime import datetime, timezone
+
+    def _shift_iso(s: str) -> str:
+        try:
+            dt = datetime.fromisoformat(s.replace("Z", "+00:00"))
+            shifted = dt.timestamp() + wall_offset
+            return datetime.fromtimestamp(shifted, tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        except (ValueError, OSError):
+            return s
+
+    def _shift_epoch(v: int) -> int:
+        return int(v + wall_offset)
+
+    body = dict(body)
+
+    if "lastOnline" in body and isinstance(body["lastOnline"], int):
+        body["lastOnline"] = _shift_epoch(body["lastOnline"])
+
+    if "timestamp" in body and isinstance(body["timestamp"], str):
+        body["timestamp"] = _shift_iso(body["timestamp"])
+
+    if "buffs" in body and isinstance(body["buffs"], dict):
+        new_buffs = {}
+        for slot, buff in body["buffs"].items():
+            buff = dict(buff)
+            if "timestamp" in buff and isinstance(buff["timestamp"], int):
+                buff["timestamp"] = _shift_epoch(buff["timestamp"])
+            if "utc_time" in buff and isinstance(buff["utc_time"], str):
+                buff["utc_time"] = _shift_iso(buff["utc_time"])
+            new_buffs[slot] = buff
+        body["buffs"] = new_buffs
+
+    return body
+
+
 def run_replay(config: dict, speed: float, loop: bool) -> None:
     """Replay example_data.jsonl to the service, preserving original timing.
+
+    Timestamps in all payloads are rewritten to reflect the current wall-clock
+    time so the JavaService receives records that appear to have been generated
+    right now rather than from the original recording session.
 
     Args:
         config:  Loaded config dict (provides base_url).
@@ -141,11 +191,22 @@ def run_replay(config: dict, speed: float, loop: bool) -> None:
     LOG.info("Replay mode: %d records, speed=%.1fx, loop=%s", total, speed, loop)
     LOG.info("Connecting to PlayerService at %s", base_url)
 
+    # Compute original recording start time (Unix epoch) from the first record
+    first_rec_ts = loader._raw_records[0]["timestamp"]
+    try:
+        from datetime import datetime, timezone
+        recording_start = datetime.fromisoformat(
+            first_rec_ts.replace("Z", "+00:00")
+        ).timestamp()
+    except (ValueError, AttributeError):
+        recording_start = time.time()
+
     pass_num = 0
     while _running:
         pass_num += 1
         sent = 0
         prev_rel = 0.0
+        replay_wall_start = time.time()
         LOG.info("--- Replay pass %d ---", pass_num)
 
         for rel_seconds, path, body in loader.replay_records():
@@ -157,6 +218,10 @@ def run_replay(config: dict, speed: float, loop: bool) -> None:
             if gap > 0:
                 time.sleep(gap)
             prev_rel = rel_seconds
+
+            # Rewrite timestamps: shift from recording epoch to current wall time
+            wall_offset = time.time() - recording_start
+            body = _rewrite_timestamps(body, wall_offset)
 
             resp = api._post(path, body)
             sent += 1
