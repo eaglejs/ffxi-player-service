@@ -16,6 +16,7 @@ ZONES = [
     "Escha - Zi'Tah", "Escha - Ru'Aun", "Reisenjima",
     "Alzadaal Undersea Ruins", "Nyzul Isle",
     "Walk of Echoes", "Legion",
+    "Tavnazian Safehold", "Bibiki Bay",
 ]
 
 TITLES = [
@@ -25,25 +26,30 @@ TITLES = [
     "Master of the Hunt",
 ]
 
-# FFXI buff icon IDs mapped to common buffs
-BUFFS = {
-    "protect": {"iconId": 56, "name": "Protect", "category": "enhancement"},
-    "shell": {"iconId": 57, "name": "Shell", "category": "enhancement"},
-    "haste": {"iconId": 580, "name": "Haste", "category": "enhancement"},
-    "refresh": {"iconId": 41, "name": "Refresh", "category": "enhancement"},
-    "regen": {"iconId": 40, "name": "Regen", "category": "enhancement"},
-    "stoneskin": {"iconId": 37, "name": "Stoneskin", "category": "enhancement"},
-    "blink": {"iconId": 36, "name": "Blink", "category": "enhancement"},
-    "phalanx": {"iconId": 39, "name": "Phalanx", "category": "enhancement"},
-    "barfire": {"iconId": 142, "name": "Barfire", "category": "enhancement"},
-    "sneak": {"iconId": 71, "name": "Sneak", "category": "enhancement"},
-    "invisible": {"iconId": 72, "name": "Invisible", "category": "enhancement"},
-    "dia": {"iconId": 134, "name": "Dia", "category": "enfeeble"},
-    "slow": {"iconId": 13, "name": "Slow", "category": "enfeeble"},
-    "paralyze": {"iconId": 4, "name": "Paralyze", "category": "enfeeble"},
-    "blind": {"iconId": 6, "name": "Blind", "category": "enfeeble"},
-    "poison": {"iconId": 2, "name": "Poison", "category": "enfeeble"},
-}
+# Player status codes observed in real game data
+STATUSES = [0, 1, 4]  # 0=normal, 1=resting, 4=engaged in combat
+
+# FFXI buff catalog using real buff IDs and types observed in example data.
+# Each entry: {buff_id, buff_name, buff_type}
+BUFF_CATALOG = [
+    {"buff_id": 33,  "buff_name": "Haste",             "buff_type": "Haste"},
+    {"buff_id": 40,  "buff_name": "Protect",            "buff_type": "Protect"},
+    {"buff_id": 41,  "buff_name": "Shell",              "buff_type": "Shell"},
+    {"buff_id": 116, "buff_name": "Phalanx",            "buff_type": "Phalanx"},
+    {"buff_id": 119, "buff_name": "STR Boost",          "buff_type": "STR Boost"},
+    {"buff_id": 197, "buff_name": "Minne",              "buff_type": "Minne"},
+    {"buff_id": 198, "buff_name": "Minuet",             "buff_type": "Minuet"},
+    {"buff_id": 213, "buff_name": "Aria",               "buff_type": "Aria"},
+    {"buff_id": 214, "buff_name": "March",              "buff_type": "March"},
+    {"buff_id": 219, "buff_name": "Chocobo Mazurka",    "buff_type": "Mazurka"},
+    {"buff_id": 252, "buff_name": "Mounted",            "buff_type": "Mounted"},
+    {"buff_id": 253, "buff_name": "Signet",             "buff_type": "Signet"},
+    {"buff_id": 272, "buff_name": "Aftermath: Lv.3",   "buff_type": "Aftermath: Lv.3"},
+    {"buff_id": 275, "buff_name": "Auspice",            "buff_type": "Auspice"},
+    {"buff_id": 317, "buff_name": "Chaos Roll",         "buff_type": "Chaos Roll"},
+    {"buff_id": 326, "buff_name": "Corsair's Roll",     "buff_type": "Corsair's Roll"},
+    {"buff_id": 353, "buff_name": "Hasso",              "buff_type": "Hasso"},
+]
 
 CHAT_MESSAGE_TYPES = ["SAY", "PARTY", "LINKSHELL", "TELL", "SHOUT", "YELL", "UNITY"]
 
@@ -65,33 +71,36 @@ CHAT_MESSAGES = [
     "Dynamis starting soon. Get ready!",
 ]
 
-# FFXI Currency1 fields
+# FFXI Currency1 fields (field names match the real JavaService API)
 CURRENCY1_TEMPLATE = {
-    "conquestPointsBastok": 0,
-    "conquestPointsSandoria": 0,
-    "conquestPointsWindurst": 0,
-    "sparksOfEminence": 0,
-    "infamy": 0,
-    "gallantry": 0,
-    "imperialStandingPoints": 0,
-    "leaderboardPoints": 0,
-    "legionPoints": 0,
-    "hallmarks": 0,
-    "bayld": 0,
-    "unity": 0,
-    "segmentPoints": 0,
+    "conquestPointsBastok":    0,
+    "conquestPointsSandoria":  0,
+    "conquestPointsWindurst":  0,
+    "sparksOfEminence":        0,
+    "unityAccolades":          0,
+    "therionIchor":            0,
+    "dominionNotes":           0,
+    "imperialStanding":        0,
+    "nyzulTokens":             0,
+    "voidstones":              0,
+    "deeds":                   0,
+    "loginPoints":             0,
 }
 
-# FFXI Currency2 fields
+# FFXI Currency2 fields (field names match the real JavaService API)
 CURRENCY2_TEMPLATE = {
-    "reiveMark": 0,
-    "meriPointe": 0,
-    "vagaryReward": 0,
-    "battlefieldPoints": 0,
-    "limitPoints": 0,
-    "jobPoints": 0,
-    "meitouPoints": 0,
-    "ambu": 0,
+    "hallmarks":               0,
+    "gallantry":               0,
+    "coalitionImprimaturs":    0,
+    "apollyonUnits":           0,
+    "temenosUnits":            0,
+    "domainPoints":            0,
+    "eschaBeads":              0,
+    "eschaSilt":               0,
+    "mogSegments":             0,
+    "gallimaufry":             0,
+    "mweyaPlasmCorpuscles":    0,
+    "potpourri":               0,
 }
 
 # Simulated player profiles

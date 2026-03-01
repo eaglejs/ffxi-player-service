@@ -27,6 +27,7 @@ from models.player import Player, PlayerStats, Merits, CapacityPoints, ExpHistor
 from services.api_client import ApiClient
 from services.player_simulator import PlayerSimulator
 from data.players import PLAYER_PROFILES
+from data.example_data_loader import ExampleDataLoader
 
 logging.basicConfig(
     level=logging.INFO,
@@ -123,7 +124,8 @@ def run(config: dict, interval: float, run_once: bool) -> None:
     LOG.info("Connecting to PlayerService at %s", base_url)
 
     players = [build_player(p) for p in PLAYER_PROFILES]
-    simulators = [PlayerSimulator(api, p) for p in players]
+    loader = ExampleDataLoader()
+    simulators = [PlayerSimulator(api, p, loader) for p in players]
 
     initialize_players(api, players)
 
