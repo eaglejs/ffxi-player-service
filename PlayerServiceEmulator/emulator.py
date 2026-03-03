@@ -216,14 +216,6 @@ def run_replay(config: dict, speed: float, loop: bool) -> None:
         replay_wall_start = time.time()
         LOG.info("--- Replay pass %d ---", pass_num)
 
-        # Reset exp history for all players at the start of each pass
-        player_ids = {body.get("playerId"): body.get("playerName")
-                      for _, _, body in loader.replay_records()
-                      if body.get("playerId")}
-        for pid, pname in player_ids.items():
-            ok = api.reset_exp_history(pid, pname or "")
-            LOG.info("[replay] reset_exp_history player %s (id=%d) -> %s", pname, pid, ok)
-
         for rel_seconds, path, body in loader.replay_records():
             if not _running:
                 break
@@ -328,6 +320,18 @@ def main():
         config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), config_path)
 
     config = load_config(config_path)
+
+    base_url = config["service"]["base_url"]
+    api = ApiClient(base_url)
+    loader = ExampleDataLoader()
+
+    # Reset exp history for all players at the start of each pass
+    player_ids = {body.get("playerId"): body.get("playerName")
+                  for _, _, body in loader.replay_records()
+                  if body.get("playerId")}
+    for pid, pname in player_ids.items():
+        ok = api.reset_exp_history(pid, pname or "")
+        LOG.info("[replay] reset_exp_history player %s (id=%d) -> %s", pname, pid, ok)
 
     if args.replay:
         run_replay(config, speed=args.speed, loop=args.loop)
