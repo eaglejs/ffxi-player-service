@@ -67,7 +67,8 @@ function Utils.convert_server_time_to_local_time()
   local now = os.time()
   local server_time = os.time() + 0x100000000 / 60 * Utils.calculate_server_start_time()
   local h, m = (os.difftime(now, os.time(os.date('!*t', now))) / 3600):modf()
-  local utc_time = os.date('!*t', 1009810800 + (server_time / 60) + 0x100000000 / 60 * Utils.calculate_server_start_time())
+  local utc_time = os.date('!*t',
+    1009810800 + (server_time / 60) + 0x100000000 / 60 * Utils.calculate_server_start_time())
   return utc_time;
 end
 
@@ -75,7 +76,7 @@ function Utils.get_duration_local_time(duration)
   local now = os.time()
   local h, m = (os.difftime(now, os.time(os.date('!*t', now))) / 3600):modf()
   local utc_time = os.date('!*t', 1009810800 + (duration / 60) + 0x100000000 / 60 *
-  Utils.calculate_server_start_time())
+    Utils.calculate_server_start_time())
   return utc_time;
 end
 
@@ -86,7 +87,8 @@ function Utils.get_current_time()
 end
 
 function Utils.get_formatted_local_time(utc_time)
- return string.format("%04d-%02d-%02dT%02d:%02d:%02dZ", utc_time.year, utc_time.month, utc_time.day, utc_time.hour, utc_time.min, utc_time.sec)
+  return string.format("%04d-%02d-%02dT%02d:%02d:%02dZ", utc_time.year, utc_time.month, utc_time.day, utc_time.hour,
+    utc_time.min, utc_time.sec)
 end
 
 return Utils

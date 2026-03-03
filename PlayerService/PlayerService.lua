@@ -397,9 +397,10 @@ function PlayerService.set_zone()
     playerName = player.name,
     exp = player.exp,
   }
-
-  PSUI.post('player/set_zone', PSUI.toJSON(zone_info))
-  PSUI.post('player/reset_exp_history', PSUI.toJSON(exp_history))
+  local zone_package = PSUI.toJSON(zone_info)
+  local exp_package = PSUI.toJSON(exp_history)
+  PSUI.post('player/set_zone', zone_package)
+  PSUI.post('player/reset_exp_history', exp_package)
   PlayerService.updateGil()
 end
 
@@ -414,7 +415,8 @@ function PlayerService.updateGil()
     gil = windower.ffxi.get_items('gil')
   }
 
-  PSUI.post('player/set_gil', PSUI.toJSON(data))
+  local jsonData = PSUI.toJSON(data)
+  PSUI.post('player/set_gil', jsonData)
 end
 
 function PlayerService.incoming_chunk_handler(id, original, modified, injected, blocked)
@@ -475,7 +477,8 @@ function PlayerService.incoming_chunk_handler(id, original, modified, injected, 
         total = packet['Merit Points'],
         max = packet['Max Merit Points']
       }
-      coroutine.schedule(function() PSUI.post('player/set_merits', PSUI.toJSON(meritPackage)) end, .5)
+      local jsonData = PSUI.toJSON(meritPackage)
+      PSUI.post('player/set_merits', jsonData)
     elseif packet['Order'] == 5 then
       local player = windower.ffxi.get_player()
       if player then
@@ -485,14 +488,15 @@ function PlayerService.incoming_chunk_handler(id, original, modified, injected, 
           playerName = player.name,
           numberOfJobPoints = packet[job .. ' Job Points']
         }
-
-        coroutine.schedule(function() PSUI.post('player/set_capacity_points', PSUI.toJSON(cpPackage)) end, 1)
+        local jsonData = PSUI.toJSON(cpPackage)
+        PSUI.post('player/set_capacity_points', jsonData)
       end
     end
   elseif id == 0x02D then
     -- (8|253) = exp, (371|372) = limit, (718|735) = capacity, (809|810) = exemplar
     -- Param 1 = EXP, Param 2 = Chain #
-    local expMessageTypes = S { 8, 253, 371, 372, 718, 735, 809, 810 }
+    -- * omitting 371 since it seems to be sending twice with 372 skewing data.
+    local expMessageTypes = S { 8, 253, 372, 718, 735, 809, 810 }
     local packet = packets.parse('incoming', original)
     -- print('Message: ' .. packet['Message'] .. ' ' .. packet['Param 1'] .. ' ' .. packet['Param 2'])
     if expMessageTypes:contains(packet['Message']) then
@@ -505,7 +509,8 @@ function PlayerService.incoming_chunk_handler(id, original, modified, injected, 
         ["chain"] = packet['Param 2'],
         ["timestamp"] = formatted_utc_time
       }
-      coroutine.schedule(function() PSUI.post('player/set_exp_history', PSUI.toJSON(expPackage)) end, 2)
+      local jsonData = PSUI.toJSON(expPackage)
+      PSUI.post('player/set_exp_history', jsonData)
     end
   end
 
@@ -530,11 +535,11 @@ function PlayerService.fetchPlayerStats()
   if not player or not PlayerService.active then
     return
   end
-  coroutine.schedule(PlayerService.send_stats_request, math.random(0, 1) / 10)
+  PlayerService.send_stats_request()
   coroutine.sleep(1.1)
-  coroutine.schedule(PlayerService.send_currency1_request, math.random(0, 1) / 10)
+  PlayerService.send_currency1_request()
   coroutine.sleep(1.1)
-  coroutine.schedule(PlayerService.send_currency2_request, math.random(0, 1) / 10)
+  PlayerService.send_currency2_request()
 end
 
 function PlayerService.send_stats_request()

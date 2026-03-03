@@ -1,5 +1,6 @@
 local http = require('socket.http')
 local ltn12 = require('ltn12')
+local helpers = require('eaglejs.Helpers')
 local host = "http://192.168.5.30:8080/api"
 -- local host = "http://192.168.5.143/api"
 
@@ -41,24 +42,38 @@ end
 function PlayerServiceInterface.post(endpoint, data)
   if not PlayerServiceInterface.online then return nil end
 
-  coroutine.schedule(function()
-    local response_body = {}
-    local url_string = ("%s/%s"):format(host, endpoint)
-    local _, status_code, headers, status_text = http.request({
-      url = url_string,
-      method = "POST",
-      headers = {
-        ["Content-Type"] = "application/json",
-        ["Content-Length"] = tostring(#data)
-      },
-      source = ltn12.source.string(data),
-      sink = ltn12.sink.table(response_body)
-    })
+  -- Log POST request to JSONL file for capture
+  -- local log_path = windower.addon_path .. 'post_capture.jsonl'
+  -- local log_file = io.open(log_path, 'a')
 
-    if status_code ~= 200 and status_text then
-      printHTTPError(status_code, status_text, endpoint)
-    end
-  end, math.random(0, 1))
+  -- if log_file then
+  --   local log_entry = PlayerServiceInterface.toJSON({
+  --     timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ"),
+  --     method = "POST",
+  --     endpoint = endpoint,
+  --     url = ("%s/%s"):format(host, endpoint),
+  --     body = data,
+  --   })
+  --   log_file:write(log_entry .. "\n")
+  --   log_file:close()
+  -- end
+
+  local response_body = {}
+  local url_string = ("%s/%s"):format(host, endpoint)
+  local _, status_code, headers, status_text = http.request({
+    url = url_string,
+    method = "POST",
+    headers = {
+      ["Content-Type"] = "application/json",
+      ["Content-Length"] = tostring(#data)
+    },
+    source = ltn12.source.string(data),
+    sink = ltn12.sink.table(response_body)
+  })
+
+  if status_code ~= 200 and status_text then
+    printHTTPError(status_code, status_text, endpoint)
+  end
 end
 
 function PlayerServiceInterface.get(endpoint)
