@@ -91,9 +91,8 @@ ffxi-player-service/
 │   └── data/
 │       └── players.py      # FFXI game data + seeded player profiles
 ├── service/                # Java backend
-│   └── JavaService/
-│       ├── build.gradle   # Gradle build config
-│       └── src/           # Java source files
+│   ├── build.gradle   # Gradle build config
+│   └── src/           # Java source files
 ├── app/                   # Vue.js frontend
 │   ├── src/
 │   │   ├── components/    # Vue components
@@ -152,7 +151,7 @@ ffxi-player-service/
 ### Backend Setup
 
 ```bash
-cd service/JavaService
+cd service
 ./gradlew run
 ```
 
@@ -314,7 +313,7 @@ sudo launchctl load /Library/LaunchDaemons/com.eaglejs.ffxi.nginx.plist
 
 ### Environment Variables
 
-Backend configuration is managed via `service/JavaService/gradle.properties` (see `gradle.example.properties` for reference).
+Backend configuration is managed via `service/gradle.properties` (see `gradle.example.properties` for reference).
 
 ## 🎮 Usage
 
@@ -328,7 +327,7 @@ Backend configuration is managed via `service/JavaService/gradle.properties` (se
 
 ### Without FFXI Client (Development / Testing)
 
-1. **Start the backend service**: `cd service/JavaService && ./gradlew run`
+1. **Start the backend service**: `cd service && ./gradlew run`
 2. **Start the emulator**: `cd PlayerServiceEmulator && python emulator.py`
 3. **Open the web dashboard**: Navigate to `http://localhost:5173`
 4. **View simulated stats**: Three player profiles will appear with live updates
@@ -347,7 +346,7 @@ npm run format        # Format code with Prettier
 
 ### Backend Development
 ```bash
-cd service/JavaService
+cd service
 ./gradlew run                                                           # Start the Java service
 ./gradlew runDevWatch -Pconfig="server src/main/resources/config.yml"   # Start the Java service with autoload on change
 ./gradlew test                                                          # Run tests
@@ -363,7 +362,7 @@ python emulator.py --interval 1  # Fast continuous mode
 
 ### Building Jar
 ```bash
-cd service/JavaService
+cd service
 ./gradlew clean jar
 ```
 

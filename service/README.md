@@ -17,7 +17,7 @@ export JAVA_HOME=/path/to/java21
 ## Project Structure
 
 ```
-JavaService/
+service/
 ├── src/
 │   ├── main/
 │   │   ├── java/io/eaglejs/ffxi/    # Java source files
