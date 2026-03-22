@@ -59,8 +59,8 @@ function Utils.calculate_server_start_time()
   -- Calculate the number of increments by dividing by the increment period
   local increments = time_diff_years / increment_period_years
 
-  -- Round to the nearest whole number and return the result
-  return math.floor(increments + 0.5)
+  -- Floor to count only complete rollover cycles
+  return math.floor(increments)
 end
 
 function Utils.convert_server_time_to_local_time()
