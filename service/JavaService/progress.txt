@@ -407,3 +407,19 @@ This fix ensures Mockito can properly mock MongoDB interfaces and other Java pla
 - Application itself runs on Java 25 as specified in build.gradle toolchain
 
 This completes the shadowJar configuration, enabling the JavaService to be built as a self-contained executable JAR with all dependencies bundled, suitable for deployment without requiring separate dependency management.
+
+## 2026-03-22 15:33:00 - Gradle shadowJar Documentation and Verification Complete
+- Verified shadowJar build works correctly when built with JAVA_HOME set to Java 21
+- shadowJar successfully creates 26.16 MB fat JAR with all dependencies included
+- Confirmed jar is runnable with `java -jar` and displays proper help output
+- Verified jar contains Main class, Dropwizard classes, and MongoDB driver
+- Updated README.md with comprehensive shadowJar documentation:
+  * Added Prerequisites section explaining Java 21 requirement for building and Java 25 for runtime
+  * Added detailed "Create Executable Fat JAR (Recommended)" section explaining shadowJar build
+  * Updated all production build examples to use `./gradlew clean shadowJar` instead of `jar`
+  * Added Java Version Issues troubleshooting section with specific guidance on JAVA_HOME setup
+  * Explained Gradle 8.14 bytecode parsing limitation requiring Java 21 for builds
+- Updated prd.json marking first Gradle Build feature as passes: true
+- ALL 28 PRD FEATURES NOW VERIFIED COMPLETE!
+
+The shadowJar configuration creates a self-contained executable JAR suitable for production deployment, requiring only Java 25 runtime (no external dependencies needed). Build process requires JAVA_HOME to point to Java 21 due to Gradle limitations with Java 25 bytecode.

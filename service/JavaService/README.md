@@ -4,8 +4,15 @@ A Dropwizard-based Java service for managing FFXI player data with WebSocket sup
 
 ## Prerequisites
 
-- Java 21 or higher
-- MongoDB (running on localhost:27017 by default)
+- **Java 21** (required for building with Gradle)
+- **Java 25** (runtime - the application runs on Java 25)
+- **MongoDB** (running on localhost:27017 by default)
+
+**Note**: Due to Gradle 8.14 bytecode parsing limitations, builds must be executed with Java 21 as JAVA_HOME, even though the application itself is compiled for and runs on Java 25. Set JAVA_HOME to Java 21 before running Gradle commands:
+```bash
+export JAVA_HOME=/path/to/java21
+./gradlew clean build
+```
 
 ## Project Structure
 
@@ -102,12 +109,26 @@ Clients can connect to receive real-time updates. By default, clients receive al
 ./gradlew test
 ```
 
-### Create Executable JAR
+### Create Executable Fat JAR (Recommended)
+Build a self-contained executable JAR with all dependencies bundled (shadowJar):
+```bash
+./gradlew clean shadowJar
+```
+
+The fat JAR file will be created at: `build/libs/ffxi-player-service-x.x.x.jar` (~26 MB)
+
+This JAR includes all dependencies (Dropwizard, MongoDB driver, etc.) and can be run directly:
+```bash
+java -jar build/libs/ffxi-player-service-x.x.x.jar server src/main/resources/config.yml
+```
+
+### Create Standard JAR (Dependencies Required)
 ```bash
 ./gradlew clean jar
 ```
 
-The JAR file will be created at: `build/libs/ffxi-player-service-x.x.x.jar`
+The standard JAR file will be created at: `build/libs/ffxi-player-service-x.x.x.jar`
+**Note**: This JAR requires dependencies to be available on the classpath.
 
 ## UI Integration
 
@@ -136,18 +157,18 @@ Run directly with Gradle.
 ```
 *Connect debugger to port 5005.*
 
-**Option 2: Watch Mode (Auto-Reload)**
-Watches for changes in `src/main/java` and `src/main/resources` and automatically restarts the server.
+**Option 2: Direct JAR Execution**
+Run the application directly with the fat JAR:
 ```bash
-./gradlew clean jar
+./gradlew clean shadowJar
 java -jar build/libs/ffxi-player-service-x.x.x.jar server src/main/resources/config.yml
 ```
 
 ### Production Mode
 
-1. **Build the production JAR:**
+1. **Build the production fat JAR:**
    ```bash
-   ./gradlew clean jar
+   ./gradlew clean shadowJar
    ```
 
 2. **Run:**
@@ -201,11 +222,20 @@ Modify `config.yml` or the `runDev` task configuration in `build.gradle` to chan
 Ensure MongoDB is running locally. The service expects a standard connection at `mongodb://localhost:27017`.
 
 ### Java Version Issues
-Check your Java version:
+Check your Java versions:
 ```bash
-java -version
+java -version      # Should be Java 25 for running the application
+echo $JAVA_HOME    # Should point to Java 21 for building with Gradle
 ```
-Should show Java 21 or higher. If not, install or switch to a compatible version.
+
+**Building**: Requires JAVA_HOME to be set to Java 21 due to Gradle 8.14 limitations with Java 25 bytecode parsing.
+**Running**: The application itself requires Java 25 runtime.
+
+If builds fail with "Unsupported class file major version 69", set JAVA_HOME to Java 21:
+```bash
+export JAVA_HOME=/path/to/java21
+./gradlew clean shadowJar
+```
 
 ## Key Dependencies
 

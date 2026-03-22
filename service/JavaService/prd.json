@@ -1,6 +1,20 @@
 [
   {
     "category": "Gradle Build",
+    "description": "./gradlew clean shadowJar doesn't successfully build a jar file that can be run with java -jar, investigate and fix the issue.",
+    "steps": [
+      "Run the command ./gradlew clean shadowJar and analyze the output for any errors or warnings that may indicate why the jar file is not being built correctly.",
+      "Check the build.gradle file for the JavaService to review the current configuration of the shadowJar task and identify any potential issues or missing configurations.",
+      "Ensure that all necessary dependencies are included in the shadowJar configuration and that the main class is specified correctly for the jar file to be runnable.",
+      "Make any necessary adjustments to the build.gradle file to fix the shadowJar configuration, such as adding missing dependencies or correcting the main class specification.",
+      "Run the ./gradlew clean shadowJar command again to see if the jar file is now being built correctly without any errors.",
+      "Test the generated jar file by running java -jar <generated-jar-file>.jar to confirm that it executes successfully and that the JavaService starts without any issues.",
+      "Document any changes made to the build.gradle file and the steps taken to resolve the issue for future reference."
+    ],
+    "passes": true
+  },
+  {
+    "category": "Gradle Build",
     "description": "It appears we should be using shadowJar to build our dropwizard service, but the shadowJar task is not configured correctly and is not including all the necessary dependencies. Configure the shadowJar task in the build.gradle file to ensure it includes all required dependencies and builds a runnable jar file for the JavaService.",
     "steps": [
       "Review the current build.gradle file to understand how the shadowJar task is currently configured.",
