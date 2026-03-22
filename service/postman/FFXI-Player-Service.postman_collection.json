@@ -394,7 +394,8 @@
 				{
 					"name": "Set Currency2",
 					"request": {
-						"method": "POST",\n						"header": [
+						"method": "POST",
+						"header": [
 							{
 								"key": "Content-Type",
 								"value": "application/json"

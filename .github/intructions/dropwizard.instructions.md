@@ -12,4 +12,5 @@ applyTo: 'service/**/*.java, service/**/*.xml'
 *   **Testing**: Write unit tests using JUnit, AssertJ, and Mockito. Use an embedded MongoDB instance (e.g., [Flapdoodle](https://github.com/flapdoodle-oss/de.flapdoodle.embed.mongo)) for integration tests.
 *   **Metrics/Health Checks**: Utilize Dropwizard's built-in [Metrics](https://dropwizard.io) and [Health Checks](https://dropwizard.io) functionality where appropriate. Implement a MongoDB health check by running a `ping` command against the database.
 *   **Error Handling**: Implement global exception mappers for consistent API error responses.
+*   **Postman**: Update the Postman collection with all new endpoints and ensure it is well-documented for ease of testing and integration.
 *   **README**: Update the README file to reflect the current state of the project, including setup instructions, usage guidelines, and any relevant documentation.
