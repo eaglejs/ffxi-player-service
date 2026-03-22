@@ -2,11 +2,12 @@ package io.eaglejs.ffxi.websocket;
 
 import io.dropwizard.lifecycle.Managed;
 import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainerInitializer;
+import org.eclipse.jetty.websocket.jakarta.server.config.JakartaWebSocketServletContainerInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.websocket.server.ServerContainer;
+import jakarta.websocket.server.ServerContainer;
+import jakarta.websocket.DeploymentException;
 
 /**
  * Manages the WebSocket server lifecycle within Dropwizard.
@@ -20,13 +21,16 @@ public class WebSocketManager implements Managed {
 
     public WebSocketManager(ServletContextHandler context) {
         this.context = context;
+        // Must be configured before the servlet context starts
+        JakartaWebSocketServletContainerInitializer.configure(context, (servletContext, container) -> {
+            container.addEndpoint(PlayerWebSocket.class);
+            LOG.info("WebSocket endpoint registered at /ws/players");
+        });
     }
 
     @Override
     public void start() throws Exception {
-        ServerContainer container = WebSocketServerContainerInitializer.initialize(context);
-        container.addEndpoint(PlayerWebSocket.class);
-        LOG.info("WebSocket endpoint registered at /ws/players");
+        LOG.info("WebSocket manager started");
     }
 
     @Override

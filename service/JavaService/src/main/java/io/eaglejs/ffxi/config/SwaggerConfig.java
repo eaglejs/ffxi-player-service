@@ -6,8 +6,8 @@ import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.integration.SwaggerConfiguration;
 import io.swagger.v3.oas.models.OpenAPI;
 
-import javax.ws.rs.core.Feature;
-import javax.ws.rs.core.FeatureContext;
+import jakarta.ws.rs.core.Feature;
+import jakarta.ws.rs.core.FeatureContext;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 

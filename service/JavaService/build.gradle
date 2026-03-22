@@ -54,6 +54,13 @@ ext {
     uiPackageName = properties.getOrDefault('uiPackageName', 'ffxi-stats')
     uiPackageVersion = properties.getOrDefault('uiPackageVersion', project.version)
     nexusNpmUrl = "http://${nexusHost}:${nexusPort}/repository/${nexusNpmRepo}/" // Use IP address to avoid IPv6 issues
+    dropwizardVersion = '4.0.9'
+    mongoDriverVersion = '4.11.3'
+    junitVersion = '4.13.2'
+    mockitoVersion = '5.11.0'
+    jjwtVersion = '0.12.6'
+    jakartaVersion = '11.0.24'
+    swaggerVersion = '2.2.22'
 }
 
 def isTestTaskRequested = gradle.startParameter.taskNames.any { taskName ->
@@ -61,23 +68,22 @@ def isTestTaskRequested = gradle.startParameter.taskNames.any { taskName ->
 }
 
 dependencies {
-    implementation 'io.dropwizard:dropwizard-core:2.0.24'
-    implementation "io.dropwizard:dropwizard-jetty:2.0.24"
-    implementation 'io.dropwizard:dropwizard-client:2.0.24'
-    implementation 'javax.websocket:javax.websocket-api:1.1'
-    implementation 'org.eclipse.jetty.websocket:javax-websocket-server-impl:9.4.43.v20210629'
-    implementation 'org.mongodb:mongodb-driver-sync:4.3.4'
-    implementation 'org.mongodb:mongodb-driver-core:4.3.4'
-    implementation 'org.mongodb:mongodb-driver-legacy:4.3.4'
-    implementation 'org.glassfish.jersey.core:jersey-client:2.32'
-    implementation 'org.glassfish.jersey.inject:jersey-hk2:2.32'
-    implementation 'org.glassfish.jersey.media:jersey-media-json-jackson:2.32'
-    implementation 'io.swagger.core.v3:swagger-jaxrs2:2.1.11'
-    implementation 'io.swagger.core.v3:swagger-annotations:2.1.11'
+    implementation "io.dropwizard:dropwizard-core:${dropwizardVersion}"
+    implementation "io.dropwizard:dropwizard-jetty:${dropwizardVersion}"
+    implementation "io.dropwizard:dropwizard-client:${dropwizardVersion}"
+    implementation "org.eclipse.jetty.websocket:websocket-jakarta-server:${jakartaVersion}"
+    implementation "org.mongodb:mongodb-driver-sync:${mongoDriverVersion}"
+    implementation "org.mongodb:mongodb-driver-core:${mongoDriverVersion}"
+    implementation "org.mongodb:mongodb-driver-legacy:${mongoDriverVersion}"
+    implementation "io.swagger.core.v3:swagger-jaxrs2-jakarta:${swaggerVersion}"
+    implementation "io.swagger.core.v3:swagger-annotations-jakarta:${swaggerVersion}"
 
-    testImplementation 'io.dropwizard:dropwizard-testing:2.0.24'
-    testImplementation 'junit:junit:4.13.2'
-    testImplementation 'org.mockito:mockito-core:4.0.0'
+    testImplementation "io.dropwizard:dropwizard-testing:${dropwizardVersion}"
+    testImplementation "junit:junit:${junitVersion}"
+    testImplementation "org.mockito:mockito-core:${mockitoVersion}"
+    testImplementation "io.jsonwebtoken:jjwt-api:${jjwtVersion}"
+    testRuntimeOnly "io.jsonwebtoken:jjwt-impl:${jjwtVersion}"
+    testRuntimeOnly "io.jsonwebtoken:jjwt-jackson:${jjwtVersion}"
 }
 
 test {
