@@ -12,7 +12,7 @@
       "Test the generated jar file to confirm that the JavaService runs correctly without any missing dependency issues.",
       "Document any changes made to the build.gradle file to ensure clarity for future reference."
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "Unit Testing",

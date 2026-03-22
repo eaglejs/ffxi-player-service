@@ -388,3 +388,22 @@ Feature: Unit Testing
 - Updated prd.json to mark feature as passes: true
 
 This fix ensures Mockito can properly mock MongoDB interfaces and other Java platform classes when running tests under Java 25, resolving all test failures without requiring code changes to the tests themselves.
+
+## 2026-03-22 11:20:00 - Gradle shadowJar Configuration Complete
+- Added com.gradleup.shadow plugin version 8.3.5 to build.gradle plugins section
+- Configured shadowJar task to create a runnable fat jar with all dependencies
+- Set archiveClassifier to empty string to make shadowJar the default artifact
+- Enabled mergeServiceFiles() to properly merge META-INF/services files from all dependencies
+- Configured manifest with Main-Class: io.eaglejs.ffxi.Main
+- Excluded signature files (*.SF, *.DSA, *.RSA) to avoid security exceptions
+- Added logging to display shadow JAR location and size on build completion
+- Made build task depend on shadowJar instead of jar
+- Updated publishing configuration to use shadowJar artifact instead of regular jar
+- Successfully built shadowJar: 26.17 MB including all Dropwizard, MongoDB, and other dependencies
+- Verified jar is runnable with proper help output
+- Verified jar contains Main class, Dropwizard classes, and MongoDB driver
+- Updated prd.json marking Gradle Build feature as passes: true
+- Build requires JAVA_HOME set to Java 21 for Gradle execution (due to Gradle 8.14 bytecode parsing limitations with Java 25)
+- Application itself runs on Java 25 as specified in build.gradle toolchain
+
+This completes the shadowJar configuration, enabling the JavaService to be built as a self-contained executable JAR with all dependencies bundled, suitable for deployment without requiring separate dependency management.
