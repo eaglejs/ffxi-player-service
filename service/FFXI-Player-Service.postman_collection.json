@@ -1,0 +1,624 @@
+{
+	"info": {
+		"_postman_id": "ffxi-player-service-2026",
+		"name": "FFXI Player Service API",
+		"description": "Complete API collection for the Final Fantasy XI Player Service - a Dropwizard-based REST API for managing player data, stats, buffs, chat logs, and more.\n\nBase URL: http://localhost:8080/api\n\nThis service provides comprehensive endpoints for:\n- Player information and online status\n- Job levels and experience tracking\n- Player stats (HP, MP, TP, merits, capacity points)\n- Buff management\n- Chat logs and messages\n- Currency management (gil and special currencies)\n- Zone tracking\n- Health checks\n\nAll POST endpoints expect JSON payloads and return JSON responses.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Player Information",
+			"description": "Endpoints for retrieving player information and lists",
+			"item": [
+				{
+					"name": "Get All Online Players",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/players/get_players",
+							"host": ["{{baseUrl}}"],
+							"path": ["players", "get_players"]
+						},
+						"description": "Returns a list of all online players (lastOnline within the last 60 seconds). Players are sorted alphabetically by playerName.\n\n**Response:** Array of Player objects\n\n**Status Codes:**\n- 200: List of players retrieved successfully\n- 500: Internal server error"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Player by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/players/get_player?playerId=1",
+							"host": ["{{baseUrl}}"],
+							"path": ["players", "get_player"],
+							"query": [
+								{
+									"key": "playerId",
+									"value": "1",
+									"description": "The unique player ID (required)"
+								}
+							]
+						},
+						"description": "Returns player stats from the database by playerId.\n\n**Query Parameters:**\n- playerId (required): Integer - The unique player ID\n\n**Response:** Player object with all stats and information\n\n**Status Codes:**\n- 200: Player retrieved successfully\n- 400: Invalid or missing playerId\n- 404: Player not found\n- 500: Internal server error"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Player Management",
+			"description": "Endpoints for creating and updating player status",
+			"item": [
+				{
+					"name": "Initialize Player",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"playerId\": 1,\n  \"playerName\": \"Eaglejs\",\n  \"lastOnline\": 1234567890\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/player/initialize_player",
+							"host": ["{{baseUrl}}"],
+							"path": ["player", "initialize_player"]
+						},
+						"description": "Initializes a new player in the database or updates if player already exists.\n\n**Request Body:**\n```json\n{\n  \"playerId\": 1,\n  \"playerName\": \"Eaglejs\",\n  \"lastOnline\": 1234567890\n}\n```\n\n**Fields:**\n- playerId (required): Integer - Unique player identifier\n- playerName (required): String - Player's character name\n- lastOnline (required): Long - Unix timestamp of last online time\n\n**Response:** Success message\n\n**Status Codes:**\n- 200: Player initialized/updated successfully\n- 400: Invalid request body\n- 500: Internal server error"
+					},
+					"response": []
+				},
+				{
+					"name": "Set Player Online Status",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"playerId\": 1,\n  \"lastOnline\": 1234567890\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/player/set_online",
+							"host": ["{{baseUrl}}"],
+							"path": ["player", "set_online"]
+						},
+						"description": "Updates the player's lastOnline timestamp to indicate they are currently active.\n\n**Request Body:**\n```json\n{\n  \"playerId\": 1,\n  \"lastOnline\": 1234567890\n}\n```\n\n**Fields:**\n- playerId (required): Integer - Unique player identifier\n- lastOnline (required): Long - Unix timestamp\n\n**Response:** Success message\n\n**Status Codes:**\n- 200: Online status updated successfully\n- 400: Invalid request body\n- 404: Player not found\n- 500: Internal server error"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Jobs & Experience",
+			"description": "Endpoints for managing player jobs, levels, and experience",
+			"item": [
+				{
+					"name": "Set Jobs",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"playerId\": 1,\n  \"mainJob\": \"WAR\",\n  \"mainJobLevel\": 99,\n  \"subJob\": \"NIN\",\n  \"subJobLevel\": 49,\n  \"exp\": 55000,\n  \"expTnl\": 60000,\n  \"mlvl\": 10,\n  \"mexp\": 25000,\n  \"mexpTnl\": 30000\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/player/set_jobs",
+							"host": ["{{baseUrl}}"],
+							"path": ["player", "set_jobs"]
+						},
+						"description": "Updates player's job information including main job, subjob, levels, and experience points.\n\n**Request Body:**\n```json\n{\n  \"playerId\": 1,\n  \"mainJob\": \"WAR\",\n  \"mainJobLevel\": 99,\n  \"subJob\": \"NIN\",\n  \"subJobLevel\": 49,\n  \"exp\": 55000,\n  \"expTnl\": 60000,\n  \"mlvl\": 10,\n  \"mexp\": 25000,\n  \"mexpTnl\": 30000\n}\n```\n\n**Fields:**\n- playerId (required): Integer\n- mainJob (required): String - 3-letter job code (e.g., WAR, WHM, BLM)\n- mainJobLevel (required): Integer - Main job level (1-99)\n- subJob (optional): String - 3-letter subjob code\n- subJobLevel (optional): Integer - Subjob level (1-49)\n- exp (optional): Long - Current experience points\n- expTnl (optional): Long - Experience to next level\n- mlvl (optional): Integer - Master level\n- mexp (optional): Long - Master experience\n- mexpTnl (optional): Long - Master exp to next level\n\n**Response:** Success message\n\n**Status Codes:**\n- 200: Jobs updated successfully\n- 400: Invalid request body\n- 404: Player not found\n- 500: Internal server error"
+					},
+					"response": []
+				},
+				{
+					"name": "Set Experience History",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"playerId\": 1,\n  \"expHistory\": [1000, 1500, 2000, 2500, 3000]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/player/set_exp_history",
+							"host": ["{{baseUrl}}"],
+							"path": ["player", "set_exp_history"]
+						},
+						"description": "Sets the player's experience gain history array.\n\n**Request Body:**\n```json\n{\n  \"playerId\": 1,\n  \"expHistory\": [1000, 1500, 2000, 2500, 3000]\n}\n```\n\n**Fields:**\n- playerId (required): Integer\n- expHistory (required): Array of Longs - Historical exp values\n\n**Response:** Success message\n\n**Status Codes:**\n- 200: Experience history updated successfully\n- 400: Invalid request body\n- 404: Player not found\n- 500: Internal server error"
+					},
+					"response": []
+				},
+				{
+					"name": "Reset Experience History",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"playerId\": 1\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/player/reset_exp_history",
+							"host": ["{{baseUrl}}"],
+							"path": ["player", "reset_exp_history"]
+						},
+						"description": "Resets the player's experience history to an empty array.\n\n**Request Body:**\n```json\n{\n  \"playerId\": 1\n}\n```\n\n**Fields:**\n- playerId (required): Integer\n\n**Response:** Success message\n\n**Status Codes:**\n- 200: Experience history reset successfully\n- 400: Invalid request body\n- 404: Player not found\n- 500: Internal server error"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Player Stats",
+			"description": "Endpoints for managing player stats (HP, MP, TP, etc.)",
+			"item": [
+				{
+					"name": "Set HP Percentage",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"playerId\": 1,\n  \"hpp\": 85\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/player/set_hpp",
+							"host": ["{{baseUrl}}"],
+							"path": ["player", "set_hpp"]
+						},
+						"description": "Updates the player's HP percentage.\n\n**Request Body:**\n```json\n{\n  \"playerId\": 1,\n  \"hpp\": 85\n}\n```\n\n**Fields:**\n- playerId (required): Integer\n- hpp (required): Integer - HP percentage (0-100)\n\n**Response:** Success message\n\n**Status Codes:**\n- 200: HP percentage updated successfully\n- 400: Invalid request body\n- 404: Player not found\n- 500: Internal server error"
+					},
+					"response": []
+				},
+				{
+					"name": "Set MP Percentage",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"playerId\": 1,\n  \"mpp\": 75\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/player/set_mpp",
+							"host": ["{{baseUrl}}"],
+							"path": ["player", "set_mpp"]
+						},
+						"description": "Updates the player's MP percentage.\n\n**Request Body:**\n```json\n{\n  \"playerId\": 1,\n  \"mpp\": 75\n}\n```\n\n**Fields:**\n- playerId (required): Integer\n- mpp (required): Integer - MP percentage (0-100)\n\n**Response:** Success message\n\n**Status Codes:**\n- 200: MP percentage updated successfully\n- 400: Invalid request body\n- 404: Player not found\n- 500: Internal server error"
+					},
+					"response": []
+				},
+				{
+					"name": "Set TP",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"playerId\": 1,\n  \"tp\": 1250\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/player/set_tp",
+							"host": ["{{baseUrl}}"],
+							"path": ["player", "set_tp"]
+						},
+						"description": "Updates the player's TP (Tactical Points).\n\n**Request Body:**\n```json\n{\n  \"playerId\": 1,\n  \"tp\": 1250\n}\n```\n\n**Fields:**\n- playerId (required): Integer\n- tp (required): Integer - TP value (typically 0-3000)\n\n**Response:** Success message\n\n**Status Codes:**\n- 200: TP updated successfully\n- 400: Invalid request body\n- 404: Player not found\n- 500: Internal server error"
+					},
+					"response": []
+				},
+				{
+					"name": "Set Stats",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"playerId\": 1,\n  \"stats\": {\n    \"STR\": 120,\n    \"DEX\": 110,\n    \"VIT\": 115,\n    \"AGI\": 105,\n    \"INT\": 95,\n    \"MND\": 90,\n    \"CHR\": 85,\n    \"ATT\": 450,\n    \"DEF\": 520,\n    \"ACC\": 380,\n    \"EVA\": 310,\n    \"RACC\": 360,\n    \"REVA\": 290,\n    \"MACC\": 400,\n    \"MEVA\": 350,\n    \"MATT\": 380,\n    \"MDEF\": 340\n  }\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/player/set_stats",
+							"host": ["{{baseUrl}}"],
+							"path": ["player", "set_stats"]
+						},
+						"description": "Updates the player's combat statistics.\n\n**Request Body:**\n```json\n{\n  \"playerId\": 1,\n  \"stats\": {\n    \"STR\": 120,\n    \"DEX\": 110,\n    \"VIT\": 115,\n    \"AGI\": 105,\n    \"INT\": 95,\n    \"MND\": 90,\n    \"CHR\": 85,\n    \"ATT\": 450,\n    \"DEF\": 520,\n    \"ACC\": 380,\n    \"EVA\": 310,\n    \"RACC\": 360,\n    \"REVA\": 290,\n    \"MACC\": 400,\n    \"MEVA\": 350,\n    \"MATT\": 380,\n    \"MDEF\": 340\n  }\n}\n```\n\n**Fields:**\n- playerId (required): Integer\n- stats (required): Object with stat values\n  - Base stats: STR, DEX, VIT, AGI, INT, MND, CHR\n  - Combat stats: ATT, DEF, ACC, EVA, RACC, REVA, MACC, MEVA, MATT, MDEF\n\n**Response:** Success message\n\n**Status Codes:**\n- 200: Stats updated successfully\n- 400: Invalid request body\n- 404: Player not found\n- 500: Internal server error"
+					},
+					"response": []
+				},
+				{
+					"name": "Set Status",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"playerId\": 1,\n  \"status\": \"Engaged in battle\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/player/set_status",
+							"host": ["{{baseUrl}}"],
+							"path": ["player", "set_status"]
+						},
+						"description": "Updates the player's current status text.\n\n**Request Body:**\n```json\n{\n  \"playerId\": 1,\n  \"status\": \"Engaged in battle\"\n}\n```\n\n**Fields:**\n- playerId (required): Integer\n- status (required): String - Status message\n\n**Response:** Success message\n\n**Status Codes:**\n- 200: Status updated successfully\n- 400: Invalid request body\n- 404: Player not found\n- 500: Internal server error"
+					},
+					"response": []
+				},
+				{
+					"name": "Set Merits",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"playerId\": 1,\n  \"meritPoints\": 75,\n  \"limitPoints\": 5000\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/player/set_merits",
+							"host": ["{{baseUrl}}"],
+							"path": ["player", "set_merits"]
+						},
+						"description": "Updates the player's merit points and limit points.\n\n**Request Body:**\n```json\n{\n  \"playerId\": 1,\n  \"meritPoints\": 75,\n  \"limitPoints\": 5000\n}\n```\n\n**Fields:**\n- playerId (required): Integer\n- meritPoints (required): Integer\n- limitPoints (required): Integer\n\n**Response:** Success message\n\n**Status Codes:**\n- 200: Merits updated successfully\n- 400: Invalid request body\n- 404: Player not found\n- 500: Internal server error"
+					},
+					"response": []
+				},
+				{
+					"name": "Set Capacity Points",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"playerId\": 1,\n  \"capacityPoints\": 15000\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/player/set_capacity_points",
+							"host": ["{{baseUrl}}"],
+							"path": ["player", "set_capacity_points"]
+						},
+						"description": "Updates the player's capacity points.\n\n**Request Body:**\n```json\n{\n  \"playerId\": 1,\n  \"capacityPoints\": 15000\n}\n```\n\n**Fields:**\n- playerId (required): Integer\n- capacityPoints (required): Long\n\n**Response:** Success message\n\n**Status Codes:**\n- 200: Capacity points updated successfully\n- 400: Invalid request body\n- 404: Player not found\n- 500: Internal server error"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Currency",
+			"description": "Endpoints for managing player currencies",
+			"item": [
+				{
+					"name": "Set Gil",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"playerId\": 1,\n  \"gil\": 5000000\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/player/set_gil",
+							"host": ["{{baseUrl}}"],
+							"path": ["player", "set_gil"]
+						},
+						"description": "Updates the player's gil (in-game currency).\n\n**Request Body:**\n```json\n{\n  \"playerId\": 1,\n  \"gil\": 5000000\n}\n```\n\n**Fields:**\n- playerId (required): Integer\n- gil (required): Long - Gil amount\n\n**Response:** Success message\n\n**Status Codes:**\n- 200: Gil updated successfully\n- 400: Invalid request body\n- 404: Player not found\n- 500: Internal server error"
+					},
+					"response": []
+				},
+				{
+					"name": "Set Currency1",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"playerId\": 1,\n  \"currency1\": {\n    \"bayld\": 100000,\n    \"kindredsSeal\": 500,\n    \"kindredsCrest\": 300,\n    \"highKindredsCrest\": 150,\n    \"sacredKindredsCrest\": 50,\n    \"ancientBeastcoin\": 200,\n    \"valorPoint\": 1000,\n    \"scyld\": 750\n  }\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/player/set_currency1",
+							"host": ["{{baseUrl}}"],
+							"path": ["player", "set_currency1"]
+						},
+						"description": "Updates the player's currency1 collection (various special currencies).\n\n**Request Body:**\n```json\n{\n  \"playerId\": 1,\n  \"currency1\": {\n    \"bayld\": 100000,\n    \"kindredsSeal\": 500,\n    \"kindredsCrest\": 300,\n    \"highKindredsCrest\": 150,\n    \"sacredKindredsCrest\": 50,\n    \"ancientBeastcoin\": 200,\n    \"valorPoint\": 1000,\n    \"scyld\": 750\n  }\n}\n```\n\n**Fields:**\n- playerId (required): Integer\n- currency1 (required): Object containing various currency amounts\n\n**Response:** Success message\n\n**Status Codes:**\n- 200: Currency1 updated successfully\n- 400: Invalid request body\n- 404: Player not found\n- 500: Internal server error"
+					},
+					"response": []
+				},
+				{
+					"name": "Set Currency2",
+					"request": {
+						"method": "POST",\n						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"playerId\": 1,\n  \"currency2\": {\n    \"imprimatur\": 10,\n    \"lebondoptCredits\": 50,\n    \"cruor\": 25000,\n    \"resistanceCredits\": 5000,\n    \"dominion_note\": 1000,\n    \"fifthEchelon_trophy\": 75,\n    \"synthosisImage\": 20,\n    \"escha_beads\": 500\n  }\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/player/set_currency2",
+							"host": ["{{baseUrl}}"],
+							"path": ["player", "set_currency2"]
+						},
+						"description": "Updates the player's currency2 collection (additional special currencies).\n\n**Request Body:**\n```json\n{\n  \"playerId\": 1,\n  \"currency2\": {\n    \"imprimatur\": 10,\n    \"lebondoptCredits\": 50,\n    \"cruor\": 25000,\n    \"resistanceCredits\": 5000,\n    \"dominion_note\": 1000,\n    \"fifthEchelon_trophy\": 75,\n    \"synthosisImage\": 20,\n    \"escha_beads\": 500\n  }\n}\n```\n\n**Fields:**\n- playerId (required): Integer\n- currency2 (required): Object containing various currency amounts\n\n**Response:** Success message\n\n**Status Codes:**\n- 200: Currency2 updated successfully\n- 400: Invalid request body\n- 404: Player not found\n- 500: Internal server error"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Buffs",
+			"description": "Endpoints for managing player buffs/status effects",
+			"item": [
+				{
+					"name": "Get Buffs",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/player/get_buffs?playerId=1",
+							"host": ["{{baseUrl}}"],
+							"path": ["player", "get_buffs"],
+							"query": [
+								{
+									"key": "playerId",
+									"value": "1",
+									"description": "The unique player ID (required)"
+								}
+							]
+						},
+						"description": "Retrieves the list of active buffs for a player.\n\n**Query Parameters:**\n- playerId (required): Integer - The unique player ID\n\n**Response:** Array of buff IDs\n\n**Status Codes:**\n- 200: Buffs retrieved successfully\n- 400: Invalid or missing playerId\n- 404: Player not found\n- 500: Internal server error"
+					},
+					"response": []
+				},
+				{
+					"name": "Set Buffs",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"playerId\": 1,\n  \"buffs\": [1, 2, 3, 4, 5]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/player/set_buffs",
+							"host": ["{{baseUrl}}"],
+							"path": ["player", "set_buffs"]
+						},
+						"description": "Sets the player's active buffs, replacing any existing buffs.\n\n**Request Body:**\n```json\n{\n  \"playerId\": 1,\n  \"buffs\": [1, 2, 3, 4, 5]\n}\n```\n\n**Fields:**\n- playerId (required): Integer\n- buffs (required): Array of Integers - Buff/status effect IDs\n\n**Response:** Success message\n\n**Status Codes:**\n- 200: Buffs updated successfully\n- 400: Invalid request body\n- 404: Player not found\n- 500: Internal server error"
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh Buffs",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"playerId\": 1\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/player/refresh_buffs",
+							"host": ["{{baseUrl}}"],
+							"path": ["player", "refresh_buffs"]
+						},
+						"description": "Refreshes the buff list for a player (clears expired buffs).\n\n**Request Body:**\n```json\n{\n  \"playerId\": 1\n}\n```\n\n**Fields:**\n- playerId (required): Integer\n\n**Response:** Success message\n\n**Status Codes:**\n- 200: Buffs refreshed successfully\n- 400: Invalid request body\n- 404: Player not found\n- 500: Internal server error"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Chat & Messages",
+			"description": "Endpoints for managing chat logs and messages",
+			"item": [
+				{
+					"name": "Get Chat Log",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/player/get_chat_log?playerId=1",
+							"host": ["{{baseUrl}}"],
+							"path": ["player", "get_chat_log"],
+							"query": [
+								{
+									"key": "playerId",
+									"value": "1",
+									"description": "The unique player ID (required)"
+								}
+							]
+						},
+						"description": "Retrieves the entire chat log for a player.\n\n**Query Parameters:**\n- playerId (required): Integer - The unique player ID\n\n**Response:** Array of chat messages\n\n**Status Codes:**\n- 200: Chat log retrieved successfully\n- 400: Invalid or missing playerId\n- 404: Player not found\n- 500: Internal server error"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Chat Log by Type",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/player/get_chat_log_by_type?playerId=1&chatType=say",
+							"host": ["{{baseUrl}}"],
+							"path": ["player", "get_chat_log_by_type"],
+							"query": [
+								{
+									"key": "playerId",
+									"value": "1",
+									"description": "The unique player ID (required)"
+								},
+								{
+									"key": "chatType",
+									"value": "say",
+									"description": "Chat type filter (e.g., say, party, tell, shout)"
+								}
+							]
+						},
+						"description": "Retrieves chat messages filtered by chat type.\n\n**Query Parameters:**\n- playerId (required): Integer - The unique player ID\n- chatType (required): String - Type of chat messages to retrieve\n\n**Response:** Array of filtered chat messages\n\n**Status Codes:**\n- 200: Chat log retrieved successfully\n- 400: Invalid or missing parameters\n- 404: Player not found\n- 500: Internal server error"
+					},
+					"response": []
+				},
+				{
+					"name": "Set Messages",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"playerId\": 1,\n  \"messages\": [\n    {\n      \"type\": \"say\",\n      \"sender\": \"Eaglejs\",\n      \"message\": \"Hello everyone!\",\n      \"timestamp\": 1234567890\n    },\n    {\n      \"type\": \"party\",\n      \"sender\": \"Friendname\",\n      \"message\": \"Ready for battle?\",\n      \"timestamp\": 1234567900\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/player/set_messages",
+							"host": ["{{baseUrl}}"],
+							"path": ["player", "set_messages"]
+						},
+						"description": "Adds new chat messages to the player's chat log.\n\n**Request Body:**\n```json\n{\n  \"playerId\": 1,\n  \"messages\": [\n    {\n      \"type\": \"say\",\n      \"sender\": \"Eaglejs\",\n      \"message\": \"Hello everyone!\",\n      \"timestamp\": 1234567890\n    }\n  ]\n}\n```\n\n**Fields:**\n- playerId (required): Integer\n- messages (required): Array of message objects\n  - type: String - Chat type (say, party, tell, shout, etc.)\n  - sender: String - Sender's name\n  - message: String - Message content\n  - timestamp: Long - Unix timestamp\n\n**Response:** Success message\n\n**Status Codes:**\n- 200: Messages added successfully\n- 400: Invalid request body\n- 404: Player not found\n- 500: Internal server error"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Location",
+			"description": "Endpoints for managing player location and zone",
+			"item": [
+				{
+					"name": "Set Zone",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"playerId\": 1,\n  \"zoneId\": 230,\n  \"zoneName\": \"West Adoulin\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/player/set_zone",
+							"host": ["{{baseUrl}}"],
+							"path": ["player", "set_zone"]
+						},
+						"description": "Updates the player's current zone/area.\n\n**Request Body:**\n```json\n{\n  \"playerId\": 1,\n  \"zoneId\": 230,\n  \"zoneName\": \"West Adoulin\"\n}\n```\n\n**Fields:**\n- playerId (required): Integer\n- zoneId (required): Integer - Numeric zone identifier\n- zoneName (required): String - Human-readable zone name\n\n**Response:** Success message\n\n**Status Codes:**\n- 200: Zone updated successfully\n- 400: Invalid request body\n- 404: Player not found\n- 500: Internal server error"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Health Check",
+			"description": "Service health and monitoring endpoints",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/health",
+							"host": ["{{baseUrl}}"],
+							"path": ["health"]
+						},
+						"description": "Returns the health status of the service and its dependencies including database connectivity.\n\n**Response:**\n```json\n{\n  \"status\": \"ok\",\n  \"checks\": {\n    \"mongodb\": {\n      \"healthy\": true,\n      \"message\": \"MongoDB connection is healthy\"\n    }\n  }\n}\n```\n\n**Status Codes:**\n- 200: Service is healthy\n- 503: Service is unhealthy (one or more checks failed)"
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080/api",
+			"type": "string"
+		}
+	]
+}
