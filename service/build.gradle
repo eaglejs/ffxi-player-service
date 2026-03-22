@@ -133,7 +133,7 @@ jar {
     
     // Merge all META-INF/services files
     doFirst {
-        def serviceDir = file("${buildDir}/tmp/jar/META-INF/services")
+        def serviceDir = layout.buildDirectory.dir("tmp/jar/META-INF/services").get().asFile
         serviceDir.deleteDir()
         serviceDir.mkdirs()
         
@@ -167,7 +167,7 @@ jar {
     }
     
     // Include the merged service files
-    from("${buildDir}/tmp/jar")
+    from(layout.buildDirectory.dir("tmp/jar"))
     
     manifest {
         attributes 'Main-Class': 'io.eaglejs.ffxi.Main'
@@ -178,7 +178,7 @@ jar {
 task downloadUI(type: Exec) {
     description = 'Download UI package from Nexus npm repository'
     def nexusUrl = "${project.ext.nexusNpmUrl}/${project.ext.uiPackageName}/-/${project.ext.uiPackageName}-${project.ext.uiPackageVersion}.tgz"
-    def downloadDir = file("${project.buildDir}/ui-download")
+    def downloadDir = layout.buildDirectory.dir("ui-download").get().asFile
     def tarFile = file("${downloadDir}/${project.ext.uiPackageName}-${project.ext.uiPackageVersion}.tgz")
     
     outputs.file(tarFile)
@@ -210,7 +210,7 @@ task downloadUI(type: Exec) {
     }
 }
 downloadUI.onlyIf { 
-    def downloadDir = file("${project.buildDir}/ui-download")
+    def downloadDir = layout.buildDirectory.dir("ui-download").get().asFile
     def markerFile = new File(downloadDir, "download-failed.marker")
     !isTestTaskRequested && !markerFile.exists()
 }
@@ -220,9 +220,9 @@ task extractUI {
     description = 'Extract UI package from tar.gz'
     dependsOn downloadUI
     
-    def downloadDir = file("${project.buildDir}/ui-download")
+    def downloadDir = layout.buildDirectory.dir("ui-download").get().asFile
     def tarFile = file("${downloadDir}/${project.ext.uiPackageName}-${project.ext.uiPackageVersion}.tgz")
-    def assetsDir = file("${project.buildDir}/resources/main/assets")
+    def assetsDir = layout.buildDirectory.dir("resources/main/assets").get().asFile
     def extractTempDir = file("${downloadDir}/extracted")
     
     inputs.file(tarFile)
@@ -279,13 +279,13 @@ task extractUI {
 
 task showArtifactLocation {
     doLast {
-        logger.lifecycle("JAR artifact will be created at: ${buildDir}/libs/${base.archivesName.get()}-${version}.jar")
+        logger.lifecycle("JAR artifact will be created at: ${layout.buildDirectory.get().asFile}/libs/${base.archivesName.get()}-${version}.jar")
     }
 }
 
 task copyWebApp(type: Copy) {
     from 'src/main/webapp'
-    into "$buildDir/resources/main/webapp"
+    into layout.buildDirectory.dir("resources/main/webapp")
 }
 
 // Try to fetch and extract UI from Nexus before processing resources
