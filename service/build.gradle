@@ -112,7 +112,7 @@ test {
 }
 
 application {
-    mainClass = 'io.eaglejs.ffxi.Main'
+    mainClass = "${project.group}.Main"
 }
 
 jar {
@@ -170,7 +170,7 @@ jar {
     from(layout.buildDirectory.dir("tmp/jar"))
     
     manifest {
-        attributes 'Main-Class': 'io.eaglejs.ffxi.Main'
+        attributes 'Main-Class': "${project.group}.Main"
     }
 }
 
@@ -389,7 +389,7 @@ task runDevWatch {
                 '-Ddw.server.applicationConnectors[0].port=8080',
                 '-Ddw.logging.level=INFO',
                 '-cp', classpath,
-                'io.eaglejs.ffxi.Main',
+                "${project.group}.Main",
                 *configParts
             ]
             
@@ -462,7 +462,7 @@ shadowJar {
     mergeServiceFiles()
     
     manifest {
-        attributes 'Main-Class': 'io.eaglejs.ffxi.Main'
+        attributes 'Main-Class': "${project.group}.Main"
     }
     
     // Exclude signature files to avoid security exceptions
