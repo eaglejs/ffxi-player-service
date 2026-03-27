@@ -6,9 +6,6 @@ const wsProtocol = protocol === 'https:' ? 'wss:' : 'ws:'
 const apiPath = import.meta.env.MODE === 'staging' || import.meta.env.PROD || port === 80
   ? `/api`
   : `:${port}/api`;
-// const wsPath = import.meta.env.MODE === 'staging' || import.meta.env.PROD
-//   ? `/ws/players`
-//   : `:${port + 1}/ws/players`;
 const wsPath = `/ws/players`;
 const fullUrl = `${protocol}//${host}${apiPath}`
 const fullWsUrl = `${wsProtocol}//${host}${port ? `:${port}` : ''}${wsPath}`
