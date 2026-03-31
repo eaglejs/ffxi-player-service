@@ -1,5 +1,5 @@
 <template>
-  <div class="icon-wrapper">
+  <span class="icon-wrapper">
     <svg
       aria-hidden="true"
       class="iconify iconify--mdi"
@@ -12,7 +12,7 @@
     >
       <path class="fill" :d="icon" />
     </svg>
-  </div>
+  </span>
 </template>
 
 <script setup lang="ts">
