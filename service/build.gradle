@@ -2,7 +2,7 @@ plugins {
     id 'java'
     id 'application'
     id 'maven-publish'
-    id 'com.gradleup.shadow' version '8.3.5'
+    id 'com.gradleup.shadow' version '9.4.0'
 }
 
 // =============================================================================
@@ -12,6 +12,7 @@ plugins {
 group = 'io.eaglejs.ffxi'
 version = '1.1.6'
 base.archivesName = 'ffxi-player-service'
+uiPackageName = 'ffxi-stats'
 
 java {
     toolchain {
@@ -37,27 +38,29 @@ repositories {
 
 ext {
     // Nexus
-    nexusMavenRepo   = properties.getOrDefault('nexusMavenRepo', 'maven-releases')
-    nexusNpmUrl      = "http://${nexusHost}:${nexusPort}/repository/${nexusNpmRepo}/"
+    nexusMavenRepo = properties.getOrDefault('nexusMavenRepo', 'maven-releases')
+    nexusNpmUrl = "http://${nexusHost}:${nexusPort}/repository/${nexusNpmRepo}/"
 
     // UI package
     // For production, publish a built version containing the 'dist' folder to Nexus.
     // If the package contains a 'dist' folder, only those built assets will be used.
     // Otherwise, index.html and public/ folder will be extracted from source.
-    uiPackageName    = properties.getOrDefault('uiPackageName', 'ffxi-stats')
+    uiPackageName = properties.getOrDefault('uiPackageName', uiPackageName)
     uiPackageVersion = properties.getOrDefault('uiPackageVersion', project.version)
 
     // Dependency versions
-    dropwizardVersion  = '4.0.9'
+    dropwizardVersion = '4.0.9'
     mongoDriverVersion = '4.11.3'
-    jakartaVersion     = '11.0.24'
-    swaggerVersion     = '2.2.22'
-    junitVersion       = '4.13.2'
-    mockitoVersion     = '5.11.0'
-    jjwtVersion        = '0.12.6'
+    jakartaVersion = '11.0.24'
+    swaggerVersion = '2.2.22'
+    junitVersion = '4.13.2'
+    mockitoVersion = '5.11.0'
+    jjwtVersion = '0.12.6'
 }
 
-def isTestTaskRequested = gradle.startParameter.taskNames.any { it.toLowerCase().contains('test') }
+def isTestTaskRequested = gradle.startParameter.taskNames.any {
+    it.toLowerCase().contains('test')
+}
 
 // =============================================================================
 // Dependencies
@@ -78,8 +81,8 @@ dependencies {
     testImplementation "junit:junit:${junitVersion}"
     testImplementation "org.mockito:mockito-core:${mockitoVersion}"
     testImplementation "io.jsonwebtoken:jjwt-api:${jjwtVersion}"
-    testRuntimeOnly    "io.jsonwebtoken:jjwt-impl:${jjwtVersion}"
-    testRuntimeOnly    "io.jsonwebtoken:jjwt-jackson:${jjwtVersion}"
+    testRuntimeOnly "io.jsonwebtoken:jjwt-impl:${jjwtVersion}"
+    testRuntimeOnly "io.jsonwebtoken:jjwt-jackson:${jjwtVersion}"
 }
 
 // =============================================================================
@@ -89,16 +92,16 @@ dependencies {
 test {
     useJUnit()
     jvmArgs(
-        '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
-        '--add-opens', 'java.base/java.util=ALL-UNNAMED',
-        '--add-opens', 'java.base/java.lang.reflect=ALL-UNNAMED',
-        '--add-opens', 'java.base/java.io=ALL-UNNAMED',
-        '--add-opens', 'java.base/java.net=ALL-UNNAMED',
-        '--add-opens', 'java.base/java.nio=ALL-UNNAMED',
-        '--add-opens', 'java.base/java.util.concurrent=ALL-UNNAMED',
-        '--add-opens', 'java.base/sun.nio.ch=ALL-UNNAMED',
-        '--add-opens', 'java.base/sun.net.dns=ALL-UNNAMED',
-        '-Dnet.bytebuddy.experimental=true'
+            '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
+            '--add-opens', 'java.base/java.util=ALL-UNNAMED',
+            '--add-opens', 'java.base/java.lang.reflect=ALL-UNNAMED',
+            '--add-opens', 'java.base/java.io=ALL-UNNAMED',
+            '--add-opens', 'java.base/java.net=ALL-UNNAMED',
+            '--add-opens', 'java.base/java.nio=ALL-UNNAMED',
+            '--add-opens', 'java.base/java.util.concurrent=ALL-UNNAMED',
+            '--add-opens', 'java.base/sun.nio.ch=ALL-UNNAMED',
+            '--add-opens', 'java.base/sun.net.dns=ALL-UNNAMED',
+            '-Dnet.bytebuddy.experimental=true'
     )
 }
 
@@ -117,9 +120,9 @@ application {
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            groupId    = project.group
+            groupId = project.group
             artifactId = base.archivesName.get()
-            version    = project.version
+            version = project.version
             artifact(shadowJar) {
                 classifier = ''
             }
@@ -143,60 +146,6 @@ publishing {
 // =============================================================================
 // Build Artifacts
 // =============================================================================
-
-jar {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-
-    from {
-        configurations.runtimeClasspath.collect {
-            it.isDirectory() ? it : zipTree(it).matching {
-                exclude 'META-INF/*.SF'
-                exclude 'META-INF/*.DSA'
-                exclude 'META-INF/*.RSA'
-                exclude 'META-INF/services/*'
-            }
-        }
-    }
-
-    // Collect and merge META-INF/services descriptors (required for Dropwizard)
-    doFirst {
-        def serviceDir = layout.buildDirectory.dir("tmp/jar/META-INF/services").get().asFile
-        serviceDir.deleteDir()
-        serviceDir.mkdirs()
-
-        def services = [:].withDefault { [] }
-        configurations.runtimeClasspath.each { dep ->
-            if (dep.isFile() && dep.name.endsWith('.jar')) {
-                try {
-                    zipTree(dep).matching {
-                        include 'META-INF/services/*'
-                    }.each { serviceFile ->
-                        def serviceName = serviceFile.name
-                        serviceFile.text.trim().split('\n').each { line ->
-                            def trimmed = line.trim()
-                            if (trimmed && !trimmed.startsWith('#')) {
-                                services[serviceName] << trimmed
-                            }
-                        }
-                    }
-                } catch (Exception e) {
-                    // Ignore files that can't be processed
-                }
-            }
-        }
-
-        services.each { serviceName, implementations ->
-            def mergedFile = new File(serviceDir, serviceName)
-            mergedFile.text = implementations.unique().join('\n') + '\n'
-        }
-    }
-
-    from(layout.buildDirectory.dir("tmp/jar"))
-
-    manifest {
-        attributes 'Main-Class': "${project.group}.Main"
-    }
-}
 
 shadowJar {
     archiveClassifier.set('')
@@ -231,11 +180,13 @@ task copyWebApp(type: Copy) {
 task downloadUI(type: Exec) {
     description = 'Download UI package from Nexus npm repository'
     def downloadDir = layout.buildDirectory.dir("ui-download").get().asFile
-    def tarFile     = file("${downloadDir}/${project.ext.uiPackageName}-${project.ext.uiPackageVersion}.tgz")
-    def nexusUrl    = "${project.ext.nexusNpmUrl}/${project.ext.uiPackageName}/-/${project.ext.uiPackageName}-${project.ext.uiPackageVersion}.tgz"
+    def tarFile = file("${downloadDir}/${project.ext.uiPackageName}-${project.ext.uiPackageVersion}.tgz")
+    def nexusUrl = "${project.ext.nexusNpmUrl}/${project.ext.uiPackageName}/-/${project.ext.uiPackageName}-${project.ext.uiPackageVersion}.tgz"
 
     outputs.file(tarFile)
-    outputs.upToDateWhen { tarFile.exists() }
+    outputs.upToDateWhen {
+        tarFile.exists()
+    }
 
     onlyIf {
         def markerFile = new File(downloadDir, "download-failed.marker")
@@ -266,26 +217,29 @@ task extractUI {
     description = 'Extract UI package from tar.gz'
     dependsOn downloadUI
 
-    def downloadDir   = layout.buildDirectory.dir("ui-download").get().asFile
-    def tarFile       = file("${downloadDir}/${project.ext.uiPackageName}-${project.ext.uiPackageVersion}.tgz")
-    def assetsDir     = layout.buildDirectory.dir("resources/main/assets").get().asFile
+    def downloadDir = layout.buildDirectory.dir("ui-download").get().asFile
+    def tarFile = file("${downloadDir}/${project.ext.uiPackageName}-${project.ext.uiPackageVersion}.tgz")
+    def assetsDir = layout.buildDirectory.dir("resources/main/assets").get().asFile
     def extractTempDir = file("${downloadDir}/extracted")
 
     inputs.file(tarFile)
     outputs.dir(assetsDir)
 
-    onlyIf { !isTestTaskRequested && tarFile.exists() }
+    onlyIf {
+        !isTestTaskRequested && tarFile.exists()
+    }
 
     doLast {
         project.copy {
             from(tarTree(resources.gzip(tarFile))) {
-                eachFile { file -> file.path = file.path.replaceFirst('package/', '') }
+                eachFile {file -> file.path = file.path.replaceFirst('package/', '')
+                }
             }
             into extractTempDir
             includeEmptyDirs = false
         }
 
-        def distDir   = new File(extractTempDir, 'dist')
+        def distDir = new File(extractTempDir, 'dist')
         def sourceDir = distDir.exists() ? distDir : extractTempDir
 
         logger.lifecycle("Using UI files from: ${sourceDir}")
@@ -332,8 +286,8 @@ task runDev(type: JavaExec) {
     group = 'application'
     dependsOn classes
 
-    classpath    = sourceSets.main.runtimeClasspath
-    mainClass    = application.mainClass
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = application.mainClass
     standardInput = System.in
 
     def configFile = file('config.yml')
@@ -342,10 +296,10 @@ task runDev(type: JavaExec) {
     }
 
     jvmArgs = [
-        '-Xdebug',
-        '-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005',
-        '-Ddw.server.applicationConnectors[0].port=8080',
-        '-Ddw.logging.level=INFO'
+            '-Xdebug',
+            '-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005',
+            '-Ddw.server.applicationConnectors[0].port=8080',
+            '-Ddw.logging.level=INFO'
     ]
 
     doFirst {
@@ -361,12 +315,12 @@ task runDevWatch {
     group = 'application'
 
     doLast {
-        def configArg   = project.hasProperty('config') ? project.property('config') : 'server config.yml'
+        def configArg = project.hasProperty('config') ? project.property('config') : 'server config.yml'
         def configParts = configArg.split(/\s+/)
 
         logger.lifecycle("")
         logger.lifecycle("=" * 80)
-        logger.lifecycle("FFXI Player Service - Development Watch Mode")
+        logger.lifecycle("${project.name} Development Service - Development Watch Mode")
         logger.lifecycle("=" * 80)
         logger.lifecycle("Watching: src/main/java, src/main/resources")
         logger.lifecycle("Config: ${configParts.join(' ')}")
@@ -376,8 +330,8 @@ task runDevWatch {
         logger.lifecycle("=" * 80)
         logger.lifecycle("")
 
-        def serverProcess  = null
-        def lastModified   = [:]
+        def serverProcess = null
+        def lastModified = [:]
         def isShuttingDown = false
 
         Runtime.runtime.addShutdownHook(new Thread({
@@ -410,14 +364,14 @@ task runDevWatch {
 
             logger.lifecycle("Starting server...")
             def javaCmd = [
-                'java',
-                '-Xdebug',
-                '-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005',
-                '-Ddw.server.applicationConnectors[0].port=8080',
-                '-Ddw.logging.level=INFO',
-                '-cp', sourceSets.main.runtimeClasspath.asPath,
-                "${project.group}.Main",
-                *configParts
+                    'java',
+                    '-Xdebug',
+                    '-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005',
+                    '-Ddw.server.applicationConnectors[0].port=8080',
+                    '-Ddw.logging.level=INFO',
+                    '-cp', sourceSets.main.runtimeClasspath.asPath,
+                    "${project.group}.Main",
+                    *configParts
             ]
 
             def processBuilder = new ProcessBuilder(javaCmd as List<String>)
@@ -431,8 +385,9 @@ task runDevWatch {
 
         def collectFiles = {
             def files = [:]
-            ['src/main/java', 'src/main/resources'].each { dir ->
-                fileTree(dir).each { file -> files[file.absolutePath] = file.lastModified() }
+            ['src/main/java', 'src/main/resources'].each {dir ->
+                fileTree(dir).each {file -> files[file.absolutePath] = file.lastModified()
+                }
             }
             return files
         }
@@ -441,7 +396,7 @@ task runDevWatch {
             def currentFiles = collectFiles()
             def changed = false
 
-            currentFiles.each { path, modified ->
+            currentFiles.each {path, modified ->
                 if (!lastModified.containsKey(path) || lastModified[path] != modified) {
                     if (lastModified.containsKey(path)) {
                         logger.lifecycle("Changed: ${file(path).name}")
@@ -450,7 +405,7 @@ task runDevWatch {
                 }
             }
 
-            lastModified.keySet().each { path ->
+            lastModified.keySet().each {path ->
                 if (!currentFiles.containsKey(path)) {
                     logger.lifecycle("Deleted: ${file(path).name}")
                     changed = true
