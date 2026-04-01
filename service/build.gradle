@@ -5,16 +5,23 @@ plugins {
     id 'com.gradleup.shadow' version '8.3.5'
 }
 
+// =============================================================================
+// Project Metadata
+// =============================================================================
+
+group = 'io.eaglejs.ffxi'
+version = '1.1.6'
+base.archivesName = 'ffxi-player-service'
+
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(25)
     }
 }
 
-// Set the project version and JAR base name
-group = 'io.eaglejs.ffxi'
-version = '1.1.6'
-base.archivesName = 'ffxi-player-service'
+// =============================================================================
+// Repositories
+// =============================================================================
 
 repositories {
     mavenCentral()
@@ -24,17 +31,95 @@ repositories {
     }
 }
 
-// Nexus Maven repo (for publishing the JAR artifact)
+// =============================================================================
+// Project Properties
+// =============================================================================
+
 ext {
-    nexusMavenRepo = properties.getOrDefault('nexusMavenRepo', 'maven-releases')
+    // Nexus
+    nexusMavenRepo   = properties.getOrDefault('nexusMavenRepo', 'maven-releases')
+    nexusNpmUrl      = "http://${nexusHost}:${nexusPort}/repository/${nexusNpmRepo}/"
+
+    // UI package
+    // For production, publish a built version containing the 'dist' folder to Nexus.
+    // If the package contains a 'dist' folder, only those built assets will be used.
+    // Otherwise, index.html and public/ folder will be extracted from source.
+    uiPackageName    = properties.getOrDefault('uiPackageName', 'ffxi-stats')
+    uiPackageVersion = properties.getOrDefault('uiPackageVersion', project.version)
+
+    // Dependency versions
+    dropwizardVersion  = '4.0.9'
+    mongoDriverVersion = '4.11.3'
+    jakartaVersion     = '11.0.24'
+    swaggerVersion     = '2.2.22'
+    junitVersion       = '4.13.2'
+    mockitoVersion     = '5.11.0'
+    jjwtVersion        = '0.12.6'
 }
+
+def isTestTaskRequested = gradle.startParameter.taskNames.any { it.toLowerCase().contains('test') }
+
+// =============================================================================
+// Dependencies
+// =============================================================================
+
+dependencies {
+    implementation "io.dropwizard:dropwizard-core:${dropwizardVersion}"
+    implementation "io.dropwizard:dropwizard-jetty:${dropwizardVersion}"
+    implementation "io.dropwizard:dropwizard-client:${dropwizardVersion}"
+    implementation "org.eclipse.jetty.websocket:websocket-jakarta-server:${jakartaVersion}"
+    implementation "org.mongodb:mongodb-driver-sync:${mongoDriverVersion}"
+    implementation "org.mongodb:mongodb-driver-core:${mongoDriverVersion}"
+    implementation "org.mongodb:mongodb-driver-legacy:${mongoDriverVersion}"
+    implementation "io.swagger.core.v3:swagger-jaxrs2-jakarta:${swaggerVersion}"
+    implementation "io.swagger.core.v3:swagger-annotations-jakarta:${swaggerVersion}"
+
+    testImplementation "io.dropwizard:dropwizard-testing:${dropwizardVersion}"
+    testImplementation "junit:junit:${junitVersion}"
+    testImplementation "org.mockito:mockito-core:${mockitoVersion}"
+    testImplementation "io.jsonwebtoken:jjwt-api:${jjwtVersion}"
+    testRuntimeOnly    "io.jsonwebtoken:jjwt-impl:${jjwtVersion}"
+    testRuntimeOnly    "io.jsonwebtoken:jjwt-jackson:${jjwtVersion}"
+}
+
+// =============================================================================
+// Test Configuration
+// =============================================================================
+
+test {
+    useJUnit()
+    jvmArgs(
+        '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
+        '--add-opens', 'java.base/java.util=ALL-UNNAMED',
+        '--add-opens', 'java.base/java.lang.reflect=ALL-UNNAMED',
+        '--add-opens', 'java.base/java.io=ALL-UNNAMED',
+        '--add-opens', 'java.base/java.net=ALL-UNNAMED',
+        '--add-opens', 'java.base/java.nio=ALL-UNNAMED',
+        '--add-opens', 'java.base/java.util.concurrent=ALL-UNNAMED',
+        '--add-opens', 'java.base/sun.nio.ch=ALL-UNNAMED',
+        '--add-opens', 'java.base/sun.net.dns=ALL-UNNAMED',
+        '-Dnet.bytebuddy.experimental=true'
+    )
+}
+
+// =============================================================================
+// Application
+// =============================================================================
+
+application {
+    mainClass = "${project.group}.Main"
+}
+
+// =============================================================================
+// Publishing
+// =============================================================================
 
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            groupId = project.group
+            groupId    = project.group
             artifactId = base.archivesName.get()
-            version = project.version
+            version    = project.version
             artifact(shadowJar) {
                 classifier = ''
             }
@@ -55,89 +140,30 @@ publishing {
     }
 }
 
-// UI Package Configuration
-// Note: For production, publish a built version containing the 'dist' folder to Nexus.
-// If the package contains a 'dist' folder, only those built assets will be used.
-// Otherwise, index.html and public/ folder will be extracted from source.
-ext {
-    uiPackageName = properties.getOrDefault('uiPackageName', 'ffxi-stats')
-    uiPackageVersion = properties.getOrDefault('uiPackageVersion', project.version)
-    nexusNpmUrl = "http://${nexusHost}:${nexusPort}/repository/${nexusNpmRepo}/" // Use IP address to avoid IPv6 issues
-    dropwizardVersion = '4.0.9'
-    mongoDriverVersion = '4.11.3'
-    junitVersion = '4.13.2'
-    mockitoVersion = '5.11.0'
-    jjwtVersion = '0.12.6'
-    jakartaVersion = '11.0.24'
-    swaggerVersion = '2.2.22'
-}
-
-def isTestTaskRequested = gradle.startParameter.taskNames.any { taskName ->
-    taskName.toLowerCase().contains('test')
-}
-
-dependencies {
-    implementation "io.dropwizard:dropwizard-core:${dropwizardVersion}"
-    implementation "io.dropwizard:dropwizard-jetty:${dropwizardVersion}"
-    implementation "io.dropwizard:dropwizard-client:${dropwizardVersion}"
-    implementation "org.eclipse.jetty.websocket:websocket-jakarta-server:${jakartaVersion}"
-    implementation "org.mongodb:mongodb-driver-sync:${mongoDriverVersion}"
-    implementation "org.mongodb:mongodb-driver-core:${mongoDriverVersion}"
-    implementation "org.mongodb:mongodb-driver-legacy:${mongoDriverVersion}"
-    implementation "io.swagger.core.v3:swagger-jaxrs2-jakarta:${swaggerVersion}"
-    implementation "io.swagger.core.v3:swagger-annotations-jakarta:${swaggerVersion}"
-
-    testImplementation "io.dropwizard:dropwizard-testing:${dropwizardVersion}"
-    testImplementation "junit:junit:${junitVersion}"
-    testImplementation "org.mockito:mockito-core:${mockitoVersion}"
-    testImplementation "io.jsonwebtoken:jjwt-api:${jjwtVersion}"
-    testRuntimeOnly "io.jsonwebtoken:jjwt-impl:${jjwtVersion}"
-    testRuntimeOnly "io.jsonwebtoken:jjwt-jackson:${jjwtVersion}"
-}
-
-test {
-    useJUnit()
-    jvmArgs(
-        '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
-        '--add-opens', 'java.base/java.util=ALL-UNNAMED',
-        '--add-opens', 'java.base/java.lang.reflect=ALL-UNNAMED',
-        '--add-opens', 'java.base/java.io=ALL-UNNAMED',
-        '--add-opens', 'java.base/java.net=ALL-UNNAMED',
-        '--add-opens', 'java.base/java.nio=ALL-UNNAMED',
-        '--add-opens', 'java.base/java.util.concurrent=ALL-UNNAMED',
-        '--add-opens', 'java.base/sun.nio.ch=ALL-UNNAMED',
-        '--add-opens', 'java.base/sun.net.dns=ALL-UNNAMED',
-        '-Dnet.bytebuddy.experimental=true'
-    )
-}
-
-application {
-    mainClass = "${project.group}.Main"
-}
+// =============================================================================
+// Build Artifacts
+// =============================================================================
 
 jar {
-    // Merge service descriptor files properly for Dropwizard
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
     from {
-        configurations.runtimeClasspath.collect { 
+        configurations.runtimeClasspath.collect {
             it.isDirectory() ? it : zipTree(it).matching {
                 exclude 'META-INF/*.SF'
                 exclude 'META-INF/*.DSA'
                 exclude 'META-INF/*.RSA'
-                exclude 'META-INF/services/*'  // Exclude for now, will be merged separately
+                exclude 'META-INF/services/*'
             }
         }
     }
-    
-    // Handle duplicate files - exclude duplicates for regular files
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    
-    // Merge all META-INF/services files
+
+    // Collect and merge META-INF/services descriptors (required for Dropwizard)
     doFirst {
         def serviceDir = layout.buildDirectory.dir("tmp/jar/META-INF/services").get().asFile
         serviceDir.deleteDir()
         serviceDir.mkdirs()
-        
-        // Collect and merge all service descriptor files
+
         def services = [:].withDefault { [] }
         configurations.runtimeClasspath.each { dep ->
             if (dep.isFile() && dep.name.endsWith('.jar')) {
@@ -158,97 +184,112 @@ jar {
                 }
             }
         }
-        
-        // Write merged service files
+
         services.each { serviceName, implementations ->
             def mergedFile = new File(serviceDir, serviceName)
             mergedFile.text = implementations.unique().join('\n') + '\n'
         }
     }
-    
-    // Include the merged service files
+
     from(layout.buildDirectory.dir("tmp/jar"))
-    
+
     manifest {
         attributes 'Main-Class': "${project.group}.Main"
     }
 }
 
-// Task to download UI package from Nexus npm repository
+shadowJar {
+    archiveClassifier.set('')
+    mergeServiceFiles()
+
+    manifest {
+        attributes 'Main-Class': "${project.group}.Main"
+    }
+
+    exclude 'META-INF/*.SF'
+    exclude 'META-INF/*.DSA'
+    exclude 'META-INF/*.RSA'
+
+    doLast {
+        logger.lifecycle("Shadow JAR created at: ${archiveFile.get().asFile.absolutePath}")
+        logger.lifecycle("Size: ${archiveFile.get().asFile.length() / 1024 / 1024} MB")
+    }
+}
+
+build.dependsOn shadowJar
+
+// =============================================================================
+// UI Tasks
+// =============================================================================
+
+task copyWebApp(type: Copy) {
+    description = 'Copy webapp resources to build directory'
+    from 'src/main/webapp'
+    into layout.buildDirectory.dir("resources/main/webapp")
+}
+
 task downloadUI(type: Exec) {
     description = 'Download UI package from Nexus npm repository'
-    def nexusUrl = "${project.ext.nexusNpmUrl}/${project.ext.uiPackageName}/-/${project.ext.uiPackageName}-${project.ext.uiPackageVersion}.tgz"
     def downloadDir = layout.buildDirectory.dir("ui-download").get().asFile
-    def tarFile = file("${downloadDir}/${project.ext.uiPackageName}-${project.ext.uiPackageVersion}.tgz")
-    
+    def tarFile     = file("${downloadDir}/${project.ext.uiPackageName}-${project.ext.uiPackageVersion}.tgz")
+    def nexusUrl    = "${project.ext.nexusNpmUrl}/${project.ext.uiPackageName}/-/${project.ext.uiPackageName}-${project.ext.uiPackageVersion}.tgz"
+
     outputs.file(tarFile)
     outputs.upToDateWhen { tarFile.exists() }
-    
+
+    onlyIf {
+        def markerFile = new File(downloadDir, "download-failed.marker")
+        !isTestTaskRequested && !markerFile.exists()
+    }
+
     doFirst {
         downloadDir.mkdirs()
         logger.lifecycle("Downloading UI package from ${nexusUrl}")
     }
-    
-    // Use curl which we know works on your system
+
     commandLine 'curl', '-f', '-L', '-o', tarFile.absolutePath, '--create-dirs', nexusUrl
-    
-    // Ignore errors - let the task succeed but log the failure
     ignoreExitValue = true
-    
+
     doLast {
         if (executionResult.get().exitValue != 0) {
             logger.warn("Failed to download UI from Nexus (curl exit code: ${executionResult.get().exitValue})")
             logger.warn("Will use placeholder UI instead")
-            // Create a marker file to prevent re-attempting
-            if (tarFile.exists()) {
-                tarFile.delete()
-            }
+            if (tarFile.exists()) tarFile.delete()
             new File(downloadDir, "download-failed.marker").text = "curl failed with exit code ${executionResult.get().exitValue}"
         } else {
             logger.lifecycle("Downloaded UI package to ${tarFile} (${tarFile.length()} bytes)")
         }
     }
 }
-downloadUI.onlyIf { 
-    def downloadDir = layout.buildDirectory.dir("ui-download").get().asFile
-    def markerFile = new File(downloadDir, "download-failed.marker")
-    !isTestTaskRequested && !markerFile.exists()
-}
 
-// Task to extract UI package
 task extractUI {
     description = 'Extract UI package from tar.gz'
     dependsOn downloadUI
-    
-    def downloadDir = layout.buildDirectory.dir("ui-download").get().asFile
-    def tarFile = file("${downloadDir}/${project.ext.uiPackageName}-${project.ext.uiPackageVersion}.tgz")
-    def assetsDir = layout.buildDirectory.dir("resources/main/assets").get().asFile
+
+    def downloadDir   = layout.buildDirectory.dir("ui-download").get().asFile
+    def tarFile       = file("${downloadDir}/${project.ext.uiPackageName}-${project.ext.uiPackageVersion}.tgz")
+    def assetsDir     = layout.buildDirectory.dir("resources/main/assets").get().asFile
     def extractTempDir = file("${downloadDir}/extracted")
-    
+
     inputs.file(tarFile)
     outputs.dir(assetsDir)
-    
+
     onlyIf { !isTestTaskRequested && tarFile.exists() }
-    
+
     doLast {
-        // Extract to temporary location first
         project.copy {
             from(tarTree(resources.gzip(tarFile))) {
-                eachFile { file ->
-                    file.path = file.path.replaceFirst('package/', '')
-                }
+                eachFile { file -> file.path = file.path.replaceFirst('package/', '') }
             }
             into extractTempDir
             includeEmptyDirs = false
         }
-        
-        // Check if there's a dist folder (built assets)
-        def distDir = new File(extractTempDir, 'dist')
+
+        def distDir   = new File(extractTempDir, 'dist')
         def sourceDir = distDir.exists() ? distDir : extractTempDir
-        
+
         logger.lifecycle("Using UI files from: ${sourceDir}")
-        
-        // Copy to final location, excluding dev files
+
         project.copy {
             from sourceDir
             into assetsDir
@@ -256,23 +297,20 @@ task extractUI {
             exclude '**/node_modules/**'
             exclude '**/.git/**'
             exclude '**/.vscode/**'
-            exclude '**/src/**'  // Exclude source if we have dist
+            exclude '**/src/**'
             exclude '**/package.json'
             exclude '**/tsconfig*.json'
             exclude '**/*.config.*'
-            exclude '**/.*'  // Exclude dotfiles like .env, .eslintrc, etc.
-            
-            // If using source (no dist), include necessary files
+            exclude '**/.*'
+
             if (!distDir.exists()) {
                 include 'index.html'
                 include 'assets/**'
                 include 'public/**'
             }
         }
-        
-        // Clean up temp directory
+
         extractTempDir.deleteDir()
-        
         logger.lifecycle("Extracted UI to ${assetsDir} (${assetsDir.listFiles()?.size() ?: 0} items)")
     }
 }
@@ -283,41 +321,33 @@ task showArtifactLocation {
     }
 }
 
-task copyWebApp(type: Copy) {
-    from 'src/main/webapp'
-    into layout.buildDirectory.dir("resources/main/webapp")
-}
-
-// Try to fetch and extract UI from Nexus before processing resources
 processResources.dependsOn copyWebApp, extractUI, showArtifactLocation
 
-// Development task with auto-restart on file changes
+// =============================================================================
+// Development Tasks
+// =============================================================================
+
 task runDev(type: JavaExec) {
     description = 'Run application in development mode (use with --continuous for auto-restart)'
     group = 'application'
-    
     dependsOn classes
-    
-    classpath = sourceSets.main.runtimeClasspath
-    mainClass = application.mainClass
-    
-    // Pass server config if it exists
+
+    classpath    = sourceSets.main.runtimeClasspath
+    mainClass    = application.mainClass
+    standardInput = System.in
+
     def configFile = file('config.yml')
     if (configFile.exists()) {
         args 'server', configFile.absolutePath
     }
-    
-    // Enable debug mode and hot reload features
+
     jvmArgs = [
         '-Xdebug',
         '-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005',
         '-Ddw.server.applicationConnectors[0].port=8080',
         '-Ddw.logging.level=INFO'
     ]
-    
-    // Keep stdin open for interactive mode
-    standardInput = System.in
-    
+
     doFirst {
         logger.lifecycle("Starting application in development mode...")
         logger.lifecycle("Files being watched: src/main/java, src/main/resources")
@@ -326,15 +356,14 @@ task runDev(type: JavaExec) {
     }
 }
 
-// Auto-reload task that watches for changes and restarts the server
 task runDevWatch {
     description = 'Run application with automatic reload on file changes (use -Pconfig="server config.yml")'
     group = 'application'
-    
+
     doLast {
-        def configArg = project.hasProperty('config') ? project.property('config') : 'server config.yml'
+        def configArg   = project.hasProperty('config') ? project.property('config') : 'server config.yml'
         def configParts = configArg.split(/\s+/)
-        
+
         logger.lifecycle("")
         logger.lifecycle("=" * 80)
         logger.lifecycle("FFXI Player Service - Development Watch Mode")
@@ -346,12 +375,11 @@ task runDevWatch {
         logger.lifecycle("Press Ctrl+C to stop")
         logger.lifecycle("=" * 80)
         logger.lifecycle("")
-        
-        def serverProcess = null
-        def lastModified = [:]
+
+        def serverProcess  = null
+        def lastModified   = [:]
         def isShuttingDown = false
-        
-        // Register shutdown hook
+
         Runtime.runtime.addShutdownHook(new Thread({
             isShuttingDown = true
             if (serverProcess?.alive) {
@@ -360,63 +388,59 @@ task runDevWatch {
                 serverProcess.waitForOrKill(5000)
             }
         }))
-        
+
         def startServer = {
             if (serverProcess?.alive) {
                 logger.lifecycle("Stopping server...")
                 serverProcess.destroy()
                 serverProcess.waitForOrKill(5000)
-                Thread.sleep(1000) // Give ports time to release
+                Thread.sleep(1000)
             }
-            
+
             logger.lifecycle("Building project...")
             def buildResult = project.exec {
                 commandLine './gradlew', 'classes', '--quiet'
                 ignoreExitValue = true
             }
-            
+
             if (buildResult.exitValue != 0) {
                 logger.error("Build failed! Server not started.")
                 return
             }
-            
+
             logger.lifecycle("Starting server...")
-            def classpath = sourceSets.main.runtimeClasspath.asPath
             def javaCmd = [
                 'java',
                 '-Xdebug',
                 '-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005',
                 '-Ddw.server.applicationConnectors[0].port=8080',
                 '-Ddw.logging.level=INFO',
-                '-cp', classpath,
+                '-cp', sourceSets.main.runtimeClasspath.asPath,
                 "${project.group}.Main",
                 *configParts
             ]
-            
+
             def processBuilder = new ProcessBuilder(javaCmd as List<String>)
             processBuilder.inheritIO()
             processBuilder.directory(project.projectDir)
             serverProcess = processBuilder.start()
-            
+
             logger.lifecycle("Server started (PID: ${serverProcess.pid()})")
             logger.lifecycle("Watching for changes...\n")
         }
-        
+
         def collectFiles = {
             def files = [:]
             ['src/main/java', 'src/main/resources'].each { dir ->
-                fileTree(dir).each { file ->
-                    files[file.absolutePath] = file.lastModified()
-                }
+                fileTree(dir).each { file -> files[file.absolutePath] = file.lastModified() }
             }
             return files
         }
-        
+
         def checkForChanges = {
             def currentFiles = collectFiles()
             def changed = false
-            
-            // Check for modified files
+
             currentFiles.each { path, modified ->
                 if (!lastModified.containsKey(path) || lastModified[path] != modified) {
                     if (lastModified.containsKey(path)) {
@@ -425,27 +449,23 @@ task runDevWatch {
                     }
                 }
             }
-            
-            // Check for deleted files
+
             lastModified.keySet().each { path ->
                 if (!currentFiles.containsKey(path)) {
                     logger.lifecycle("Deleted: ${file(path).name}")
                     changed = true
                 }
             }
-            
+
             lastModified = currentFiles
             return changed
         }
-        
-        // Initial build and start
+
         lastModified = collectFiles()
         startServer()
-        
-        // Watch loop
+
         while (!isShuttingDown && !Thread.currentThread().interrupted) {
-            Thread.sleep(1000) // Check every second
-            
+            Thread.sleep(1000)
             if (checkForChanges()) {
                 logger.lifecycle("\n" + "=" * 80)
                 logger.lifecycle("Changes detected - Restarting server...")
@@ -455,27 +475,3 @@ task runDevWatch {
         }
     }
 }
-
-// Configure shadowJar to create a runnable fat jar with all dependencies
-shadowJar {
-    archiveClassifier.set('')
-    mergeServiceFiles()
-    
-    manifest {
-        attributes 'Main-Class': "${project.group}.Main"
-    }
-    
-    // Exclude signature files to avoid security exceptions
-    exclude 'META-INF/*.SF'
-    exclude 'META-INF/*.DSA'
-    exclude 'META-INF/*.RSA'
-    
-    // Configure the shadow jar to be the main artifact for publishing
-    doLast {
-        logger.lifecycle("Shadow JAR created at: ${archiveFile.get().asFile.absolutePath}")
-        logger.lifecycle("Size: ${archiveFile.get().asFile.length() / 1024 / 1024} MB")
-    }
-}
-
-// Make build task depend on shadowJar instead of jar
-build.dependsOn shadowJar
