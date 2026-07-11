@@ -4,17 +4,17 @@
   <dict>
     <key>Label</key>
     <string>io.eaglejs.ffxi.service</string>
-    <!-- Define the program path and arguments -->
+    
     <key>ProgramArguments</key>
     <array>
-      <string>/Users/eaglejs/.sdkman/candidates/java/21.0.1-zulu/zulu-21.jdk/Contents/Home/bin/java</string>
+      <string>/Users/eaglejs/.sdkman/candidates/java/25.0.2-tem/bin/java</string>
       <string>-jar</string>
       <string>/Users/eaglejs/repos/ffxi-player-service/service/build/libs/ffxi-player-service-1.1.6.jar</string>
       <string>server</string>
       <string>/Users/eaglejs/repos/ffxi-player-service/service/src/main/resources/config-production.yml</string>
     </array>
 
-    <key>Environment</key>
+    <key>EnvironmentVariables</key>
     <dict>
       <key>PORT</key>
       <string>8080</string>
@@ -27,21 +27,11 @@
     <string>/tmp/io.eaglejs.ffxi.service.err</string>
     <key>StandardOutPath</key>
     <string>/tmp/io.eaglejs.ffxi.service.out</string>
-    
+
     <key>RunAtLoad</key>
     <true />
-    <key>StartInterval</key>
-    <integer>3600</integer>
+
     <key>KeepAlive</key>
     <true />
-    <key>Restart</key>
-    <dict>
-      <key>WhenBoot</key>
-      <true />
-      <key>WhenIdle</key>
-      <true />
-      <key>WhenWake</key>
-      <true />
-    </dict>
   </dict>
 </plist>
