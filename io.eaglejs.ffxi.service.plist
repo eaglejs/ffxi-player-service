@@ -4,14 +4,14 @@
   <dict>
     <key>Label</key>
     <string>io.eaglejs.ffxi.service</string>
-    
+
     <key>ProgramArguments</key>
     <array>
       <string>/Users/eaglejs/.sdkman/candidates/java/25.0.2-tem/bin/java</string>
       <string>-jar</string>
-      <string>/Users/eaglejs/repos/ffxi-player-service/service/build/libs/ffxi-player-service-1.1.6.jar</string>
+      <string>/Users/eaglejs/ffxi-player-service.jar</string>
       <string>server</string>
-      <string>/Users/eaglejs/repos/ffxi-player-service/service/src/main/resources/config-production.yml</string>
+      <string>/Users/eaglejs/config-production.yml</string>
     </array>
 
     <key>EnvironmentVariables</key>
