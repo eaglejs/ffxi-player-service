@@ -13,28 +13,56 @@
               {{ chatFilterValue }}
             </button>
             <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="#" @click.prevent="setChatFilter('None')">None</a></li>
-              <li><a class="dropdown-item" href="#" @click.prevent="setChatFilter('Say')">Say</a></li>
-              <li><a class="dropdown-item" href="#" @click.prevent="setChatFilter('Tell')">Tell</a></li>
-              <li><a class="dropdown-item" href="#" @click.prevent="setChatFilter('Party')">Party</a></li>
               <li>
-                <a class="dropdown-item" href="#" @click.prevent="setChatFilter('Linkshell1')">Linkshell1</a>
+                <a class="dropdown-item" href="#" @click.prevent="setChatFilter('None')">None</a>
               </li>
               <li>
-                <a class="dropdown-item" href="#" @click.prevent="setChatFilter('Linkshell2')">Linkshell2</a>
+                <a class="dropdown-item" href="#" @click.prevent="setChatFilter('Say')">Say</a>
               </li>
-              <li><a class="dropdown-item" href="#" @click.prevent="setChatFilter('Yell')">Yell</a></li>
-              <li><a class="dropdown-item" href="#" @click.prevent="setChatFilter('Unity')">Unity</a></li>
-              <li><a class="dropdown-item" href="#" @click.prevent="setChatFilter('Drops')">Drops</a></li>
-              <li><a class="dropdown-item" href="#" @click.prevent="setChatFilter('Obtained')">Obtained</a></li>
+              <li>
+                <a class="dropdown-item" href="#" @click.prevent="setChatFilter('Tell')">Tell</a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="#" @click.prevent="setChatFilter('Party')">Party</a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="#" @click.prevent="setChatFilter('Linkshell1')"
+                  >Linkshell1</a
+                >
+              </li>
+              <li>
+                <a class="dropdown-item" href="#" @click.prevent="setChatFilter('Linkshell2')"
+                  >Linkshell2</a
+                >
+              </li>
+              <li>
+                <a class="dropdown-item" href="#" @click.prevent="setChatFilter('Yell')">Yell</a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="#" @click.prevent="setChatFilter('Unity')">Unity</a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="#" @click.prevent="setChatFilter('Drops')">Drops</a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="#" @click.prevent="setChatFilter('Obtained')"
+                  >Obtained</a
+                >
+              </li>
             </ul>
           </h2>
         </div>
         <section class="d-flex justify-content-end flex-grow-1">
-          <button class="btn btn-secondary btn-sm arrow-btns mx-1" @click="scrollToLastChild('smooth')">
+          <button
+            class="btn btn-secondary btn-sm arrow-btns mx-1"
+            @click="scrollToLastChild('smooth')"
+          >
             <GenIcon :icon="mdiChevronDown" size="lg" />
           </button>
-          <button class="btn btn-secondary btn-sm arrow-btns mx-1" @click="scrollToFirstChild('smooth')">
+          <button
+            class="btn btn-secondary btn-sm arrow-btns mx-1"
+            @click="scrollToFirstChild('smooth')"
+          >
             <GenIcon :icon="mdiChevronUp" size="lg" />
           </button>
           <section class="d-flex align-items-center form-check form-switch">
@@ -54,13 +82,16 @@
       </div>
     </div>
     <div ref="chatLogEl" v-if="chatLog.length" class="card-body chat-log">
-      <section ref="firstChildEl" ></section>
+      <section ref="firstChildEl"></section>
       <pre v-for="item in chatLog" :key="item.timeStamp + uuid()">
 <code :class="chatColor(item?.messageType)"><span v-if="timeStampsEnabled">[{{ toLocalTime(item.timeStamp) }}]&nbsp;</span><template v-for="(part, idx) in formatMessage(item?.message)" :key="idx"><span v-if="part.style" :class="part.style">{{ part.text }}</span><template v-else>{{ part.text }}</template></template></code>
       </pre>
-      <section ref="lastChildEl" ></section>
+      <section ref="lastChildEl"></section>
     </div>
-    <div v-else-if="isLoading" class="card-body chat-log d-flex align-items-center justify-content-center">
+    <div
+      v-else-if="isLoading"
+      class="card-body chat-log d-flex align-items-center justify-content-center"
+    >
       <div class="spinner-grow text-light text-center" role="status">
         <span class="visually-hidden">Loading...</span>
       </div>
@@ -87,7 +118,9 @@ const isLoading = ref(true)
 const chatLogEl = ref<HTMLElement | undefined>()
 const firstChildEl = ref<HTMLElement | undefined>()
 const lastChildEl = ref<HTMLElement | undefined>()
-const chatFilterValue = ref<string>(JSON.parse(localStorage.getItem(playerId.toString()) || '{}')?.chatFilter ?? 'Chat')
+const chatFilterValue = ref<string>(
+  JSON.parse(localStorage.getItem(playerId.toString()) || '{}')?.chatFilter ?? 'Chat'
+)
 const timeStampsEnabled = ref<boolean>(
   localStorage.getItem('timeStampsEnabled') === 'true' || false
 )
@@ -104,8 +137,8 @@ const messageTypeMap = {
   trial: 'trial',
   say: 'say',
   obtained: 'obtained',
-  drops: 'obtained',
-};
+  drops: 'obtained'
+}
 
 const chatLog = computed(() => {
   return playerStore.chatLog.filter((item: any) => {
@@ -118,54 +151,55 @@ const chatLog = computed(() => {
 })
 
 function chatColor(messageType: string) {
-  return messageTypeMap[messageType.toLowerCase() as keyof typeof messageTypeMap] || 'say';
+  return messageTypeMap[messageType.toLowerCase() as keyof typeof messageTypeMap] || 'say'
 }
 
 function formatMessage(message: string) {
-  if (!message) return [{ text: '', style: '' }];
-  
+  if (!message) return [{ text: '', style: '' }]
+
   // Count the number of ・ characters
-  const dotCount = (message.match(/・/g) || []).length;
-  
+  const dotCount = (message.match(/・/g) || []).length
+
   // Only convert if there's an even number of dots
   if (dotCount === 0 || dotCount % 2 !== 0) {
-    return [{ text: message, style: '' }];
+    return [{ text: message, style: '' }]
   }
-  
-  const parts: Array<{ text: string; style: string }> = [];
-  let currentText = '';
-  let isOpening = true;
-  
+
+  const parts: Array<{ text: string; style: string }> = []
+  let currentText = ''
+  let isOpening = true
+
   for (let i = 0; i < message.length; i++) {
     if (message[i] === '・') {
       // Push any accumulated text
       if (currentText) {
-        parts.push({ text: currentText, style: '' });
-        currentText = '';
+        parts.push({ text: currentText, style: '' })
+        currentText = ''
       }
       // Add colored ornamental brackets (unique Unicode that won't conflict with actual parentheses)
       if (isOpening) {
-        parts.push({ text: '❴', style: 'open-translation' });
-        isOpening = false;
+        parts.push({ text: '❴', style: 'open-translation' })
+        isOpening = false
       } else {
-        parts.push({ text: '❵', style: 'closed-translation' });
-        isOpening = true;
+        parts.push({ text: '❵', style: 'closed-translation' })
+        isOpening = true
       }
     } else {
-      currentText += message[i];
+      currentText += message[i]
     }
   }
-  
+
   // Push any remaining text
   if (currentText) {
-    parts.push({ text: currentText, style: '' });
+    parts.push({ text: currentText, style: '' })
   }
-  
-  return parts.length > 0 ? parts : [{ text: message, style: '' }];
+
+  return parts.length > 0 ? parts : [{ text: message, style: '' }]
 }
 
 const toggleTimeStamp = () => {
   timeStampsEnabled.value = !timeStampsEnabled.value
+  scrollToLastChild('instant')
   localStorage.setItem('timeStampsEnabled', timeStampsEnabled.value.toString())
 }
 
@@ -196,7 +230,6 @@ const scrollToFirstChild = (behavior: ScrollBehavior) => {
   })
 }
 
-
 const handleScrollEvent = () => {
   if (chatLogEl.value!.scrollTop + chatLogEl.value!.clientHeight < chatLogEl.value!.scrollHeight) {
     autoScrollIsActive.value = false
@@ -216,42 +249,44 @@ const handleResizeEvent = () => {
 }
 
 async function setChatFilter(filter: string) {
-  const playerSettings: PlayerSettings = JSON.parse(localStorage.getItem(playerId.toString()) || '{}')
+  const playerSettings: PlayerSettings = JSON.parse(
+    localStorage.getItem(playerId.toString()) || '{}'
+  )
   if (filter === chatFilterValue.value || (filter === 'None' && chatFilterValue.value === 'Chat')) {
     return
   }
   isLoading.value = true
-  playerStore.clearChatLog();
+  playerStore.clearChatLog()
   if (filter === 'None') {
     chatFilterValue.value = 'Chat'
     playerSettings.chatFilter = 'Chat'
-    await playerStore.fetchChatLog(playerId);
+    await playerStore.fetchChatLog(playerId)
   } else {
     playerSettings.chatFilter = filter ?? 'Chat'
     chatFilterValue.value = filter ?? 'Chat'
     await playerStore.fetchChatLogByMessageType(playerId, filter.toUpperCase())
   }
-  isLoading.value = false;
+  isLoading.value = false
   localStorage.setItem(playerId.toString(), JSON.stringify(playerSettings))
   setTimeout(() => scrollToLastChild('instant'), 100)
 }
 
 onMounted(async () => {
-  playerStore.clearChatLog();
-  isLoading.value = true;
+  playerStore.clearChatLog()
+  isLoading.value = true
   if (chatFilterValue.value !== 'Chat') {
     await playerStore.fetchChatLogByMessageType(playerId, chatFilterValue.value.toUpperCase())
   } else {
     await playerStore.fetchChatLog(playerId)
   }
-  isLoading.value = false;
+  isLoading.value = false
   scrollToLastChild('instant')
-  window.addEventListener('visibilitychange', handleVisibilityChangeEvent);
+  window.addEventListener('visibilitychange', handleVisibilityChangeEvent)
   chatLogEl.value?.addEventListener('wheel', handleScrollEvent)
   if (isIPhone() || isAndroid()) {
     chatLogEl.value!.addEventListener('touchmove', handleScrollEvent)
   }
-  window.addEventListener('resize', handleResizeEvent);
+  window.addEventListener('resize', handleResizeEvent)
 })
 
 onUpdated(() => {
@@ -265,18 +300,16 @@ onUpdated(() => {
 })
 
 onUnmounted(() => {
-  window.removeEventListener('resize', handleResizeEvent);
-  window.removeEventListener('visibilitychange', handleVisibilityChangeEvent);
+  window.removeEventListener('resize', handleResizeEvent)
+  window.removeEventListener('visibilitychange', handleVisibilityChangeEvent)
   window.removeEventListener('wheel', handleScrollEvent)
   if (isIPhone() || isAndroid()) {
     chatLogEl.value!.removeEventListener('touchmove', handleScrollEvent)
   }
 })
-
 </script>
 
 <style scoped lang="scss">
-
 .arrow-btns {
   max-height: auto;
   padding: 0 5px;
@@ -349,5 +382,4 @@ code {
 .obtained {
   color: var(--chat-log-lime);
 }
-
 </style>
