@@ -11,6 +11,8 @@ import org.eclipse.jetty.servlets.CrossOriginFilter;
 import io.dropwizard.core.Application;
 import io.dropwizard.core.setup.Bootstrap;
 import io.dropwizard.core.setup.Environment;
+import io.dropwizard.jetty.HttpConnectorFactory;
+import io.dropwizard.jetty.HttpsConnectorFactory;
 import io.eaglejs.ffxi.config.SwaggerConfig;
 import io.eaglejs.ffxi.health.MongoHealthCheck;
 import io.eaglejs.ffxi.resources.HealthResource;
@@ -30,86 +32,92 @@ import jakarta.servlet.http.HttpServletRequest;
 
 public class Main extends Application<FFXIConfiguration> {
 
-    public static void main(String[] args) throws Exception {
-        new Main().run(args);
+  public static void main(String[] args) throws Exception {
+    new Main().run(args);
+  }
+
+  @Override
+  public String getName() {
+    return "ffxi-player-service";
+  }
+
+  @Override
+  public void initialize(Bootstrap<FFXIConfiguration> bootstrap) {
+    bootstrap.getObjectMapper().registerSubtypes(
+        HttpConnectorFactory.class,
+        HttpsConnectorFactory.class);
+  }
+
+  @Override
+  public void run(FFXIConfiguration configuration, Environment environment) {
+    // Configure CORS if enabled
+    if (configuration.getCors().isEnabled()) {
+      configureCors(environment, configuration.getCors());
     }
 
-    @Override
-    public String getName() {
-        return "ffxi-player-service";
-    }
+    // Initialize MongoDB service
+    MongoDBService mongoDBService = new MongoDBService(configuration.getMongoUri());
 
-    @Override
-    public void initialize(Bootstrap<FFXIConfiguration> bootstrap) {
-        // initialization logic
-    }
+    environment.healthChecks().register("mongodb", new MongoHealthCheck(configuration.getMongoUri()));
+    environment.jersey().register(new HealthResource(environment.healthChecks()));
+    environment.jersey().register(new PlayersResource(mongoDBService));
+    environment.jersey().register(new SinglePlayerResource(mongoDBService));
+    environment.jersey().register(new SwaggerConfig());
 
-    @Override
-    public void run(FFXIConfiguration configuration, Environment environment) {
-        // Configure CORS if enabled
-        if (configuration.getCors().isEnabled()) {
-            configureCors(environment, configuration.getCors());
+    // Register WebSocket endpoint
+    ServletContextHandler contextHandler = environment.getApplicationContext();
+    environment.lifecycle().manage(new WebSocketManager(contextHandler));
+
+    // SPA fallback filter: forwards unknown paths to index.html for Vue Router
+    FilterRegistration.Dynamic spaFilter = environment.servlets().addFilter("spaFilter", new Filter() {
+      @Override
+      public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+          throws IOException, ServletException {
+        HttpServletRequest httpRequest = (HttpServletRequest) request;
+        String path = httpRequest.getRequestURI();
+
+        // Pass through API routes, WebSocket, and any path with a file extension
+        if (path.startsWith("/api/") || path.startsWith("/ws/") || path.contains(".")) {
+          chain.doFilter(request, response);
+          return;
         }
-        
-        // Initialize MongoDB service
-        MongoDBService mongoDBService = new MongoDBService(configuration.getMongoUri());
-        
-        environment.healthChecks().register("mongodb", new MongoHealthCheck(configuration.getMongoUri()));
-        environment.jersey().register(new HealthResource(environment.healthChecks()));
-        environment.jersey().register(new PlayersResource(mongoDBService));
-        environment.jersey().register(new SinglePlayerResource(mongoDBService));
-        environment.jersey().register(new SwaggerConfig());
 
-        // Register WebSocket endpoint
-        ServletContextHandler contextHandler = environment.getApplicationContext();
-        environment.lifecycle().manage(new WebSocketManager(contextHandler));
+        // Forward SPA routes (e.g. /charts, /players/123) to index.html
+        request.getRequestDispatcher("/index.html").forward(request, response);
+      }
 
-        // SPA fallback filter: forwards unknown paths to index.html for Vue Router
-        FilterRegistration.Dynamic spaFilter = environment.servlets().addFilter("spaFilter", new Filter() {
-            @Override
-            public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-                    throws IOException, ServletException {
-                HttpServletRequest httpRequest = (HttpServletRequest) request;
-                String path = httpRequest.getRequestURI();
+      @Override
+      public void init(FilterConfig config) {
+      }
 
-                // Pass through API routes, WebSocket, and any path with a file extension
-                if (path.startsWith("/api/") || path.startsWith("/ws/") || path.contains(".")) {
-                    chain.doFilter(request, response);
-                    return;
-                }
+      @Override
+      public void destroy() {
+      }
+    });
+    spaFilter.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), false, "/*");
 
-                // Forward SPA routes (e.g. /charts, /players/123) to index.html
-                request.getRequestDispatcher("/index.html").forward(request, response);
-            }
+    // Configure static assets serving for UI
+    // API endpoints are served at /api/* (configured in config.yml)
+    // Static UI files are served at the root /*
+    ServletHolder staticServlet = new ServletHolder("static", DefaultServlet.class);
+    staticServlet.setInitParameter("resourceBase",
+        Main.class.getClassLoader().getResource("assets").toExternalForm());
+    staticServlet.setInitParameter("dirAllowed", "false");
+    staticServlet.setInitParameter("pathInfoOnly", "false");
+    contextHandler.addServlet(staticServlet, "/*");
+  }
 
-            @Override public void init(FilterConfig config) {}
-            @Override public void destroy() {}
-        });
-        spaFilter.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), false, "/*");
+  private void configureCors(Environment environment, io.eaglejs.ffxi.config.CorsConfiguration corsConfig) {
+    final FilterRegistration.Dynamic cors = environment.servlets().addFilter("CORS", CrossOriginFilter.class);
 
-        // Configure static assets serving for UI
-        // API endpoints are served at /api/* (configured in config.yml)
-        // Static UI files are served at the root /*
-        ServletHolder staticServlet = new ServletHolder("static", DefaultServlet.class);
-        staticServlet.setInitParameter("resourceBase",
-            Main.class.getClassLoader().getResource("assets").toExternalForm());
-        staticServlet.setInitParameter("dirAllowed", "false");
-        staticServlet.setInitParameter("pathInfoOnly", "false");
-        contextHandler.addServlet(staticServlet, "/*");
-    }
-    
-    private void configureCors(Environment environment, io.eaglejs.ffxi.config.CorsConfiguration corsConfig) {
-        final FilterRegistration.Dynamic cors = 
-            environment.servlets().addFilter("CORS", CrossOriginFilter.class);
-        
-        // Configure CORS parameters from configuration
-        cors.setInitParameter(CrossOriginFilter.ALLOWED_ORIGINS_PARAM, corsConfig.getAllowedOrigins());
-        cors.setInitParameter(CrossOriginFilter.ALLOWED_HEADERS_PARAM, corsConfig.getAllowedHeaders());
-        cors.setInitParameter(CrossOriginFilter.ALLOWED_METHODS_PARAM, corsConfig.getAllowedMethods());
-        cors.setInitParameter(CrossOriginFilter.ALLOW_CREDENTIALS_PARAM, String.valueOf(corsConfig.isAllowCredentials()));
-        cors.setInitParameter(CrossOriginFilter.EXPOSED_HEADERS_PARAM, corsConfig.getExposedHeaders());
-        
-        // Add URL mapping for CORS filter
-        cors.addMappingForUrlPatterns(EnumSet.allOf(DispatcherType.class), true, "/*");
-    }
+    // Configure CORS parameters from configuration
+    cors.setInitParameter(CrossOriginFilter.ALLOWED_ORIGINS_PARAM, corsConfig.getAllowedOrigins());
+    cors.setInitParameter(CrossOriginFilter.ALLOWED_HEADERS_PARAM, corsConfig.getAllowedHeaders());
+    cors.setInitParameter(CrossOriginFilter.ALLOWED_METHODS_PARAM, corsConfig.getAllowedMethods());
+    cors.setInitParameter(CrossOriginFilter.ALLOW_CREDENTIALS_PARAM, String.valueOf(corsConfig.isAllowCredentials()));
+    cors.setInitParameter(CrossOriginFilter.EXPOSED_HEADERS_PARAM, corsConfig.getExposedHeaders());
+
+    // Add URL mapping for CORS filter
+    cors.addMappingForUrlPatterns(EnumSet.allOf(DispatcherType.class), true, "/*");
+  }
 }
