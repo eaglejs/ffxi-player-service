@@ -199,8 +199,8 @@ function formatMessage(message: string) {
 
 const toggleTimeStamp = () => {
   timeStampsEnabled.value = !timeStampsEnabled.value
-  scrollToLastChild('instant')
   localStorage.setItem('timeStampsEnabled', timeStampsEnabled.value.toString())
+  setTimeout(() => scrollToLastChild('instant'), 0)
 }
 
 const toLocalTime = (timeStamp: string) => {
