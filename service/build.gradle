@@ -10,7 +10,7 @@ plugins {
 // =============================================================================
 
 group = 'io.eaglejs.ffxi'
-version      = '1.2.3'
+version      = '1.2.4'
 base.archivesName = 'ffxi-player-service'
 uiPackageName = 'ffxi-stats'
 
