@@ -24,7 +24,7 @@ function buildWsUrl(host: string, protocol: string, configuredPort?: string | nu
 }
 
 function resolveWsPort(
-  protocol: string,
+  isProdLike: boolean,
   configuredAppPort?: string | number,
   configuredWsPort?: string | number
 ) {
@@ -37,7 +37,7 @@ function resolveWsPort(
     return normalizedWsPort
   }
 
-  if (protocol === 'https:') {
+  if (isProdLike) {
     return undefined
   }
 
@@ -48,7 +48,11 @@ const fullUrl = `${protocol}//${host}${apiPath}`
 const fullWsUrl = buildWsUrl(
   host,
   protocol,
-  resolveWsPort(protocol, import.meta.env.VITE_PORT, import.meta.env.VITE_WEBSOCKET_PORT)
+  resolveWsPort(
+    import.meta.env.MODE === 'staging' || import.meta.env.PROD,
+    import.meta.env.VITE_PORT,
+    import.meta.env.VITE_WEBSOCKET_PORT
+  )
 )
 
 const iconsPath =

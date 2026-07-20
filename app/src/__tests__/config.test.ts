@@ -18,15 +18,16 @@ describe('buildWsUrl', () => {
 })
 
 describe('resolveWsPort', () => {
-  it('does not reuse app port for https by default', () => {
-    expect(resolveWsPort('https:', '8080')).toBeUndefined()
+  it('does not reuse app port in production/staging by default', () => {
+    expect(resolveWsPort(true, '8080')).toBeUndefined()
   })
 
-  it('reuses app port for http when websocket port is not provided', () => {
-    expect(resolveWsPort('http:', '8080')).toBe('8080')
+  it('reuses app port in development when websocket port is not provided', () => {
+    expect(resolveWsPort(false, '8080')).toBe('8080')
   })
 
   it('prefers explicit websocket port when configured', () => {
-    expect(resolveWsPort('https:', '8080', '8443')).toBe('8443')
+    expect(resolveWsPort(true, '8080', '8443')).toBe('8443')
+    expect(resolveWsPort(false, '8080', '8443')).toBe('8443')
   })
 })
