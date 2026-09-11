@@ -22,6 +22,18 @@ export const useServerStore = defineStore('server', () => {
     }
   }
 
+  // Detaches a stale socket's handlers so it can never process another message
+  // after it has been replaced, even if the browser is slow to report it as closed.
+  function disposeSocket(socket: WebSocket) {
+    socket.onopen = null
+    socket.onmessage = null
+    socket.onclose = null
+    socket.onerror = null
+    if (socket.readyState === socket.OPEN || socket.readyState === socket.CONNECTING) {
+      socket.close()
+    }
+  }
+
   function createWebSocket() {
     const socket = new WebSocket(fullWsUrl)
 
@@ -72,7 +84,9 @@ export const useServerStore = defineStore('server', () => {
       return
     }
 
+    const staleSocket = websocket.value
     websocket.value = createWebSocket()
+    disposeSocket(staleSocket)
   }
 
   function setWebSocketMessageHandler(handler: ((event: MessageEvent) => void) | null) {
