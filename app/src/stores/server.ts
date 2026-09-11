@@ -89,10 +89,31 @@ export const useServerStore = defineStore('server', () => {
     disposeSocket(staleSocket)
   }
 
+  // Drops the live connection so the browser can't buffer a backlog of messages
+  // while the tab is hidden/frozen for it to dump on us all at once later.
+  function disconnectWebSocket() {
+    clearWebSocketRetry()
+    clearWebSocketHeartbeat()
+    disposeSocket(websocket.value)
+  }
+
+  // Always opens a brand new connection, regardless of the stale socket's reported state.
+  function reconnectWebSocket() {
+    const staleSocket = websocket.value
+    websocket.value = createWebSocket()
+    disposeSocket(staleSocket)
+  }
+
   function setWebSocketMessageHandler(handler: ((event: MessageEvent) => void) | null) {
     websocketMessageHandler.value = handler
     websocket.value.onmessage = handler
   }
 
-  return { connectWebSocket, setWebSocketMessageHandler, websocket }
+  return {
+    connectWebSocket,
+    disconnectWebSocket,
+    reconnectWebSocket,
+    setWebSocketMessageHandler,
+    websocket
+  }
 })

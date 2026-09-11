@@ -96,7 +96,14 @@ export const usePlayerStore = defineStore('player', () => {
 
   window.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') {
-      serverStore.connectWebSocket()
+      serverStore.reconnectWebSocket()
+      // Re-sync current truth instead of letting a buffered backlog of missed
+      // messages replay and animate through every state change since we left.
+      if (players.value.size > 0) {
+        fetchPlayers()
+      }
+    } else {
+      serverStore.disconnectWebSocket()
     }
   })
   window.addEventListener('online', () => {
@@ -104,7 +111,10 @@ export const usePlayerStore = defineStore('player', () => {
   })
   setInterval(() => {
     console.log('PlayerStore: Checking WebSocket connection...')
-    if (serverStore.websocket.readyState !== serverStore.websocket.OPEN) {
+    if (
+      document.visibilityState === 'visible' &&
+      serverStore.websocket.readyState !== serverStore.websocket.OPEN
+    ) {
       serverStore.connectWebSocket()
     }
   }, 5000)
