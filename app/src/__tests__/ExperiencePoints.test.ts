@@ -215,6 +215,84 @@ describe('ExperiencePoints.vue', () => {
       
       expect(wrapper.vm.averageExperiencePts).toBe(0)
     })
+
+    it('returns 0 for single data point (avoids division by zero)', () => {
+      const singlePointPlayer = {
+        ...mockPlayer,
+        expHistory: {
+          experience: [{ points: 500, timestamp: '2024-01-01T00:00:00Z' }],
+          capacity: [],
+          exemplar: [{ points: 200, timestamp: '2024-01-01T00:00:00Z' }]
+        }
+      } as Player
+
+      const wrapper = shallowMount(ExperiencePoints, {
+        props: { player: singlePointPlayer }
+      })
+
+      expect(wrapper.vm.averageExperiencePts).toBe(0)
+      expect(wrapper.vm.averageExemplarPts).toBe(0)
+    })
+
+    it('returns 0 when points share identical timestamps', () => {
+      const identicalTimePlayer = {
+        ...mockPlayer,
+        expHistory: {
+          experience: [],
+          capacity: [],
+          exemplar: [
+            { points: 500, timestamp: '2024-01-01T00:00:00Z' },
+            { points: 500, timestamp: '2024-01-01T00:00:00Z' }
+          ]
+        }
+      } as Player
+
+      const wrapper = shallowMount(ExperiencePoints, {
+        props: { player: identicalTimePlayer }
+      })
+
+      expect(wrapper.vm.averageExemplarPts).toBe(0)
+    })
+
+    it('correctly calculates rate when samples are out of chronological order', () => {
+      const outOfOrderPlayer = {
+        ...mockPlayer,
+        expHistory: {
+          experience: [],
+          capacity: [],
+          exemplar: [
+            { points: 2000, timestamp: '2024-01-01T01:00:00Z' },
+            { points: 1000, timestamp: '2024-01-01T00:00:00Z' }
+          ]
+        }
+      } as Player
+
+      const wrapper = shallowMount(ExperiencePoints, {
+        props: { player: outOfOrderPlayer }
+      })
+
+      expect(wrapper.vm.averageExemplarPts).toBe(3)
+    })
+
+    it('handles invalid timestamps gracefully', () => {
+      const invalidTimePlayer = {
+        ...mockPlayer,
+        expHistory: {
+          experience: [],
+          capacity: [],
+          exemplar: [
+            { points: 1000, timestamp: 'invalid-date' },
+            { points: 2000, timestamp: '2024-01-01T00:00:00Z' }
+          ]
+        }
+      } as Player
+
+      const wrapper = shallowMount(ExperiencePoints, {
+        props: { player: invalidTimePlayer }
+      })
+
+      expect(wrapper.vm.averageExemplarPts).toBe(0)
+    })
   })
 
   describe('reactivity', () => {
@@ -231,6 +309,50 @@ describe('ExperiencePoints.vue', () => {
       await wrapper.setProps({ player: updatedPlayer })
       
       expect(wrapper.vm.totalMerits).toBe(75)
+    })
+
+    it('updates averageExemplarPts and graph when exemplar history changes', async () => {
+      const wrapper = shallowMount(ExperiencePoints, {
+        props: { player: mockPlayer }
+      })
+
+      const updatedPlayer = {
+        ...mockPlayer,
+        expHistory: {
+          ...mockPlayer.expHistory,
+          exemplar: [
+            { points: 500, timestamp: '2024-01-01T00:00:00Z' },
+            { points: 1500, timestamp: '2024-01-01T01:00:00Z' }
+          ]
+        }
+      }
+
+      await wrapper.setProps({ player: updatedPlayer })
+
+      expect(wrapper.vm.averageExemplarPts).toBe(2)
+      expect(wrapper.vm.experienceGraph.datasets[2].data).toEqual([500, 1500])
+    })
+
+    it('updates averageCapacityPts and graph when capacity history changes', async () => {
+      const wrapper = shallowMount(ExperiencePoints, {
+        props: { player: mockPlayer }
+      })
+
+      const updatedPlayer = {
+        ...mockPlayer,
+        expHistory: {
+          ...mockPlayer.expHistory,
+          capacity: [
+            { points: 2000, timestamp: '2024-01-01T00:00:00Z' },
+            { points: 4000, timestamp: '2024-01-01T01:00:00Z' }
+          ]
+        }
+      }
+
+      await wrapper.setProps({ player: updatedPlayer })
+
+      expect(wrapper.vm.averageCapacityPts).toBe(6)
+      expect(wrapper.vm.experienceGraph.datasets[1].data).toEqual([2000, 4000])
     })
   })
 })

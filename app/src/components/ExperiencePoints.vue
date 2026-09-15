@@ -163,20 +163,31 @@ function renderLatestData() {
 }
 
 function analyzePoints(experiencePoints: Experience[]): number {
-  if (!experiencePoints || experiencePoints.length === 0) {
+  if (!experiencePoints || experiencePoints.length < 2) {
     return 0
   }
 
   // Convert timestamps to Date objects and sort by timestamp
-  const points = experiencePoints.map((item) => ({
-    points: item.points ?? 0,
-    timestamp: new Date(item.timestamp).getTime()
-  }))
+  const points = experiencePoints
+    .map((item) => ({
+      points: Number(item.points) || 0,
+      timestamp: new Date(item.timestamp).getTime()
+    }))
+    .filter((item) => !isNaN(item.timestamp))
+    .sort((a, b) => a.timestamp - b.timestamp)
+
+  if (points.length < 2) {
+    return 0
+  }
 
   // Calculate the total time span of the given data points
   const startTime = points[0]?.timestamp ?? 0
   const endTime = points[points.length - 1]?.timestamp ?? 0
   const totalTimeSpan = (endTime - startTime) / 1000 // in seconds
+
+  if (totalTimeSpan <= 0) {
+    return 0
+  }
 
   // Calculate total points accumulated
   const totalPoints = points.reduce((sum, item) => sum + item.points, 0)
@@ -196,8 +207,9 @@ onMounted(() => {
 })
 
 watch(
-  () => props.player?.expHistory?.experience,
-  () => renderLatestData()
+  () => props.player,
+  () => renderLatestData(),
+  { deep: true }
 )
 </script>
 
