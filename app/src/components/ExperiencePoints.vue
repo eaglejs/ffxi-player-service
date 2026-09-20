@@ -194,17 +194,20 @@ function renderLatestData() {
     }
   }
 
-  const expData = expList.map((item: Experience) => ({
+  const expData = expList.map((item: Experience, i: number) => ({
+    x: labels[i] || `#${i + 1}`,
     y: item.points ?? 0,
     chain: item.chain,
     timestamp: item.timestamp
   }))
-  const capData = capList.map((item: Experience) => ({
+  const capData = capList.map((item: Experience, i: number) => ({
+    x: labels[i] || `#${i + 1}`,
     y: item.points ?? 0,
     chain: item.chain,
     timestamp: item.timestamp
   }))
-  const exData = exList.map((item: Experience) => ({
+  const exData = exList.map((item: Experience, i: number) => ({
+    x: labels[i] || `#${i + 1}`,
     y: item.points ?? 0,
     chain: item.chain,
     timestamp: item.timestamp
