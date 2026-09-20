@@ -135,24 +135,26 @@ describe('ExperiencePoints.vue', () => {
       expect(wrapper.vm.experienceGraph.datasets[2].label).toBe('EX')
     })
 
-    it('generates labels matching history length', () => {
+    it('generates sample number labels for graph', () => {
       const wrapper = shallowMount(ExperiencePoints, {
         props: { player: mockPlayer }
       })
       
-      expect(wrapper.vm.experienceGraph.labels).toHaveLength(2)
+      expect(wrapper.vm.experienceGraph.labels).toEqual(['1', '2'])
     })
 
-    it('generates chain labels when chain data is present', () => {
+    it('extracts current chain values when chain data is present', () => {
       const playerWithChains: Player = {
         ...mockPlayer,
         expHistory: {
           experience: [
             { points: 1000, chain: 0, timestamp: '2024-01-01T00:00:00Z' },
-            { points: 2000, chain: 1, timestamp: '2024-01-01T00:01:00Z' }
+            { points: 2000, chain: 107, timestamp: '2024-01-01T00:01:00Z' }
           ],
           capacity: [],
-          exemplar: []
+          exemplar: [
+            { points: 500, chain: 25, timestamp: '2024-01-01T00:01:00Z' }
+          ]
         }
       } as Player
 
@@ -160,7 +162,9 @@ describe('ExperiencePoints.vue', () => {
         props: { player: playerWithChains }
       })
 
-      expect(wrapper.vm.experienceGraph.labels).toEqual(['Chain 0', 'Chain 1'])
+      expect(wrapper.vm.latestExpChain).toBe(107)
+      expect(wrapper.vm.latestExChain).toBe(25)
+      expect(wrapper.vm.latestCapChain).toBeNull()
     })
   })
 
@@ -350,7 +354,7 @@ describe('ExperiencePoints.vue', () => {
       await wrapper.setProps({ player: updatedPlayer })
 
       expect(wrapper.vm.averageExemplarPts).toBe(2)
-      expect(wrapper.vm.experienceGraph.datasets[2].data.map((d: any) => d.y)).toEqual([500, 1500])
+      expect(wrapper.vm.experienceGraph.datasets[2].data.map((d: any) => d.y)).toEqual([0, 2])
     })
 
     it('updates averageCapacityPts and graph when capacity history changes', async () => {
@@ -372,7 +376,7 @@ describe('ExperiencePoints.vue', () => {
       await wrapper.setProps({ player: updatedPlayer })
 
       expect(wrapper.vm.averageCapacityPts).toBe(6)
-      expect(wrapper.vm.experienceGraph.datasets[1].data.map((d: any) => d.y)).toEqual([2000, 4000])
+      expect(wrapper.vm.experienceGraph.datasets[1].data.map((d: any) => d.y)).toEqual([0, 6])
     })
   })
 })

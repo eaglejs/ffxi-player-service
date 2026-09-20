@@ -1,21 +1,36 @@
 <template>
   <div class="card experience-wrapper" v-if="experienceGraph">
     <div class="card-header">
-      <div class="d-flex">
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
         <h2 v-if="isExperienceDashboard" class="mb-0">
           <GenOnlineDot :player="player" />
           {{ playerName }}
         </h2>
         <h2 v-else class="mb-0">Experience Points</h2>
-        <section class="d-inline-flex flex-grow-1 justify-content-end">
-          <span class="pe-2 experience-points"
+        <section class="d-inline-flex flex-wrap align-items-center gap-3">
+          <span class="experience-points font-weight-bold"
             >{{ averageExperiencePts.toLocaleString() }}k XP/hr</span
           >
-          <span class="ps-2 pe-2 capacity-points"
+          <span class="capacity-points font-weight-bold"
             >{{ averageCapacityPts.toLocaleString() }}k CP/hr</span
           >
-          <span class="ps-2 exemplar-points">{{ averageExemplarPts.toLocaleString() }}k EX/hr</span>
+          <span class="exemplar-points font-weight-bold"
+            >{{ averageExemplarPts.toLocaleString() }}k EX/hr</span
+          >
         </section>
+      </div>
+
+      <!-- Current Chains Display -->
+      <div class="d-flex align-items-center gap-3 mt-2 text-muted small border-top pt-2" v-if="hasChainData">
+        <span class="chain-badge xp-chain" v-if="latestExpChain !== null">
+          <b>XP Chain</b>: {{ latestExpChain }}
+        </span>
+        <span class="chain-badge cp-chain" v-if="latestCapChain !== null">
+          <b>CP Chain</b>: {{ latestCapChain }}
+        </span>
+        <span class="chain-badge ex-chain" v-if="latestExChain !== null">
+          <b>EX Chain</b>: {{ latestExChain }}
+        </span>
       </div>
     </div>
     <div class="card-body">
@@ -60,9 +75,11 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, T
 const experiencePointsRGB = 'rgb(74, 156, 88)'
 const capacityPointsRGB = 'rgb(233 164 0)'
 const exemplarPointsRGB = 'rgb(255, 99, 132)'
+
 const props = defineProps<{
   player: Player | undefined
 }>()
+
 const averageExperiencePts = ref(0)
 const averageCapacityPts = ref(0)
 const averageExemplarPts = ref(0)
@@ -78,6 +95,31 @@ const totalMerits: ComputedRef<number> = computed(() => props.player?.merits?.to
 const maxMerits: ComputedRef<number> = computed(() => props.player?.merits?.max || 0)
 const totalCapacityPoints: ComputedRef<number> = computed(
   () => props?.player?.capacityPoints?.total || 0
+)
+
+const latestExpChain = computed(() => {
+  const list = props.player?.expHistory?.experience
+  if (!list || list.length === 0) return null
+  const last = list[list.length - 1]
+  return last && typeof last.chain === 'number' ? last.chain : null
+})
+
+const latestCapChain = computed(() => {
+  const list = props.player?.expHistory?.capacity
+  if (!list || list.length === 0) return null
+  const last = list[list.length - 1]
+  return last && typeof last.chain === 'number' ? last.chain : null
+})
+
+const latestExChain = computed(() => {
+  const list = props.player?.expHistory?.exemplar
+  if (!list || list.length === 0) return null
+  const last = list[list.length - 1]
+  return last && typeof last.chain === 'number' ? last.chain : null
+})
+
+const hasChainData = computed(
+  () => latestExpChain.value !== null || latestCapChain.value !== null || latestExChain.value !== null
 )
 
 const experienceGraph = ref<ChartData<'line', any[]>>({
@@ -133,43 +175,58 @@ const options: ChartOptions<'line'> = {
           if (!tooltipItems.length) return ''
           const item = tooltipItems[0]
           const raw = item.raw
-          const chainText = raw && typeof raw.chain === 'number' ? `Chain ${raw.chain}` : item.label
+          const sampleLabel = `Sample #${item.label}`
           if (raw && raw.timestamp) {
             try {
               const date = new Date(raw.timestamp)
-              const timeStr = date.toLocaleTimeString()
-              return `${chainText} (${timeStr})`
+              return `${sampleLabel} (${date.toLocaleTimeString()})`
             } catch {
               // ignore date parse errors
             }
           }
-          return chainText
+          return sampleLabel
         },
         label: (context: any) => {
           const label = context.dataset.label || ''
           const raw = context.raw
-          const val = typeof raw === 'object' && raw !== null ? raw.y : context.parsed.y
+          const rateVal = typeof raw === 'object' && raw !== null ? raw.y : context.parsed.y
           const chain =
             typeof raw === 'object' && raw !== null && typeof raw.chain === 'number'
               ? raw.chain
               : null
-          const formattedVal = val !== undefined && val !== null ? val.toLocaleString() : '0'
+          const rawPts =
+            typeof raw === 'object' && raw !== null && typeof raw.rawPoints === 'number'
+              ? raw.rawPoints
+              : null
+
+          let line = `${label} Rate: ${rateVal}k ${label}/hr`
           if (chain !== null) {
-            return `${label}: ${formattedVal} (Chain ${chain})`
+            line += ` (Chain ${chain})`
           }
-          return `${label}: ${formattedVal}`
+          if (rawPts !== null) {
+            line += ` [+${rawPts.toLocaleString()} pts]`
+          }
+          return line
         }
       }
     }
   },
   scales: {
     x: {
+      title: {
+        display: true,
+        text: 'Sample #'
+      },
       grid: {
         display: false
       }
     },
     y: {
       beginAtZero: true,
+      title: {
+        display: true,
+        text: 'Rate (k/hr)'
+      },
       grid: {
         color: 'rgba(200, 200, 200, 0.15)'
       }
@@ -186,29 +243,29 @@ function renderLatestData() {
 
   const labels: string[] = []
   for (let i = 0; i < maxLen; i++) {
-    const chain = expList[i]?.chain ?? capList[i]?.chain ?? exList[i]?.chain
-    if (chain !== undefined && chain !== null) {
-      labels.push(`Chain ${chain}`)
-    } else {
-      labels.push(`#${i + 1}`)
-    }
+    labels.push(`${i + 1}`)
   }
 
   const expData = expList.map((item: Experience, i: number) => ({
-    x: labels[i] || `#${i + 1}`,
-    y: item.points ?? 0,
+    x: labels[i] || `${i + 1}`,
+    y: calculatePointRate(expList, i),
+    rawPoints: item.points,
     chain: item.chain,
     timestamp: item.timestamp
   }))
+
   const capData = capList.map((item: Experience, i: number) => ({
-    x: labels[i] || `#${i + 1}`,
-    y: item.points ?? 0,
+    x: labels[i] || `${i + 1}`,
+    y: calculatePointRate(capList, i),
+    rawPoints: item.points,
     chain: item.chain,
     timestamp: item.timestamp
   }))
+
   const exData = exList.map((item: Experience, i: number) => ({
-    x: labels[i] || `#${i + 1}`,
-    y: item.points ?? 0,
+    x: labels[i] || `${i + 1}`,
+    y: calculatePointRate(exList, i),
+    rawPoints: item.points,
     chain: item.chain,
     timestamp: item.timestamp
   }))
@@ -262,6 +319,43 @@ function updateRates() {
   averageExemplarPts.value = analyzePoints(exList)
 }
 
+function calculatePointRate(history: Experience[], index: number): number {
+  if (!history || index < 0 || index >= history.length) return 0
+
+  const subHistory = history.slice(0, index + 1)
+  const validPoints = subHistory
+    .filter((item) => item && typeof item.points === 'number')
+    .map((item) => ({
+      points: item.points ?? 0,
+      timestamp: item.timestamp ? new Date(item.timestamp).getTime() : NaN
+    }))
+    .filter((item) => !isNaN(item.timestamp))
+
+  if (validPoints.length <= 1) return 0
+
+  validPoints.sort((a, b) => a.timestamp - b.timestamp)
+
+  const currentTs = validPoints[validPoints.length - 1]?.timestamp ?? 0
+  const WINDOW_MS = 60 * 60 * 1000 // 1 hour window
+  const windowCutoff = currentTs - WINDOW_MS
+
+  const windowPoints = validPoints.filter((p) => p.timestamp >= windowCutoff)
+  if (windowPoints.length <= 1) return 0
+
+  const firstTs = windowPoints[0]?.timestamp ?? 0
+  const lastTs = windowPoints[windowPoints.length - 1]?.timestamp ?? 0
+  const timeSpanSeconds = (lastTs - firstTs) / 1000
+
+  if (timeSpanSeconds === 0) return 0
+
+  const totalPoints = windowPoints.reduce((sum, item) => sum + item.points, 0)
+  const effectiveTimeSpan = Math.max(timeSpanSeconds, 60)
+  const ratePerSecond = totalPoints / effectiveTimeSpan
+  const ratePerHour = ratePerSecond * 3600
+
+  return parseFloat((ratePerHour / 1000).toFixed(1)) || 0
+}
+
 function analyzePoints(experiencePoints: Experience[]): number {
   if (!experiencePoints || experiencePoints.length === 0) {
     return 0
@@ -275,7 +369,7 @@ function analyzePoints(experiencePoints: Experience[]): number {
     }))
     .filter((item) => !isNaN(item.timestamp))
 
-  if (validPoints.length === 0) {
+  if (validPoints.length <= 1) {
     return 0
   }
 
@@ -350,6 +444,25 @@ watch(
 
 .exemplar-points {
   color: rgb(255, 99, 132);
+}
+
+.chain-badge {
+  font-size: 0.85rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  background-color: rgba(255, 255, 255, 0.05);
+
+  &.xp-chain {
+    border-left: 3px solid rgb(74, 156, 88);
+  }
+
+  &.cp-chain {
+    border-left: 3px solid rgb(233, 164, 0);
+  }
+
+  &.ex-chain {
+    border-left: 3px solid rgb(255, 99, 132);
+  }
 }
 </style>
 
