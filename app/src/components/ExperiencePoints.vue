@@ -37,7 +37,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch, type ComputedRef, onMounted } from 'vue'
+import { computed, ref, watch, type ComputedRef, onMounted, onUnmounted } from 'vue'
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -67,6 +67,8 @@ const averageExperiencePts = ref(0)
 const averageCapacityPts = ref(0)
 const averageExemplarPts = ref(0)
 const isExperienceDashboard = ref<boolean>(window.location.pathname === '/charts')
+let timerId: ReturnType<typeof setInterval> | null = null
+
 const playerName = computed(() =>
   props.player && props.player.playerName
     ? props.player.playerName.charAt(0).toUpperCase() + props.player.playerName.slice(1)
@@ -244,6 +246,14 @@ function renderLatestData() {
     ]
   }
 
+  updateRates()
+}
+
+function updateRates() {
+  const expList: Experience[] = props.player?.expHistory?.experience || []
+  const capList: Experience[] = props.player?.expHistory?.capacity || []
+  const exList: Experience[] = props.player?.expHistory?.exemplar || []
+
   averageExperiencePts.value = analyzePoints(expList)
   averageCapacityPts.value = analyzePoints(capList)
   averageExemplarPts.value = analyzePoints(exList)
@@ -262,39 +272,39 @@ function analyzePoints(experiencePoints: Experience[]): number {
     }))
     .filter((item) => !isNaN(item.timestamp))
 
-  if (validPoints.length <= 1) {
+  if (validPoints.length === 0) {
     return 0
   }
 
   validPoints.sort((a, b) => a.timestamp - b.timestamp)
 
-  // Filter out session gaps (> 1 hour inactivity)
-  let startIdx = 0
-  const INACTIVITY_THRESHOLD_MS = 60 * 60 * 1000 // 1 hour
-  for (let i = validPoints.length - 1; i > 0; i--) {
-    const currentTs = validPoints[i]?.timestamp
-    const prevTs = validPoints[i - 1]?.timestamp
-    if (currentTs !== undefined && prevTs !== undefined && currentTs - prevTs > INACTIVITY_THRESHOLD_MS) {
-      startIdx = i
-      break
-    }
-  }
+  const latestTs = validPoints[validPoints.length - 1]?.timestamp ?? 0
+  const nowMs = Date.now()
 
-  const sessionPoints = validPoints.slice(startIdx)
-  if (sessionPoints.length <= 1) {
+  // Inactivity decay: if last gain was > 15 minutes ago in live play, rate drops to 0
+  if (nowMs - latestTs > 15 * 60 * 1000 && latestTs > nowMs - 24 * 60 * 60 * 1000) {
     return 0
   }
 
-  const startTime = sessionPoints[0]?.timestamp ?? 0
-  const endTime = sessionPoints[sessionPoints.length - 1]?.timestamp ?? 0
-  const totalTimeSpanSeconds = (endTime - startTime) / 1000
+  // 1-hour rolling window before latest entry
+  const WINDOW_MS = 60 * 60 * 1000 // 1 hour
+  const windowCutoff = latestTs - WINDOW_MS
+  const windowPoints = validPoints.filter((p) => p.timestamp >= windowCutoff)
 
-  if (totalTimeSpanSeconds === 0) {
+  if (windowPoints.length <= 1) {
     return 0
   }
 
-  const totalPoints = sessionPoints.reduce((sum, item) => sum + item.points, 0)
-  const effectiveTimeSpan = Math.max(totalTimeSpanSeconds, 60)
+  const firstTs = windowPoints[0]?.timestamp ?? 0
+  const lastTs = windowPoints[windowPoints.length - 1]?.timestamp ?? 0
+  const timeSpanSeconds = (lastTs - firstTs) / 1000
+
+  if (timeSpanSeconds === 0) {
+    return 0
+  }
+
+  const totalPoints = windowPoints.reduce((sum, item) => sum + item.points, 0)
+  const effectiveTimeSpan = Math.max(timeSpanSeconds, 60)
   const ratePerSecond = totalPoints / effectiveTimeSpan
   const ratePerHour = ratePerSecond * 3600
 
@@ -303,6 +313,16 @@ function analyzePoints(experiencePoints: Experience[]): number {
 
 onMounted(() => {
   renderLatestData()
+  timerId = setInterval(() => {
+    updateRates()
+  }, 1000)
+})
+
+onUnmounted(() => {
+  if (timerId) {
+    clearInterval(timerId)
+    timerId = null
+  }
 })
 
 watch(
@@ -329,3 +349,4 @@ watch(
   color: rgb(255, 99, 132);
 }
 </style>
+
