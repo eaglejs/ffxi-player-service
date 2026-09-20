@@ -250,7 +250,7 @@ function renderLatestData() {
 }
 
 function analyzePoints(experiencePoints: Experience[]): number {
-  if (!experiencePoints || experiencePoints.length < 2) {
+  if (!experiencePoints || experiencePoints.length === 0) {
     return 0
   }
 
@@ -260,54 +260,40 @@ function analyzePoints(experiencePoints: Experience[]): number {
       points: item.points ?? 0,
       timestamp: item.timestamp ? new Date(item.timestamp).getTime() : NaN
     }))
+    .filter((item) => !isNaN(item.timestamp))
 
-  if (validPoints.length === 0) {
+  if (validPoints.length <= 1) {
     return 0
   }
 
-  const hasTimestamps = validPoints.every((p) => !isNaN(p.timestamp))
-  if (hasTimestamps) {
-    validPoints.sort((a, b) => a.timestamp - b.timestamp)
-  }
-
-  if (validPoints.length === 1) {
-    return 0
-  }
+  validPoints.sort((a, b) => a.timestamp - b.timestamp)
 
   // Filter out session gaps (> 1 hour inactivity)
   let startIdx = 0
-  if (hasTimestamps) {
-    const INACTIVITY_THRESHOLD_MS = 60 * 60 * 1000 // 1 hour
-    for (let i = validPoints.length - 1; i > 0; i--) {
-      const currentTs = validPoints[i]?.timestamp
-      const prevTs = validPoints[i - 1]?.timestamp
-      if (
-        currentTs !== undefined &&
-        prevTs !== undefined &&
-        currentTs - prevTs > INACTIVITY_THRESHOLD_MS
-      ) {
-        startIdx = i
-        break
-      }
+  const INACTIVITY_THRESHOLD_MS = 60 * 60 * 1000 // 1 hour
+  for (let i = validPoints.length - 1; i > 0; i--) {
+    const currentTs = validPoints[i]?.timestamp
+    const prevTs = validPoints[i - 1]?.timestamp
+    if (currentTs !== undefined && prevTs !== undefined && currentTs - prevTs > INACTIVITY_THRESHOLD_MS) {
+      startIdx = i
+      break
     }
   }
 
   const sessionPoints = validPoints.slice(startIdx)
-  if (sessionPoints.length === 0) {
+  if (sessionPoints.length <= 1) {
+    return 0
+  }
+
+  const startTime = sessionPoints[0]?.timestamp ?? 0
+  const endTime = sessionPoints[sessionPoints.length - 1]?.timestamp ?? 0
+  const totalTimeSpanSeconds = (endTime - startTime) / 1000
+
+  if (totalTimeSpanSeconds === 0) {
     return 0
   }
 
   const totalPoints = sessionPoints.reduce((sum, item) => sum + item.points, 0)
-
-  let totalTimeSpanSeconds = 0
-  if (hasTimestamps && sessionPoints.length > 1) {
-    const startTime = sessionPoints[0]?.timestamp ?? 0
-    const endTime = sessionPoints[sessionPoints.length - 1]?.timestamp ?? 0
-    totalTimeSpanSeconds = (endTime - startTime) / 1000
-  } else if (!hasTimestamps) {
-    totalTimeSpanSeconds = sessionPoints.length * 30
-  }
-
   const effectiveTimeSpan = Math.max(totalTimeSpanSeconds, 60)
   const ratePerSecond = totalPoints / effectiveTimeSpan
   const ratePerHour = ratePerSecond * 3600

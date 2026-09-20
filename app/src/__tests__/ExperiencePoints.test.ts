@@ -350,7 +350,7 @@ describe('ExperiencePoints.vue', () => {
       await wrapper.setProps({ player: updatedPlayer })
 
       expect(wrapper.vm.averageExemplarPts).toBe(2)
-      expect(wrapper.vm.experienceGraph.datasets[2].data).toEqual([500, 1500])
+      expect(wrapper.vm.experienceGraph.datasets[2].data.map((d: any) => d.y)).toEqual([500, 1500])
     })
 
     it('updates averageCapacityPts and graph when capacity history changes', async () => {
@@ -372,7 +372,7 @@ describe('ExperiencePoints.vue', () => {
       await wrapper.setProps({ player: updatedPlayer })
 
       expect(wrapper.vm.averageCapacityPts).toBe(6)
-      expect(wrapper.vm.experienceGraph.datasets[1].data).toEqual([2000, 4000])
+      expect(wrapper.vm.experienceGraph.datasets[1].data.map((d: any) => d.y)).toEqual([2000, 4000])
     })
   })
 })
