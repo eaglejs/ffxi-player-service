@@ -285,7 +285,7 @@ describe('ExperiencePoints.vue', () => {
           experience: [],
           capacity: [],
           exemplar: [
-            { points: 2000, timestamp: '2024-01-01T01:00:00Z' },
+            { points: 2000, timestamp: '2024-01-01T00:02:00Z' },
             { points: 1000, timestamp: '2024-01-01T00:00:00Z' }
           ]
         }
@@ -295,7 +295,7 @@ describe('ExperiencePoints.vue', () => {
         props: { player: outOfOrderPlayer }
       })
 
-      expect(wrapper.vm.averageExemplarPts).toBe(3)
+      expect(wrapper.vm.averageExemplarPts).toBe(90)
     })
 
     it('handles invalid timestamps gracefully', () => {
@@ -346,15 +346,15 @@ describe('ExperiencePoints.vue', () => {
           ...mockPlayer.expHistory,
           exemplar: [
             { points: 500, timestamp: '2024-01-01T00:00:00Z' },
-            { points: 1500, timestamp: '2024-01-01T01:00:00Z' }
+            { points: 1500, timestamp: '2024-01-01T00:02:00Z' }
           ]
         }
       }
 
       await wrapper.setProps({ player: updatedPlayer })
 
-      expect(wrapper.vm.averageExemplarPts).toBe(2)
-      expect(wrapper.vm.experienceGraph.datasets[2].data.map((d: any) => d.y)).toEqual([0, 2])
+      expect(wrapper.vm.averageExemplarPts).toBe(60)
+      expect(wrapper.vm.experienceGraph.datasets[2].data.map((d: any) => d.y)).toEqual([0, 60])
     })
 
     it('updates averageCapacityPts and graph when capacity history changes', async () => {
@@ -368,15 +368,15 @@ describe('ExperiencePoints.vue', () => {
           ...mockPlayer.expHistory,
           capacity: [
             { points: 2000, timestamp: '2024-01-01T00:00:00Z' },
-            { points: 4000, timestamp: '2024-01-01T01:00:00Z' }
+            { points: 4000, timestamp: '2024-01-01T00:02:00Z' }
           ]
         }
       }
 
       await wrapper.setProps({ player: updatedPlayer })
 
-      expect(wrapper.vm.averageCapacityPts).toBe(6)
-      expect(wrapper.vm.experienceGraph.datasets[1].data.map((d: any) => d.y)).toEqual([0, 6])
+      expect(wrapper.vm.averageCapacityPts).toBe(180)
+      expect(wrapper.vm.experienceGraph.datasets[1].data.map((d: any) => d.y)).toEqual([0, 180])
     })
   })
 })

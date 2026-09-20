@@ -336,11 +336,18 @@ function calculatePointRate(history: Experience[], index: number): number {
   validPoints.sort((a, b) => a.timestamp - b.timestamp)
 
   const currentTs = validPoints[validPoints.length - 1]?.timestamp ?? 0
-  const WINDOW_MS = 60 * 60 * 1000 // 1 hour window
+  const WINDOW_MS = 10 * 60 * 1000 // 10-minute rolling window matching PointWatch
   const windowCutoff = currentTs - WINDOW_MS
 
   const windowPoints = validPoints.filter((p) => p.timestamp >= windowCutoff)
-  if (windowPoints.length <= 1) return 0
+  if (windowPoints.length <= 1) {
+    if (windowPoints.length === 1) {
+      const pts = windowPoints[0]?.points ?? 0
+      const ratePerSecond = pts / 60
+      return parseFloat(((ratePerSecond * 3600) / 1000).toFixed(1)) || 0
+    }
+    return 0
+  }
 
   const firstTs = windowPoints[0]?.timestamp ?? 0
   const lastTs = windowPoints[windowPoints.length - 1]?.timestamp ?? 0
@@ -383,12 +390,17 @@ function analyzePoints(experiencePoints: Experience[]): number {
     return 0
   }
 
-  // 1-hour rolling window before latest entry
-  const WINDOW_MS = 60 * 60 * 1000 // 1 hour
+  // 10-minute rolling window before latest entry (PointWatch standard)
+  const WINDOW_MS = 10 * 60 * 1000 // 10 minutes
   const windowCutoff = latestTs - WINDOW_MS
   const windowPoints = validPoints.filter((p) => p.timestamp >= windowCutoff)
 
   if (windowPoints.length <= 1) {
+    if (windowPoints.length === 1) {
+      const pts = windowPoints[0]?.points ?? 0
+      const ratePerSecond = pts / 60
+      return parseFloat(((ratePerSecond * 3600) / 1000).toFixed(1)) || 0
+    }
     return 0
   }
 
