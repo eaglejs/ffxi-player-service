@@ -25,8 +25,7 @@
       <section>
         <div class="d-flex justify-content-between">
           <span
-            ><b>Merits</b>:
-            <span class="experience-points">{{ totalMerits }}</span></span
+            ><b>Merits</b>: <span class="experience-points">{{ totalMerits }}</span></span
           >
           <span
             ><b>Job Points</b>: <span class="capacity-points">{{ totalCapacityPoints }}</span></span
@@ -48,7 +47,8 @@ import {
   Title,
   Tooltip,
   Legend,
-  type ChartData
+  type ChartData,
+  type ChartOptions
 } from 'chart.js'
 import { Line } from 'vue-chartjs'
 import type { Player } from '@/types/Player'
@@ -72,94 +72,181 @@ const playerName = computed(() =>
     ? props.player.playerName.charAt(0).toUpperCase() + props.player.playerName.slice(1)
     : ''
 )
-const totalMerits: ComputedRef<number> = computed(() => props.player?.merits.total || 0)
-const maxMerits: ComputedRef<number> = computed(() => props.player?.merits.max || 0)
+const totalMerits: ComputedRef<number> = computed(() => props.player?.merits?.total || 0)
+const maxMerits: ComputedRef<number> = computed(() => props.player?.merits?.max || 0)
 const totalCapacityPoints: ComputedRef<number> = computed(
   () => props?.player?.capacityPoints?.total || 0
 )
-const experiencePoints: ComputedRef<number[]> = computed(
-  () => props.player?.expHistory?.experience?.map((exp: Experience) => exp.points) || []
-)
-const capacityPoints: ComputedRef<number[]> = computed(
-  () => props.player?.expHistory?.capacity?.map((exp: Experience) => exp.points) || []
-)
-const exemplarPoints: ComputedRef<number[]> = computed(
-  () => props.player?.expHistory?.exemplar?.map((exp: Experience) => exp.points) || []
-)
 
-const experienceGraph = ref<ChartData<'line', (number | null)[]>>({
-  labels: (function () {
-    let labels = []
-    for (let i = 0; i < 50; i++) {
-      labels.push(i.toString())
-    }
-    return labels
-  })(),
+const experienceGraph = ref<ChartData<'line', any[]>>({
+  labels: [],
   datasets: [
     {
-      data: experiencePoints.value || [],
+      data: [],
       label: 'XP',
       fill: false,
       borderColor: experiencePointsRGB,
-      tension: 0.1
+      backgroundColor: experiencePointsRGB,
+      tension: 0.2,
+      pointRadius: 4,
+      pointHoverRadius: 6
     },
     {
-      data: capacityPoints.value || [],
+      data: [],
       label: 'CP',
       fill: false,
       borderColor: capacityPointsRGB,
-      tension: 0.1
+      backgroundColor: capacityPointsRGB,
+      tension: 0.2,
+      pointRadius: 4,
+      pointHoverRadius: 6
     },
     {
-      data: exemplarPoints.value || [],
+      data: [],
       label: 'EX',
       fill: false,
       borderColor: exemplarPointsRGB,
-      tension: 0.1
+      backgroundColor: exemplarPointsRGB,
+      tension: 0.2,
+      pointRadius: 4,
+      pointHoverRadius: 6
     }
   ]
 })
-const options = {
+
+const options: ChartOptions<'line'> = {
   responsive: true,
-  maintainAspectRatio: false
+  maintainAspectRatio: false,
+  plugins: {
+    legend: {
+      position: 'top',
+      labels: {
+        usePointStyle: true,
+        boxWidth: 8
+      }
+    },
+    tooltip: {
+      callbacks: {
+        title: (tooltipItems: any[]) => {
+          if (!tooltipItems.length) return ''
+          const item = tooltipItems[0]
+          const raw = item.raw
+          const chainText = raw && typeof raw.chain === 'number' ? `Chain ${raw.chain}` : item.label
+          if (raw && raw.timestamp) {
+            try {
+              const date = new Date(raw.timestamp)
+              const timeStr = date.toLocaleTimeString()
+              return `${chainText} (${timeStr})`
+            } catch {
+              // ignore date parse errors
+            }
+          }
+          return chainText
+        },
+        label: (context: any) => {
+          const label = context.dataset.label || ''
+          const raw = context.raw
+          const val = typeof raw === 'object' && raw !== null ? raw.y : context.parsed.y
+          const chain =
+            typeof raw === 'object' && raw !== null && typeof raw.chain === 'number'
+              ? raw.chain
+              : null
+          const formattedVal = val !== undefined && val !== null ? val.toLocaleString() : '0'
+          if (chain !== null) {
+            return `${label}: ${formattedVal} (Chain ${chain})`
+          }
+          return `${label}: ${formattedVal}`
+        }
+      }
+    }
+  },
+  scales: {
+    x: {
+      grid: {
+        display: false
+      }
+    },
+    y: {
+      beginAtZero: true,
+      grid: {
+        color: 'rgba(200, 200, 200, 0.15)'
+      }
+    }
+  }
 }
 
 function renderLatestData() {
+  const expList: Experience[] = props.player?.expHistory?.experience || []
+  const capList: Experience[] = props.player?.expHistory?.capacity || []
+  const exList: Experience[] = props.player?.expHistory?.exemplar || []
+
+  const maxLen = Math.max(expList.length, capList.length, exList.length)
+
+  const labels: string[] = []
+  for (let i = 0; i < maxLen; i++) {
+    const chain = expList[i]?.chain ?? capList[i]?.chain ?? exList[i]?.chain
+    if (chain !== undefined && chain !== null) {
+      labels.push(`Chain ${chain}`)
+    } else {
+      labels.push(`#${i + 1}`)
+    }
+  }
+
+  const expData = expList.map((item: Experience) => ({
+    y: item.points ?? 0,
+    chain: item.chain,
+    timestamp: item.timestamp
+  }))
+  const capData = capList.map((item: Experience) => ({
+    y: item.points ?? 0,
+    chain: item.chain,
+    timestamp: item.timestamp
+  }))
+  const exData = exList.map((item: Experience) => ({
+    y: item.points ?? 0,
+    chain: item.chain,
+    timestamp: item.timestamp
+  }))
+
   experienceGraph.value = {
-    labels: (function () {
-      let labels = []
-      for (let i = 0; i < 50; i++) {
-        labels.push(i.toString())
-      }
-      return labels
-    })(),
+    labels,
     datasets: [
       {
-        data: experiencePoints.value || [],
+        data: expData,
         label: 'XP',
         fill: false,
         borderColor: experiencePointsRGB,
-        tension: 0.1
+        backgroundColor: experiencePointsRGB,
+        tension: 0.2,
+        pointRadius: 4,
+        pointHoverRadius: 6
       },
       {
-        data: capacityPoints.value || [],
+        data: capData,
         label: 'CP',
         fill: false,
         borderColor: capacityPointsRGB,
-        tension: 0.1
+        backgroundColor: capacityPointsRGB,
+        tension: 0.2,
+        pointRadius: 4,
+        pointHoverRadius: 6
       },
       {
-        data: exemplarPoints.value || [],
+        data: exData,
         label: 'EX',
         fill: false,
         borderColor: exemplarPointsRGB,
-        tension: 0.1
+        backgroundColor: exemplarPointsRGB,
+        tension: 0.2,
+        pointRadius: 4,
+        pointHoverRadius: 6
       }
     ]
   }
-  averageExperiencePts.value = analyzePoints(props?.player?.expHistory?.experience || [])
-  averageCapacityPts.value = analyzePoints(props?.player?.expHistory?.capacity || [])
-  averageExemplarPts.value = analyzePoints(props?.player?.expHistory?.exemplar || [])
+
+  averageExperiencePts.value = analyzePoints(expList)
+  averageCapacityPts.value = analyzePoints(capList)
+  averageExemplarPts.value = analyzePoints(exList)
 }
 
 function analyzePoints(experiencePoints: Experience[]): number {
@@ -167,38 +254,64 @@ function analyzePoints(experiencePoints: Experience[]): number {
     return 0
   }
 
-  // Convert timestamps to Date objects and sort by timestamp
-  const points = experiencePoints
+  const validPoints = experiencePoints
+    .filter((item) => item && typeof item.points === 'number')
     .map((item) => ({
-      points: Number(item.points) || 0,
-      timestamp: new Date(item.timestamp).getTime()
+      points: item.points ?? 0,
+      timestamp: item.timestamp ? new Date(item.timestamp).getTime() : NaN
     }))
-    .filter((item) => !isNaN(item.timestamp))
-    .sort((a, b) => a.timestamp - b.timestamp)
 
-  if (points.length < 2) {
+  if (validPoints.length === 0) {
     return 0
   }
 
-  // Calculate the total time span of the given data points
-  const startTime = points[0]?.timestamp ?? 0
-  const endTime = points[points.length - 1]?.timestamp ?? 0
-  const totalTimeSpan = (endTime - startTime) / 1000 // in seconds
+  const hasTimestamps = validPoints.every((p) => !isNaN(p.timestamp))
+  if (hasTimestamps) {
+    validPoints.sort((a, b) => a.timestamp - b.timestamp)
+  }
 
-  if (totalTimeSpan <= 0) {
+  if (validPoints.length === 1) {
     return 0
   }
 
-  // Calculate total points accumulated
-  const totalPoints = points.reduce((sum, item) => sum + item.points, 0)
+  // Filter out session gaps (> 1 hour inactivity)
+  let startIdx = 0
+  if (hasTimestamps) {
+    const INACTIVITY_THRESHOLD_MS = 60 * 60 * 1000 // 1 hour
+    for (let i = validPoints.length - 1; i > 0; i--) {
+      const currentTs = validPoints[i]?.timestamp
+      const prevTs = validPoints[i - 1]?.timestamp
+      if (
+        currentTs !== undefined &&
+        prevTs !== undefined &&
+        currentTs - prevTs > INACTIVITY_THRESHOLD_MS
+      ) {
+        startIdx = i
+        break
+      }
+    }
+  }
 
-  // Calculate the rate of points per second
-  const ratePerSecond = totalPoints / totalTimeSpan
+  const sessionPoints = validPoints.slice(startIdx)
+  if (sessionPoints.length === 0) {
+    return 0
+  }
 
-  // Extrapolate the rate to an hour
+  const totalPoints = sessionPoints.reduce((sum, item) => sum + item.points, 0)
+
+  let totalTimeSpanSeconds = 0
+  if (hasTimestamps && sessionPoints.length > 1) {
+    const startTime = sessionPoints[0]?.timestamp ?? 0
+    const endTime = sessionPoints[sessionPoints.length - 1]?.timestamp ?? 0
+    totalTimeSpanSeconds = (endTime - startTime) / 1000
+  } else if (!hasTimestamps) {
+    totalTimeSpanSeconds = sessionPoints.length * 30
+  }
+
+  const effectiveTimeSpan = Math.max(totalTimeSpanSeconds, 60)
+  const ratePerSecond = totalPoints / effectiveTimeSpan
   const ratePerHour = ratePerSecond * 3600
 
-  // Format the rate to one decimal point
   return parseFloat((ratePerHour / 1000).toFixed(1)) || 0
 }
 
@@ -207,7 +320,7 @@ onMounted(() => {
 })
 
 watch(
-  () => props.player,
+  () => props.player?.expHistory,
   () => renderLatestData(),
   { deep: true }
 )
@@ -220,8 +333,6 @@ watch(
 
 .experience-points {
   color: rgb(74, 156, 88);
-  // color: rgb(86, 156, 86);
-  // color: rgb(86, 130, 47);
 }
 
 .capacity-points {

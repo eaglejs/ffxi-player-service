@@ -135,12 +135,32 @@ describe('ExperiencePoints.vue', () => {
       expect(wrapper.vm.experienceGraph.datasets[2].label).toBe('EX')
     })
 
-    it('generates 50 labels for graph', () => {
+    it('generates labels matching history length', () => {
       const wrapper = shallowMount(ExperiencePoints, {
         props: { player: mockPlayer }
       })
       
-      expect(wrapper.vm.experienceGraph.labels).toHaveLength(50)
+      expect(wrapper.vm.experienceGraph.labels).toHaveLength(2)
+    })
+
+    it('generates chain labels when chain data is present', () => {
+      const playerWithChains: Player = {
+        ...mockPlayer,
+        expHistory: {
+          experience: [
+            { points: 1000, chain: 0, timestamp: '2024-01-01T00:00:00Z' },
+            { points: 2000, chain: 1, timestamp: '2024-01-01T00:01:00Z' }
+          ],
+          capacity: [],
+          exemplar: []
+        }
+      } as Player
+
+      const wrapper = shallowMount(ExperiencePoints, {
+        props: { player: playerWithChains }
+      })
+
+      expect(wrapper.vm.experienceGraph.labels).toEqual(['Chain 0', 'Chain 1'])
     })
   })
 
