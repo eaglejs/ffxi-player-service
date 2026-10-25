@@ -43,3 +43,15 @@ npm run test:unit
 ```sh
 npm run lint
 ```
+
+## Inventory search (hidden)
+
+A search over every character's stored inventory, hidden until unlocked. Type the passphrase anywhere on the site (outside an input), or tap the logo 7 times quickly on a phone to get a prompt. A magnifier button then appears in the nav (shortcut `3`) and the unlock is remembered in the browser until you press **Lock**. Only a hash of the passphrase is in the code, and the API endpoints themselves are not protected.
+
+- Search by item name or id. "Include key items" searches key item names separately. Click a character to browse all of their bags.
+- Item icons are served by the backend (`/api/items/icon/<id>.png`), which stores each one permanently after the PlayerService extracts it from the game. Until an icon exists a placeholder is shown.
+- Names come from `src/assets/item-data.json`, built from Windower's resources and loaded only when the page is opened. Regenerate it after a game update:
+
+```sh
+npm run build:item-data -- --resources "<path to Windower/res>"   # or omit --resources to download from GitHub
+```

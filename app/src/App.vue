@@ -2,7 +2,7 @@
   <nav class="navbar">
     <div class="container-fluid ms-2 me-2">
       <h1>
-        <RouterLink class="navbar-brand" to="/"
+        <RouterLink class="navbar-brand" to="/" @click="onLogoClick"
           ><img :src="`${imagesPath}sam.webp`" alt="Samurai" class="me-2 logo" />FFXI
           Stats</RouterLink
         >
@@ -17,6 +17,11 @@
           <li>
             <RouterLink class="theme-btn btn btn-light me-1" to="/charts">
               <GenIcon :icon="mdiChartTimelineVariant" size="xl" />
+            </RouterLink>
+          </li>
+          <li v-if="unlocked" class="unlock-reveal">
+            <RouterLink class="theme-btn btn btn-light me-1" to="/inventory" aria-label="Inventory search">
+              <GenIcon :icon="mdiMagnify" size="xl" />
             </RouterLink>
           </li>
         </ul>
@@ -50,6 +55,7 @@
     </div>
   </nav>
   <RouterView />
+  <PasswordPrompt v-if="showPrompt" @close="showPrompt = false" />
   <GenAppVersion :themeColor="themeColor" />
 </template>
 
@@ -62,6 +68,7 @@ import {
   mdiFullscreen,
   mdiFullscreenExit,
   mdiHome,
+  mdiMagnify,
   mdiWeatherNight,
   mdiWeatherSunny
 } from '@mdi/js'
@@ -70,9 +77,39 @@ import { imagesPath } from '@/helpers/config'
 import GenTooltip from '@/components/gen-components/GenTooltip.vue'
 import GenIcon from '@/components/gen-components/GenIcon.vue'
 import GenAppVersion from '@/components/gen-components/GenAppVersion.vue'
+import PasswordPrompt from '@/components/inventory/PasswordPrompt.vue'
+import { useSecretUnlock } from '@/composables/useSecretUnlock'
 
 const themeStore = useThemeStore()
 const router = useRouter()
+const { unlocked, handleKeydown: handleUnlockKey } = useSecretUnlock()
+
+// Phones cannot type the passphrase blind, so 7 quick taps on the logo open a prompt instead.
+const LOGO_TAPS = 7
+const LOGO_TAP_WINDOW_MS = 3000
+const showPrompt: Ref<boolean> = ref(false)
+let logoTaps: number[] = []
+
+function onLogoClick(): void {
+  if (unlocked.value) return
+  const now = Date.now()
+  logoTaps = [...logoTaps.filter((t) => now - t < LOGO_TAP_WINDOW_MS), now]
+  if (logoTaps.length >= LOGO_TAPS) {
+    logoTaps = []
+    showPrompt.value = true
+  }
+}
+
+function isTyping(target: EventTarget | null): boolean {
+  const el = target as HTMLElement | null
+  return (
+    !!el &&
+    (el.tagName === 'INPUT' ||
+      el.tagName === 'TEXTAREA' ||
+      el.tagName === 'SELECT' ||
+      el.isContentEditable)
+  )
+}
 
 const theme: ComputedRef<string> = computed(() => themeStore.theme)
 const themeColor: ComputedRef<string> = computed(() => (theme.value === 'dark' ? '#fff' : '#000'))
@@ -121,10 +158,15 @@ onMounted(() => {
 
   // add event listener that listens to 1 key press to toggle home page
   document.addEventListener('keydown', (e) => {
+    handleUnlockKey(e)
+    // Number shortcuts must not fire while typing (e.g. searching for "+1" items)
+    if (isTyping(e.target) || e.ctrlKey || e.metaKey || e.altKey) return
     if (e.key === '1') {
       router.push('/')
     } else if (e.key === '2') {
       router.push('/charts')
+    } else if (e.key === '3' && unlocked.value) {
+      router.push('/inventory')
     }
   })
 })
@@ -145,6 +187,21 @@ onMounted(() => {
 
 .fill {
   fill: v-bind(themeColor);
+}
+
+.unlock-reveal {
+  animation: reveal 0.6s ease-out;
+}
+
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 .router-link-active:not(.navbar-brand) {

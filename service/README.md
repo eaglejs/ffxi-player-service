@@ -136,6 +136,14 @@ GET /api/player/inventory/search?item=4096&item=77&player=sungjinwoo
 
 `itemId` appears on each location only when more than one item id is searched. Results are sorted by `totalCount` desc, then `playerName`; players with no matches are omitted.
 
+### Item Icons (`/items`)
+
+A permanent, write-once store of 32x32 item icons, one `<itemId>.png` per item in `itemIconDir` (config key; defaults to `~/ffxi-data/item-icons`). Keep it outside the build directory so redeploys never wipe it, and back it up with your data. Icons are extracted from the game's own DAT files on the PC running the PlayerService and uploaded here once; nothing is ever overwritten.
+
+- `GET /items/icon/{id}.png`: the icon (`Cache-Control: max-age=31536000, immutable`), or 404 if none is stored yet.
+- `PUT /items/icon/{id}.png` (`Content-Type: image/png`): stores the icon. `201 Icon: STORED`, `200 Icon: EXISTS` (unchanged), `400` if the id is outside 0-65535 or the body is not a 32x32 PNG, `413` over 64 KB.
+- `POST /items/icons/missing` with `{"ids":[4096,5,6]}`: returns `{"missing":[5,6]}`, the ids with no stored icon (max 5000 ids per call).
+
 ### Player Lists (`/players`)
 - `GET /players/get_players`: List all online players (active in last 60s).
 - `GET /players/get_player?playerId={id}`: Retrieve full details for a specific player.

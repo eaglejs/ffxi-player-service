@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
+import { useSecretUnlock } from '@/composables/useSecretUnlock'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -20,6 +21,13 @@ const router = createRouter({
       component: () => import('../views/PlayerDetails.vue')
     },
     {
+      // Hidden until the passphrase is entered (see useSecretUnlock)
+      path: '/inventory',
+      name: 'inventory',
+      component: () => import('../views/InventorySearchView.vue'),
+      meta: { requiresUnlock: true }
+    },
+    {
       path: '/:pathMatch(.*)*',
       redirect: '/'
     }
@@ -35,6 +43,12 @@ const router = createRouter({
         behavior: 'instant'
       }
     }
+  }
+})
+
+router.beforeEach((to) => {
+  if (to.meta.requiresUnlock && !useSecretUnlock().unlocked.value) {
+    return '/'
   }
 })
 

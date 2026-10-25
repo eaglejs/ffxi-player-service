@@ -15,3 +15,6 @@ cors:
   exposedHeaders: "Content-Type,Authorization,X-Requested-With"
 
 mongoUri: mongodb://production-host:27017/ffxi
+
+# Permanent, write-once item icon store (PNG per item id). Keep outside build/.
+itemIconDir: /var/lib/ffxi/item-icons

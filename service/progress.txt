@@ -510,3 +510,9 @@ This Postman collection provides comprehensive API documentation and testing cap
 - GET /player/{playerId}/inventory, GET /player/inventory/search (item, player, bag, includeKeyItems, limit, offset; name -> 400), GET /player/{playerId}/inventory/search alias.
 - New: InventoryDao, InventoryResource, InventorySnapshotRequest/InventoryItem, RequestSizeLimitFilter. Tests are Mockito-based (no Testcontainers); the aggregation pipeline was verified manually against a scratch mongod.
 - README and Postman ("Inventory" folder) updated. prd.json: both items marked passes: true.
+
+## Item icon store (backend)
+
+- ItemIconStore (write-once PNG-per-id directory, atomic, validates 32x32 PNG <= 64 KB) and ItemIconResource: GET/PUT /items/icon/{id}.png, POST /items/icons/missing. `itemIconDir` config key (default ~/ffxi-data/item-icons).
+- Verified end to end against a running jar: store, exists no-op, 400/413 cases, byte-identical read-back, immutable cache header, missing-ids lookup.
+- Next: PlayerService icon_sync.py (DAT extraction on the game PC), then the UI.

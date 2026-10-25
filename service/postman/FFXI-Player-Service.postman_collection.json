@@ -733,6 +733,95 @@
 			]
 		},
 		{
+			"name": "Item Icons",
+			"description": "Permanent, write-once store of 32x32 item icons",
+			"item": [
+				{
+					"name": "Get Item Icon",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/items/icon/4096.png",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"items",
+								"icon",
+								"4096.png"
+							]
+						},
+						"description": "Serves the stored icon (cached for a year, immutable).\n\n**Status Codes:** 200 (image/png), 404 (none stored yet)"
+					},
+					"response": []
+				},
+				{
+					"name": "Upload Item Icon",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "image/png"
+							}
+						],
+						"body": {
+							"mode": "file",
+							"file": {}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/items/icon/4096.png",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"items",
+								"icon",
+								"4096.png"
+							]
+						},
+						"description": "Stores a 32x32 PNG for the item id. Write-once: an existing icon is never overwritten. In Postman choose Body > binary and select a PNG.\n\n**Status Codes:**\n- 201 `Icon: STORED`\n- 200 `Icon: EXISTS`\n- 400 invalid id (0-65535) or not a 32x32 PNG\n- 413 over 64 KB"
+					},
+					"response": []
+				},
+				{
+					"name": "Find Missing Icons",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"ids\": [\n    4096,\n    5,\n    6\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/items/icons/missing",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"items",
+								"icons",
+								"missing"
+							]
+						},
+						"description": "Returns the ids that have no stored icon yet (max 5000 ids).\n\n**Status Codes:** 200, 400 (missing ids, out-of-range id, too many ids)"
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "Location",
 			"description": "Endpoints for managing player location and zone",
 			"item": [

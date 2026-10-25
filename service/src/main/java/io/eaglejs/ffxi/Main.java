@@ -1,6 +1,7 @@
 package io.eaglejs.ffxi;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.EnumSet;
 
 import org.eclipse.jetty.servlet.DefaultServlet;
@@ -18,9 +19,11 @@ import io.eaglejs.ffxi.health.MongoHealthCheck;
 import io.eaglejs.ffxi.dao.InventoryDao;
 import io.eaglejs.ffxi.resources.HealthResource;
 import io.eaglejs.ffxi.resources.InventoryResource;
+import io.eaglejs.ffxi.resources.ItemIconResource;
 import io.eaglejs.ffxi.resources.RequestSizeLimitFilter;
 import io.eaglejs.ffxi.resources.PlayersResource;
 import io.eaglejs.ffxi.resources.SinglePlayerResource;
+import io.eaglejs.ffxi.service.ItemIconStore;
 import io.eaglejs.ffxi.service.MongoDBService;
 import io.eaglejs.ffxi.websocket.WebSocketManager;
 import jakarta.servlet.DispatcherType;
@@ -68,6 +71,7 @@ public class Main extends Application<FFXIConfiguration> {
     InventoryDao inventoryDao = new InventoryDao(mongoDBService.getInventoriesCollection());
     inventoryDao.ensureIndexes();
     environment.jersey().register(new InventoryResource(inventoryDao));
+    environment.jersey().register(new ItemIconResource(new ItemIconStore(Path.of(configuration.getItemIconDir()))));
     environment.jersey().register(new RequestSizeLimitFilter());
     environment.jersey().register(new SwaggerConfig());
 

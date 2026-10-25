@@ -13,6 +13,10 @@ public class FFXIConfiguration extends Configuration {
     @NotEmpty
     private String mongoUri = "mongodb://localhost:27017";
 
+    /** Permanent, write-once store for item icon PNGs. Keep it outside the build directory. */
+    @NotEmpty
+    private String itemIconDir = System.getProperty("user.home") + "/ffxi-data/item-icons";
+
     @Valid
     @NotNull
     private CorsConfiguration cors = new CorsConfiguration();
@@ -25,6 +29,16 @@ public class FFXIConfiguration extends Configuration {
     @JsonProperty
     public void setMongoUri(String mongoUri) {
         this.mongoUri = mongoUri;
+    }
+
+    @JsonProperty
+    public String getItemIconDir() {
+        return itemIconDir;
+    }
+
+    @JsonProperty
+    public void setItemIconDir(String itemIconDir) {
+        this.itemIconDir = itemIconDir;
     }
 
     @JsonProperty
