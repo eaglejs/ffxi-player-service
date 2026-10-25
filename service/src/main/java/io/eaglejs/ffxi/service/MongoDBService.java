@@ -34,6 +34,13 @@ public class MongoDBService {
     }
     
     /**
+     * Get the inventories collection (one document per playerId) from the ffxi database.
+     */
+    public MongoCollection<Document> getInventoriesCollection() {
+        return database.getCollection("inventories");
+    }
+
+    /**
      * Close the MongoDB client connection.
      */
     public void close() {

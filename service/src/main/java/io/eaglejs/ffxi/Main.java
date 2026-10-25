@@ -15,7 +15,10 @@ import io.dropwizard.jetty.HttpConnectorFactory;
 import io.dropwizard.jetty.HttpsConnectorFactory;
 import io.eaglejs.ffxi.config.SwaggerConfig;
 import io.eaglejs.ffxi.health.MongoHealthCheck;
+import io.eaglejs.ffxi.dao.InventoryDao;
 import io.eaglejs.ffxi.resources.HealthResource;
+import io.eaglejs.ffxi.resources.InventoryResource;
+import io.eaglejs.ffxi.resources.RequestSizeLimitFilter;
 import io.eaglejs.ffxi.resources.PlayersResource;
 import io.eaglejs.ffxi.resources.SinglePlayerResource;
 import io.eaglejs.ffxi.service.MongoDBService;
@@ -62,6 +65,10 @@ public class Main extends Application<FFXIConfiguration> {
     environment.jersey().register(new HealthResource(environment.healthChecks()));
     environment.jersey().register(new PlayersResource(mongoDBService));
     environment.jersey().register(new SinglePlayerResource(mongoDBService));
+    InventoryDao inventoryDao = new InventoryDao(mongoDBService.getInventoriesCollection());
+    inventoryDao.ensureIndexes();
+    environment.jersey().register(new InventoryResource(inventoryDao));
+    environment.jersey().register(new RequestSizeLimitFilter());
     environment.jersey().register(new SwaggerConfig());
 
     // Register WebSocket endpoint

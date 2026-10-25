@@ -566,6 +566,173 @@
 			]
 		},
 		{
+			"name": "Inventory",
+			"description": "Endpoints for storing and searching character inventory snapshots",
+			"item": [
+				{
+					"name": "Set Inventory",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"playerId\": 1,\n  \"playerName\": \"Sungjinwoo\",\n  \"contentHash\": \"3b7e0c1d5a...sha256-hex\",\n  \"timestamp\": 1761350000,\n  \"gil\": 12345,\n  \"keyItems\": [\n    1,\n    2,\n    3\n  ],\n  \"bags\": {\n    \"inventory\": [\n      {\n        \"id\": 4096,\n        \"count\": 12\n      }\n    ],\n    \"wardrobe\": [\n      {\n        \"id\": 12345,\n        \"count\": 1\n      }\n    ],\n    \"slip 01\": [\n      {\n        \"id\": 27000,\n        \"count\": 1\n      }\n    ]\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/player/set_inventory",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"player",
+								"set_inventory"
+							]
+						},
+						"description": "Replaces a character's full inventory snapshot (gil, every bag, key items). Idempotent.\n\n**Body:** playerId, playerName, contentHash (required); timestamp (epoch seconds), gil (>=0), keyItems (int[]), bags ({bagName: [{id, count>=1}]}). Bag names are opaque keys; names containing '.' or starting with '$' are rejected.\n\n**Response (text/plain):**\n- 200 `Inventory: OK` - saved, or same contentHash (no write)\n- 200 `Inventory: STALE` - timestamp older than the stored snapshot, ignored\n- 400 - lists every invalid field\n- 413 - body over 1 MB\n- 500 - database error"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Inventory",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/player/1/inventory",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"player",
+								"1",
+								"inventory"
+							],
+							"query": []
+						},
+						"description": "Returns the stored inventory snapshot for a player.\n\n**Status Codes:** 200, 404 (none stored), 500"
+					},
+					"response": []
+				},
+				{
+					"name": "Search Inventories (all players)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/player/inventory/search?item=4096",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"player",
+								"inventory",
+								"search"
+							],
+							"query": [
+								{
+									"key": "item",
+									"value": "4096",
+									"description": "Item id; repeatable or comma-separated (required)"
+								}
+							]
+						},
+						"description": "Finds an item across every stored inventory.\n\nItem ids are matched against stored snapshots; name->id resolution is client-side.\n\n**Query Parameters:**\n- item (required): item id; repeatable or comma-separated\n- player: playerId or case-insensitive playerName (404 if unknown)\n- bag: bag filter, repeatable\n- includeKeyItems: true also matches key item ids (bag 'keyItems')\n- limit (default 100, max 500), offset (default 0)\n- name: not supported, returns 400\n\n**Response:** {query, totalMatches, results:[{playerId, playerName, totalCount, locations:[{bag, count, itemId?}], updatedAt}]}. itemId is present only when several ids are searched.\n\n**Status Codes:** 200, 400 (no item, bad item/limit/offset, name), 404 (unknown player), 500"
+					},
+					"response": []
+				},
+				{
+					"name": "Search Inventories (one player, multiple items, key items)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/player/inventory/search?item=4096,77&player=sungjinwoo&includeKeyItems=true&bag=wardrobe&limit=100&offset=0",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"player",
+								"inventory",
+								"search"
+							],
+							"query": [
+								{
+									"key": "item",
+									"value": "4096,77",
+									"description": "Item ids"
+								},
+								{
+									"key": "player",
+									"value": "sungjinwoo",
+									"description": "playerId or playerName"
+								},
+								{
+									"key": "includeKeyItems",
+									"value": "true",
+									"description": "Also match key items"
+								},
+								{
+									"key": "bag",
+									"value": "wardrobe",
+									"description": "Optional bag filter"
+								},
+								{
+									"key": "limit",
+									"value": "100",
+									"description": "Max 500"
+								},
+								{
+									"key": "offset",
+									"value": "0",
+									"description": "Pagination offset"
+								}
+							]
+						},
+						"description": "Searches one player for several ids, including key items.\n\nItem ids are matched against stored snapshots; name->id resolution is client-side.\n\n**Query Parameters:**\n- item (required): item id; repeatable or comma-separated\n- player: playerId or case-insensitive playerName (404 if unknown)\n- bag: bag filter, repeatable\n- includeKeyItems: true also matches key item ids (bag 'keyItems')\n- limit (default 100, max 500), offset (default 0)\n- name: not supported, returns 400\n\n**Response:** {query, totalMatches, results:[{playerId, playerName, totalCount, locations:[{bag, count, itemId?}], updatedAt}]}. itemId is present only when several ids are searched.\n\n**Status Codes:** 200, 400 (no item, bad item/limit/offset, name), 404 (unknown player), 500"
+					},
+					"response": []
+				},
+				{
+					"name": "Search Player Inventory (alias)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/player/1/inventory/search?item=4096",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"player",
+								"1",
+								"inventory",
+								"search"
+							],
+							"query": [
+								{
+									"key": "item",
+									"value": "4096",
+									"description": "Item id; repeatable or comma-separated (required)"
+								}
+							]
+						},
+						"description": "Alias of the search endpoint with the player filter set to the path playerId.\n\nItem ids are matched against stored snapshots; name->id resolution is client-side.\n\n**Query Parameters:**\n- item (required): item id; repeatable or comma-separated\n- player: playerId or case-insensitive playerName (404 if unknown)\n- bag: bag filter, repeatable\n- includeKeyItems: true also matches key item ids (bag 'keyItems')\n- limit (default 100, max 500), offset (default 0)\n- name: not supported, returns 400\n\n**Response:** {query, totalMatches, results:[{playerId, playerName, totalCount, locations:[{bag, count, itemId?}], updatedAt}]}. itemId is present only when several ids are searched.\n\n**Status Codes:** 200, 400 (no item, bad item/limit/offset, name), 404 (unknown player), 500"
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "Location",
 			"description": "Endpoints for managing player location and zone",
 			"item": [

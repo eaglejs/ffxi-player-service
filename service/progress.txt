@@ -503,3 +503,10 @@ This Postman collection provides comprehensive API documentation and testing cap
 
 ### Status: ✅ ALL 29 PRD FEATURES NOW COMPLETE!
 
+
+## Inventory endpoints (set_inventory + inventory search)
+
+- POST /player/set_inventory: full snapshot upsert into `inventories` (unique playerId index, playerNameLower index). Same contentHash -> no write; older timestamp -> 'Inventory: STALE'; 400 lists all invalid fields; 413 over 1 MB (RequestSizeLimitFilter); no WebSocket broadcast (pure JSON endpoints).
+- GET /player/{playerId}/inventory, GET /player/inventory/search (item, player, bag, includeKeyItems, limit, offset; name -> 400), GET /player/{playerId}/inventory/search alias.
+- New: InventoryDao, InventoryResource, InventorySnapshotRequest/InventoryItem, RequestSizeLimitFilter. Tests are Mockito-based (no Testcontainers); the aggregation pipeline was verified manually against a scratch mongod.
+- README and Postman ("Inventory" folder) updated. prd.json: both items marked passes: true.

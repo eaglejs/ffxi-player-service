@@ -63,12 +63,78 @@ Used primarily for data ingestion (setting state) and specific data retrieval.
   - `GET /player/get_buffs`
   - `POST /player/set_buffs`
   - `POST /player/refresh_buffs` (Clear buffs)
+  - `POST /player/set_inventory` (full per-character inventory snapshot, see below)
+  - `GET /player/{playerId}/inventory`
+  - `GET /player/inventory/search` (find item ids across characters)
+  - `GET /player/{playerId}/inventory/search` (same, scoped to one character)
 - **Chat & History**:
   - `GET /player/get_chat_log`
   - `GET /player/get_chat_log_by_type`
   - `POST /player/set_messages`
   - `POST /player/set_exp_history`
   - `POST /player/reset_exp_history`
+
+### Inventory (`/player`)
+
+`POST /player/set_inventory` stores one document per `playerId` in the `inventories` collection (unique index on `playerId`, index on `playerNameLower`). The snapshot **replaces** the stored one, so removed items disappear.
+
+```json
+{
+  "playerId": 1,
+  "playerName": "Sungjinwoo",
+  "contentHash": "<sha256 hex>",
+  "timestamp": 1761350000,
+  "gil": 12345,
+  "keyItems": [1, 2, 3],
+  "bags": {
+    "inventory": [{ "id": 4096, "count": 12 }],
+    "wardrobe": [{ "id": 12345, "count": 1 }],
+    "slip 01": [{ "id": 27000, "count": 1 }]
+  }
+}
+```
+
+- `playerId`, `playerName`, `contentHash` are required; `gil >= 0`; item `count >= 1`.
+- Bag names are opaque keys (new bags/slips are accepted). Names containing `.` or starting with `$` are rejected.
+- Responses (text/plain): `200 Inventory: OK` (saved or same `contentHash`, no write), `200 Inventory: STALE` (`timestamp` older than the stored one, ignored), `400` listing every invalid field, `413` for bodies over 1 MB, `500` on database errors. Safe to retry with the same body.
+- Characters with no recorded `playerId` (never logged in since the Python service learned ids) are skipped client-side until they log in.
+
+`GET /player/{playerId}/inventory` returns the stored snapshot (404 if none).
+
+`GET /player/inventory/search` finds item ids across stored snapshots:
+
+| Param | Description |
+|-------|-------------|
+| `item` | Item id; repeatable and/or comma-separated. Required. |
+| `player` | Optional playerId or case-insensitive playerName. 404 if unknown. |
+| `bag` | Optional bag filter, repeatable (e.g. `bag=wardrobe&bag=satchel`). |
+| `includeKeyItems` | `true` also matches key item ids (reported as bag `keyItems`). Default `false`. |
+| `limit` / `offset` | Pagination over players. Default 100, max 500 / 0. |
+| `name` | Not supported (400): the backend only stores ids, so resolve names to ids client-side. |
+
+```
+GET /api/player/inventory/search?item=4096&item=77&player=sungjinwoo
+```
+```json
+{
+  "query": { "item": [4096, 77], "player": "sungjinwoo", "bag": [], "includeKeyItems": false, "limit": 100, "offset": 0 },
+  "totalMatches": 1,
+  "results": [
+    {
+      "playerId": 1,
+      "playerName": "Sungjinwoo",
+      "totalCount": 13,
+      "locations": [
+        { "bag": "inventory", "itemId": 4096, "count": 12 },
+        { "bag": "slip 01", "itemId": 77, "count": 1 }
+      ],
+      "updatedAt": "2026-10-25T03:56:03.094Z"
+    }
+  ]
+}
+```
+
+`itemId` appears on each location only when more than one item id is searched. Results are sorted by `totalCount` desc, then `playerName`; players with no matches are omitted.
 
 ### Player Lists (`/players`)
 - `GET /players/get_players`: List all online players (active in last 60s).
