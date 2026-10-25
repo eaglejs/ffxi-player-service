@@ -1,52 +1,57 @@
 <template>
-  <GameWindow :label="`${player.playerName} REMA weapons`">
-    <template #header>
-      <span class="char-name">
-        <McIcon :path="mdiSwordCross" :size="18" />
+  <section class="card rema-card" :aria-label="`${player.playerName} REMA weapons`">
+    <div class="card-header d-flex flex-wrap justify-content-between align-items-baseline gap-1">
+      <h2 class="mb-0 char-name">
+        <McIcon :path="mdiSwordCross" :size="20" />
         {{ player.playerName }}
-      </span>
+      </h2>
       <span class="meta">
         <strong>{{ player.ownedTotal }}</strong> of {{ player.weaponTotal }} weapons
         <template v-if="updated"> · synced {{ updated }}</template>
       </span>
-    </template>
+    </div>
 
-    <p v-if="!ownedInView" class="none empty">{{ emptyText }}</p>
+    <div class="card-body">
+      <p v-if="!ownedInView" class="none empty">{{ emptyText }}</p>
 
-    <section v-for="category in sections" :key="category.key" class="category">
-      <h3 class="category-head">
-        <span>{{ category.label }}</span>
-        <span class="count" :class="{ done: category.owned.length === category.total }">
-          {{ category.owned.length }}/{{ category.total }}
-        </span>
-      </h3>
-      <div class="progress" aria-hidden="true">
-        <div class="fill" :style="{ width: `${(category.owned.length / category.total) * 100}%` }" />
-      </div>
-
-      <ul v-if="category.owned.length" class="weapons">
-        <li
-          v-for="owned in category.owned"
-          :key="owned.weapon.name"
-          class="weapon"
-          :title="tooltip(owned)"
-        >
-          <span class="icon-wrap">
-            <ItemIcon :id="owned.stage.id" :tile="44" />
-            <span class="badge">{{ stageBadge(owned.stage) }}</span>
+      <section v-for="category in sections" :key="category.key" class="category">
+        <h3 class="category-head">
+          <span>{{ category.label }}</span>
+          <span class="count" :class="{ done: category.owned.length === category.total }">
+            {{ category.owned.length }}/{{ category.total }}
           </span>
-          <span class="name">{{ owned.weapon.name }}</span>
-          <span class="visually-hidden">{{ tooltip(owned) }}</span>
-        </li>
-      </ul>
-      <p v-else class="none">None yet</p>
+        </h3>
+        <div class="progress" aria-hidden="true">
+          <div
+            class="progress-bar"
+            :style="{ width: `${(category.owned.length / category.total) * 100}%` }"
+          />
+        </div>
 
-      <details v-if="category.missing.length && category.owned.length" class="missing">
-        <summary>Missing ({{ category.missing.length }})</summary>
-        <p>{{ category.missing.map((w) => w.name).join(', ') }}</p>
-      </details>
-    </section>
-  </GameWindow>
+        <ul v-if="category.owned.length" class="weapons">
+          <li
+            v-for="owned in category.owned"
+            :key="owned.weapon.name"
+            class="weapon"
+            :title="tooltip(owned)"
+          >
+            <span class="icon-wrap">
+              <ItemIcon :id="owned.stage.id" :tile="44" />
+              <span class="badge rounded-pill text-bg-primary">{{ stageBadge(owned.stage) }}</span>
+            </span>
+            <span class="name">{{ owned.weapon.name }}</span>
+            <span class="visually-hidden">{{ tooltip(owned) }}</span>
+          </li>
+        </ul>
+        <p v-else class="none">None yet</p>
+
+        <details v-if="category.missing.length && category.owned.length" class="missing">
+          <summary>Missing ({{ category.missing.length }})</summary>
+          <p>{{ category.missing.map((w) => w.name).join(', ') }}</p>
+        </details>
+      </section>
+    </div>
+  </section>
 </template>
 
 <script setup lang="ts">
@@ -54,7 +59,6 @@ import { computed } from 'vue'
 import { mdiSwordCross } from '@mdi/js'
 import { stageBadge, stageLabel, type OwnedWeapon, type PlayerRema } from '@/helpers/rema'
 import { timeAgo } from '@/helpers/time'
-import GameWindow from '@/components/inventory/GameWindow.vue'
 import ItemIcon from '@/components/inventory/ItemIcon.vue'
 import McIcon from '@/components/inventory/McIcon.vue'
 
@@ -83,23 +87,22 @@ function tooltip(owned: OwnedWeapon): string {
 
 <style scoped lang="scss">
 .char-name {
-  color: #f3e3b3;
-  font-size: 1.15rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
+  align-items: center;
+  display: inline-flex;
+  font-size: 1.25rem;
+  gap: 0.4rem;
 }
 
 .meta {
-  color: rgb(255 255 255 / 65%);
   font-size: 0.85rem;
+  opacity: 0.85;
 }
 
 .category {
-  padding: 0.65rem 0.25rem 0.1rem;
-
   & + & {
-    border-top: 1px solid rgb(255 255 255 / 8%);
-    margin-top: 0.4rem;
+    border-top: 1px solid var(--bs-border-color);
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
   }
 }
 
@@ -115,32 +118,24 @@ function tooltip(owned: OwnedWeapon): string {
 }
 
 .count {
-  color: rgb(255 255 255 / 65%);
+  color: var(--bs-secondary-color);
   font-variant-numeric: tabular-nums;
 
   &.done {
-    color: #f3e3b3;
+    color: var(--bs-success);
+    font-weight: 600;
   }
 }
 
 .progress {
-  background: rgb(255 255 255 / 10%);
-  border-radius: 999px;
-  height: 3px;
-  margin-bottom: 0.6rem;
-  overflow: hidden;
-}
-
-.fill {
-  background: linear-gradient(90deg, #c9b27c, #f3e3b3);
-  height: 100%;
-  transition: width 0.4s ease;
+  height: 4px;
+  margin-bottom: 0.75rem;
 }
 
 .weapons {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.6rem 0.4rem;
+  gap: 0.75rem 0.5rem;
   list-style: none;
   margin: 0;
   padding: 0;
@@ -150,7 +145,7 @@ function tooltip(owned: OwnedWeapon): string {
   align-items: center;
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
+  gap: 0.25rem;
   width: 96px;
 }
 
@@ -159,41 +154,34 @@ function tooltip(owned: OwnedWeapon): string {
 }
 
 .badge {
-  background: #031633;
-  border: 1px solid #c9b27c;
-  border-radius: 999px;
-  color: #f3e3b3;
   font-size: 0.65rem;
   font-variant-numeric: tabular-nums;
-  line-height: 1.2;
-  padding: 0 5px;
   position: absolute;
-  right: -6px;
+  right: -8px;
   top: -6px;
 }
 
 .name {
-  color: rgb(255 255 255 / 85%);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   line-height: 1.2;
   text-align: center;
   word-break: break-word;
 }
 
 .none {
-  color: rgb(255 255 255 / 45%);
+  color: var(--bs-secondary-color);
   font-size: 0.85rem;
   margin: 0.1rem 0 0.4rem;
 
   &.empty {
-    margin: 0.9rem 0.25rem 0.5rem;
+    margin: 0;
   }
 }
 
 .missing {
-  color: rgb(255 255 255 / 55%);
-  font-size: 0.78rem;
-  margin: 0.5rem 0 0.2rem;
+  color: var(--bs-secondary-color);
+  font-size: 0.8rem;
+  margin-top: 0.5rem;
 
   summary {
     cursor: pointer;

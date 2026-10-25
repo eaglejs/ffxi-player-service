@@ -94,8 +94,6 @@ onMounted(() => rema.refresh())
 }
 
 .shell {
-  margin: 0 auto;
-  max-width: 1200px;
   padding-bottom: 3rem;
 }
 
@@ -144,13 +142,13 @@ onMounted(() => rema.refresh())
     border-color 0.15s;
 
   &:hover {
-    border-color: #c9b27c;
+    border-color: var(--bs-primary);
   }
 
   &.on {
-    background: #0c2d66;
-    border-color: #c9b27c;
-    color: #f3e3b3;
+    background: var(--bs-primary);
+    border-color: var(--bs-primary);
+    color: #fff;
   }
 }
 
@@ -174,7 +172,7 @@ onMounted(() => rema.refresh())
   align-items: start;
   display: grid;
   gap: 1rem;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 520px), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 440px), 1fr));
   margin-top: 0.75rem;
 }
 </style>
