@@ -88,6 +88,27 @@ public class InventoryDaoTest {
     }
 
     @Test
+    public void listCharactersProjectsSummariesInNameOrder() {
+        FindIterable<Document> projected = mock(FindIterable.class);
+        FindIterable<Document> sorted = mock(FindIterable.class);
+        when(collection.find()).thenReturn(findIterable);
+        when(findIterable.projection(any(Bson.class))).thenReturn(projected);
+        when(projected.sort(any(Bson.class))).thenReturn(sorted);
+        com.mongodb.client.MongoCursor<Document> cursor = mock(com.mongodb.client.MongoCursor.class);
+        when(sorted.iterator()).thenReturn(cursor);
+        when(cursor.hasNext()).thenReturn(true, false);
+        when(cursor.next()).thenReturn(new Document("playerId", 7).append("playerName", "Alpha").append("gil", 5L)
+                .append("updatedAt", new java.util.Date(0)));
+
+        List<Map<String, Object>> characters = dao.listCharacters();
+
+        assertEquals(1, characters.size());
+        assertEquals(7, characters.get(0).get("playerId"));
+        assertEquals("Alpha", characters.get(0).get("playerName"));
+        assertEquals("1970-01-01T00:00:00Z", characters.get(0).get("updatedAt"));
+    }
+
+    @Test
     public void searchPipelineFiltersPlayerBagAndItems() {
         SearchCriteria criteria = new SearchCriteria();
         criteria.itemIds = List.of(4096, 4097);

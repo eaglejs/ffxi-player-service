@@ -603,6 +603,26 @@
 					"response": []
 				},
 				{
+					"name": "List Characters With Inventories",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/player/inventory/characters",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"player",
+								"inventory",
+								"characters"
+							]
+						},
+						"description": "Returns every character that has a stored inventory snapshot (online or not), sorted by name.\n\n**Response:** [{playerId, playerName, gil, updatedAt}]\n\n**Status Codes:** 200, 500"
+					},
+					"response": []
+				},
+				{
 					"name": "Get Inventory",
 					"request": {
 						"method": "GET",

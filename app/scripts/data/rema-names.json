@@ -1,0 +1,29 @@
+{
+  "_source": "BG Wiki: Relic_Weapon, Empyrean_Weapon, Mythic_Weapon, Aeonic_Weapon (checked 2026-10-25). Prime weapons are discovered from the item resources by their 'Prime ' name prefix.",
+  "relic": {
+    "Spharai": "Hand-to-Hand", "Mandau": "Dagger", "Excalibur": "Sword", "Ragnarok": "Great Sword",
+    "Guttler": "Axe", "Bravura": "Great Axe", "Apocalypse": "Scythe", "Gungnir": "Polearm",
+    "Kikoku": "Katana", "Amanomurakumo": "Great Katana", "Mjollnir": "Club", "Claustrum": "Staff",
+    "Yoichinoyumi": "Archery", "Annihilator": "Marksmanship", "Gjallarhorn": "Instrument", "Aegis": "Shield"
+  },
+  "empyrean": {
+    "Verethragna": "Hand-to-Hand", "Twashtar": "Dagger", "Almace": "Sword", "Caladbolg": "Great Sword",
+    "Farsha": "Axe", "Ukonvasara": "Great Axe", "Redemption": "Scythe", "Rhongomiant": "Polearm",
+    "Kannagi": "Katana", "Masamune": "Great Katana", "Gambanteinn": "Club", "Hvergelmir": "Staff",
+    "Gandiva": "Archery", "Armageddon": "Marksmanship", "Daurdabla": "Instrument", "Ochain": "Shield"
+  },
+  "mythic": {
+    "Glanzfaust": "Hand-to-Hand", "Kenkonken": "Hand-to-Hand", "Vajra": "Dagger", "Carnwenhan": "Dagger",
+    "Terpsichore": "Dagger", "Murgleis": "Sword", "Burtgang": "Sword", "Tizona": "Sword",
+    "Epeolatry": "Great Sword", "Aymur": "Axe", "Conqueror": "Great Axe", "Liberator": "Scythe",
+    "Ryunohige": "Polearm", "Nagi": "Katana", "Kogarasumaru": "Great Katana", "Yagrush": "Club",
+    "Idris": "Club", "Laevateinn": "Staff", "Nirvana": "Staff", "Tupsimati": "Staff",
+    "Gastraphetes": "Marksmanship", "Death Penalty": "Marksmanship"
+  },
+  "aeonic": {
+    "Godhands": "Hand-to-Hand", "Aeneas": "Dagger", "Sequence": "Sword", "Lionheart": "Great Sword",
+    "Tri-edge": "Axe", "Chango": "Great Axe", "Anguta": "Scythe", "Trishula": "Polearm",
+    "Heishi Shorinken": "Katana", "Dojikiri Yasutsuna": "Great Katana", "Tishtrya": "Club",
+    "Khatvanga": "Staff", "Fail-Not": "Archery", "Fomalhaut": "Marksmanship", "Marsyas": "Instrument", "Srivatsa": "Shield"
+  }
+}

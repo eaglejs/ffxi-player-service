@@ -64,6 +64,7 @@ Used primarily for data ingestion (setting state) and specific data retrieval.
   - `POST /player/set_buffs`
   - `POST /player/refresh_buffs` (Clear buffs)
   - `POST /player/set_inventory` (full per-character inventory snapshot, see below)
+  - `GET /player/inventory/characters`
   - `GET /player/{playerId}/inventory`
   - `GET /player/inventory/search` (find item ids across characters)
   - `GET /player/{playerId}/inventory/search` (same, scoped to one character)
@@ -98,6 +99,8 @@ Used primarily for data ingestion (setting state) and specific data retrieval.
 - Bag names are opaque keys (new bags/slips are accepted). Names containing `.` or starting with `$` are rejected.
 - Responses (text/plain): `200 Inventory: OK` (saved or same `contentHash`, no write), `200 Inventory: STALE` (`timestamp` older than the stored one, ignored), `400` listing every invalid field, `413` for bodies over 1 MB, `500` on database errors. Safe to retry with the same body.
 - Characters with no recorded `playerId` (never logged in since the Python service learned ids) are skipped client-side until they log in.
+
+`GET /player/inventory/characters` lists every character with a stored inventory (online or not), sorted by name: `[{"playerId","playerName","gil","updatedAt"}]`.
 
 `GET /player/{playerId}/inventory` returns the stored snapshot (404 if none).
 

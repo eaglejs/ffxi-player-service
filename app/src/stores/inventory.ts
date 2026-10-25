@@ -2,7 +2,12 @@ import { defineStore } from 'pinia'
 import axios from 'axios'
 import { fullUrl } from '@/helpers/config'
 import { KEY_ITEMS_BAG } from '@/helpers/bags'
-import type { InventorySearchResponse, PlayerInventory, SearchParams } from '@/types/Inventory'
+import type {
+  CharacterSummary,
+  InventorySearchResponse,
+  PlayerInventory,
+  SearchParams
+} from '@/types/Inventory'
 
 // All characters fit comfortably in one page, so paging is never needed from the UI.
 const SEARCH_LIMIT = 500
@@ -41,5 +46,11 @@ export const useInventoryStore = defineStore('inventory', () => {
     }
   }
 
-  return { searchInventory, searchKeyItems, getInventory }
+  /** Every character with a stored inventory, online or not, sorted by name. */
+  async function listCharacters(): Promise<CharacterSummary[]> {
+    const response = await axios.get<CharacterSummary[]>(`${fullUrl}/player/inventory/characters`)
+    return response.data
+  }
+
+  return { searchInventory, searchKeyItems, getInventory, listCharacters }
 })

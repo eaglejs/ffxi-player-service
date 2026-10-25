@@ -22,6 +22,11 @@ describe('inventory route guard', () => {
     expect(router.currentRoute.value.path).toBe('/')
   })
 
+  it('leaves the REMA page open to everyone', async () => {
+    await router.push('/rema')
+    expect(router.currentRoute.value.path).toBe('/rema')
+  })
+
   it('does not let a wrong passphrase through', async () => {
     useSecretUnlock().tryPassword('x') // wrong phrase must not unlock
     await router.push('/inventory')

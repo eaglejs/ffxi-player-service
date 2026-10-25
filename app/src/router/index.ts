@@ -28,6 +28,11 @@ const router = createRouter({
       meta: { requiresUnlock: true }
     },
     {
+      path: '/rema',
+      name: 'rema',
+      component: () => import('../views/RemaWeaponsView.vue')
+    },
+    {
       path: '/:pathMatch(.*)*',
       redirect: '/'
     }

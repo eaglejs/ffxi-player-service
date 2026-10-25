@@ -121,6 +121,21 @@ public class InventoryResourceTest {
     }
 
     @Test
+    public void listCharactersReturnsTheDaoSummaries() {
+        List<Map<String, Object>> characters = List.of(Map.of("playerId", 1, "playerName", "Alpha"));
+        when(dao.listCharacters()).thenReturn(characters);
+        Response response = resource.listCharacters();
+        assertEquals(200, response.getStatus());
+        assertEquals(characters, response.getEntity());
+    }
+
+    @Test
+    public void listCharactersReturns500OnDaoFailure() {
+        when(dao.listCharacters()).thenThrow(new RuntimeException("mongo down"));
+        assertEquals(500, resource.listCharacters().getStatus());
+    }
+
+    @Test
     public void searchRequiresItem() {
         assertEquals(400, resource.searchInventories(null, null, null, null, false, null, null).getStatus());
     }

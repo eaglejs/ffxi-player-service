@@ -61,3 +61,10 @@ export interface CharacterResult {
   total: number
   rows: ResultRow[]
 }
+
+export interface CharacterSummary {
+  playerId: number
+  playerName: string
+  gil: number
+  updatedAt: string | null
+}

@@ -120,6 +120,24 @@ public class InventoryResource {
   }
 
   @GET
+  @Path("/inventory/characters")
+  @Operation(summary = "List Characters With Inventories", description = "Returns every character that has a stored inventory snapshot (online or not), sorted by name.", responses = {
+      @ApiResponse(responseCode = "200", description = "Characters retrieved successfully"),
+      @ApiResponse(responseCode = "500", description = "Internal server error")
+  })
+  public Response listCharacters() {
+    try {
+      return Response.ok(inventoryDao.listCharacters()).build();
+    } catch (Exception e) {
+      LOG.error("Error listing inventory characters", e);
+      return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+          .type(MediaType.TEXT_PLAIN)
+          .entity("An error occurred while listing characters.")
+          .build();
+    }
+  }
+
+  @GET
   @Path("/inventory/search")
   @Operation(summary = "Search Inventories", description = "Finds item ids across stored inventories, for one player or all players. Item id to name resolution is client-side.", responses = {
       @ApiResponse(responseCode = "200", description = "Search results"),

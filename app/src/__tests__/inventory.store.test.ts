@@ -44,6 +44,12 @@ describe('useInventoryStore', () => {
     expect(await useInventoryStore().getInventory(8)).toBeNull()
   })
 
+  it('lists every character with a stored inventory', async () => {
+    get.mockResolvedValueOnce({ data: [{ playerId: 1, playerName: 'Alpha', gil: 5, updatedAt: null }] })
+    expect(await useInventoryStore().listCharacters()).toHaveLength(1)
+    expect(get).toHaveBeenCalledWith('http://host/api/player/inventory/characters')
+  })
+
   it('rethrows other errors', async () => {
     get.mockRejectedValueOnce(new Error('network'))
     await expect(useInventoryStore().getInventory(9)).rejects.toThrow('network')

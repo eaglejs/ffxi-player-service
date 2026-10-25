@@ -55,3 +55,16 @@ A search over every character's stored inventory, hidden until unlocked. Type th
 ```sh
 npm run build:item-data -- --resources "<path to Windower/res>"   # or omit --resources to download from GitHub
 ```
+
+## REMA weapons
+
+Open to everyone (nav button, shortcut `4`). Shows every character with a synced inventory and which Relic, Empyrean, Mythic, Aeonic and Prime weapons they hold, with the highest upgrade stage as a badge and the missing ones listed per category.
+
+- Data: one search per category against the inventory API, plus `GET /player/inventory/characters` so characters with none of these weapons still appear.
+- The weapon list lives in `scripts/data/rema-names.json` (checked against BG Wiki; Prime weapons are found by their "Prime " name). Stage item ids come from Windower's `items.lua`. Rebuild after a game update, or to add a new weapon:
+
+```sh
+npm run build:rema-data -- --resources "<path to Windower/res>"   # or omit --resources to download from GitHub
+```
+
+- Stage labels ("Lv 99 II", "iL 119") come from the item data's level, item level and id order, not from in-game stage names; tooltips also show "stage k of n".

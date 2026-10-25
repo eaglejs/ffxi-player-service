@@ -24,6 +24,11 @@
               <GenIcon :icon="mdiMagnify" size="xl" />
             </RouterLink>
           </li>
+          <li>
+            <RouterLink class="theme-btn btn btn-light me-1" to="/rema" aria-label="REMA weapons">
+              <GenIcon :icon="mdiSwordCross" size="xl" />
+            </RouterLink>
+          </li>
         </ul>
         <GenTooltip :tip="fullScreenTitleText" placement="bottom">
           <template #main>
@@ -69,6 +74,7 @@ import {
   mdiFullscreenExit,
   mdiHome,
   mdiMagnify,
+  mdiSwordCross,
   mdiWeatherNight,
   mdiWeatherSunny
 } from '@mdi/js'
@@ -167,6 +173,8 @@ onMounted(() => {
       router.push('/charts')
     } else if (e.key === '3' && unlocked.value) {
       router.push('/inventory')
+    } else if (e.key === '4') {
+      router.push('/rema')
     }
   })
 })

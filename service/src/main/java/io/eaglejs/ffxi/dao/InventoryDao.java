@@ -114,6 +114,24 @@ public class InventoryDao {
         return SaveResult.SAVED;
     }
 
+    /** One summary per character with a stored inventory, sorted by name. */
+    public List<Map<String, Object>> listCharacters() {
+        List<Map<String, Object>> characters = new ArrayList<>();
+        for (Document doc : collection
+                .find()
+                .projection(new Document("playerId", 1).append("playerName", 1).append("gil", 1).append("updatedAt", 1))
+                .sort(new Document("playerNameLower", 1))) {
+            Map<String, Object> entry = new LinkedHashMap<>();
+            entry.put("playerId", doc.get("playerId"));
+            entry.put("playerName", doc.get("playerName"));
+            entry.put("gil", doc.get("gil"));
+            Object updatedAt = doc.get("updatedAt");
+            entry.put("updatedAt", updatedAt instanceof Date ? ((Date) updatedAt).toInstant().toString() : null);
+            characters.add(entry);
+        }
+        return characters;
+    }
+
     public Document findByPlayerId(int playerId) {
         return collection.find(eq("playerId", playerId)).first();
     }
