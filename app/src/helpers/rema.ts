@@ -9,6 +9,11 @@ export interface RemaStage {
   id: number
   level: number
   itemLevel: number
+  description?: string
+  jobs?: number
+  slots?: number
+  flags?: number
+  races?: number
 }
 
 export interface RemaWeapon {

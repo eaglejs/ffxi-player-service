@@ -42,18 +42,23 @@ watch(
 <style scoped lang="scss">
 .item-icon {
   align-items: center;
-  background: rgb(255 255 255 / 6%);
-  border: 1px solid rgb(255 255 255 / 12%);
+  background-color: var(--bs-secondary-bg);
+  border: 1px solid var(--bs-border-color);
   border-radius: 8px;
-  color: rgb(255 255 255 / 55%);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.08);
+  color: var(--bs-secondary-color);
   display: inline-flex;
   flex: none;
   height: var(--tile);
   justify-content: center;
+  transition:
+    border-color 0.15s ease,
+    transform 0.15s ease;
   width: var(--tile);
 
   img {
     image-rendering: pixelated;
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.25));
   }
 }
 </style>

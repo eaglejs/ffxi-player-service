@@ -1,6 +1,16 @@
 import { describe, it, expect } from 'vitest'
 import { bagLabel, compareBags } from '@/helpers/bags'
-import { findIds, loadItemData, MAX_ITEM_IDS, itemName, findItemIds } from '@/helpers/items'
+import {
+  buildItemTooltipView,
+  findIds,
+  findItemIds,
+  formatJobs,
+  formatSlots,
+  itemName,
+  loadItemData,
+  loadItemDetails,
+  MAX_ITEM_IDS
+} from '@/helpers/items'
 import { timeAgo } from '@/helpers/time'
 
 describe('findIds', () => {
@@ -39,6 +49,20 @@ describe('real item data', () => {
     expect(itemName(data, 4097)).toBe('Ice Crystal')
     expect(itemName(data, 999999)).toBe('Item #999999')
     expect(findItemIds(data, 'fire crystal').ids).toContain(4096)
+  })
+
+  it('builds BG-Wiki style tooltip views for weapons and armor', async () => {
+    const details = await loadItemDetails()
+    const nyame = buildItemTooltipView(23768, 'Nyame Mail', details['23768'])
+    expect(nyame.rare).toBe(true)
+    expect(nyame.ex).toBe(true)
+    expect(nyame.slotLabel).toBe('[Body]')
+    expect(nyame.raceLabel).toBe('All Races')
+    expect(nyame.levelJobLabel).toBe('Lv. 99 All Jobs')
+    expect(nyame.itemLevelLabel).toBe('<ItemLevel:119>')
+    expect(nyame.lines[0]).toContain('DEF:189')
+    expect(formatJobs(160)).toBe('RDM / PLD')
+    expect(formatSlots(3)).toBe('[Main, Sub]')
   })
 })
 

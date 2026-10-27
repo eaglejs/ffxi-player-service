@@ -139,7 +139,7 @@ describe('shipped rema-data.json', () => {
 
   it('has the five categories with plausible sizes', () => {
     expect(real.categories.map((c) => c.key)).toEqual(['relic', 'empyrean', 'mythic', 'aeonic', 'prime'])
-    expect(real.categories.map((c) => c.weapons.length)).toEqual([16, 16, 22, 16, 13])
+    expect(real.categories.map((c) => c.weapons.length)).toEqual([16, 16, 22, 16, 16])
   })
 
   it('never reuses an item id across weapons', () => {

@@ -10,7 +10,16 @@ const spharai = {
   type: 'Hand-to-Hand',
   stages: [
     { id: 100, level: 75, itemLevel: 0 },
-    { id: 103, level: 99, itemLevel: 119 }
+    {
+      id: 103,
+      level: 99,
+      itemLevel: 119,
+      description: 'DMG:+182 Delay:+116 Attack+60\n"Final Heaven"',
+      jobs: 4,
+      slots: 1,
+      flags: 63552,
+      races: 510
+    }
   ]
 }
 const mandau = { name: 'Mandau', type: 'Dagger', stages: [{ id: 200, level: 75, itemLevel: 0 }] }
@@ -90,5 +99,24 @@ describe('RemaPlayerCard', () => {
     const wrapper = mount(RemaPlayerCard, { props: { player: empty } })
     expect(wrapper.find('.empty').text()).toBe('No REMA weapons yet')
     expect(wrapper.findAll('.category')).toHaveLength(0)
+  })
+
+  it('shows a mouse-following BG-Wiki stat tooltip on weapon hover', async () => {
+    const wrapper = mount(RemaPlayerCard, { props: { player }, attachTo: document.body })
+    const weapon = wrapper.find('.weapon')
+    await weapon.trigger('mouseenter', { clientX: 120, clientY: 160 })
+    const tip = document.body.querySelector('.item-hover-tooltip')
+    expect(tip).not.toBeNull()
+    expect(tip!.textContent).toContain('Spharai')
+    expect(tip!.textContent).toContain('Rare')
+    expect(tip!.textContent).toContain('Ex')
+    expect(tip!.textContent).toContain('[Main] Hand-to-Hand')
+    expect(tip!.textContent).toContain('DMG:+182 Delay:+116 Attack+60')
+    expect(tip!.textContent).toContain('"Final Heaven"')
+    expect(tip!.textContent).toContain('Lv. 99 MNK')
+    expect(tip!.textContent).toContain('<ItemLevel:119>')
+    await weapon.trigger('mouseleave')
+    expect(document.body.querySelector('.item-hover-tooltip')).toBeNull()
+    wrapper.unmount()
   })
 })

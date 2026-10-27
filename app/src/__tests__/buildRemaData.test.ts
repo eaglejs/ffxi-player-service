@@ -23,13 +23,20 @@ describe('build-rema-data', () => {
     expect(rows.find((r: { id: number }) => r.id === 40).name).toBe('Quote "Q" Sword')
   })
 
-  it('collects stages in order, includes shields, and finds Prime weapons by name', () => {
-    const data = buildRemaData(rows, { relic: { Spharai: 'Hand-to-Hand', Aegis: 'Shield' } })
+  it('collects stages in order, includes shields, and builds Prime from its name list', () => {
+    const data = buildRemaData(rows, {
+      relic: { Spharai: 'Hand-to-Hand', Aegis: 'Shield' },
+      prime: ['Prime Dagger', 'Quote "Q" Sword']
+    })
     const relic = data.categories.find((c: { key: string }) => c.key === 'relic')
     expect(relic.weapons.map((w: { name: string }) => w.name)).toEqual(['Spharai', 'Aegis'])
     expect(relic.weapons[0].stages.map((s: { id: number }) => s.id)).toEqual([10, 11])
     const prime = data.categories.find((c: { key: string }) => c.key === 'prime')
-    expect(prime.weapons).toEqual([{ name: 'Prime Dagger', type: 'Dagger', stages: [{ id: 30, level: 99, itemLevel: 119 }] }])
+    // Only the named list counts, with types read from items.lua; other "Prime ..." items are ignored.
+    expect(prime.weapons.map((w: { name: string; type: string }) => [w.name, w.type])).toEqual([
+      ['Prime Dagger', 'Dagger'],
+      ['Quote "Q" Sword', 'Sword']
+    ])
   })
 
   it('fails loudly when a listed weapon is missing from the resources', () => {

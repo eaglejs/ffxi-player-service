@@ -1,7 +1,7 @@
 <template>
   <div class="backdrop" @click.self="emit('close')">
     <form
-      class="prompt"
+      class="prompt card"
       :class="{ shake }"
       role="dialog"
       aria-modal="true"
@@ -9,16 +9,21 @@
       @submit.prevent="submit"
       @keydown.esc="emit('close')"
     >
-      <input
-        ref="input"
-        v-model="value"
-        type="password"
-        class="form-control"
-        autocomplete="off"
-        aria-label="Passphrase"
-        placeholder="Passphrase"
-      />
-      <p v-if="failed" class="error" role="alert">Incorrect passphrase</p>
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h2 class="mb-0">Unlock Inventory Search</h2>
+      </div>
+      <div class="card-body">
+        <input
+          ref="input"
+          v-model="value"
+          type="password"
+          class="form-control"
+          autocomplete="off"
+          aria-label="Passphrase"
+          placeholder="Enter passphrase…"
+        />
+        <p v-if="failed" class="error" role="alert">Incorrect passphrase</p>
+      </div>
     </form>
   </div>
 </template>
@@ -55,7 +60,7 @@ function submit() {
 <style scoped lang="scss">
 .backdrop {
   align-items: flex-start;
-  background: rgb(0 0 0 / 55%);
+  background: rgba(0, 0, 0, 0.55);
   display: flex;
   inset: 0;
   justify-content: center;
@@ -65,12 +70,14 @@ function submit() {
 }
 
 .prompt {
-  max-width: 320px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  color: var(--bs-body-color);
+  max-width: 360px;
   width: 90%;
 }
 
 .error {
-  color: #ff8d8d;
+  color: var(--bs-danger);
   font-size: 0.85rem;
   margin: 0.5rem 0 0;
 }

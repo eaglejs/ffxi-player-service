@@ -1,95 +1,152 @@
 <template>
   <main class="inventory">
-    <div class="shell container-fluid">
-      <header class="page-head">
-        <h2>
-          <McIcon :path="mdiMagnify" :size="26" />
-          Inventory Search
-        </h2>
-        <button type="button" class="btn btn-sm btn-outline-secondary lock-btn" @click="relock">
-          <McIcon :path="mdiLockOutline" :size="16" />
-          Lock
-        </button>
-      </header>
-
-      <div class="search-bar">
-        <McIcon :path="mdiMagnify" :size="22" class="search-icon" />
-        <input
-          ref="searchInput"
-          v-model="search.query.value"
-          type="search"
-          class="search-input"
-          placeholder="Search items by name or id…"
-          aria-label="Search inventory"
-          autocomplete="off"
-          spellcheck="false"
-        />
-        <button
-          v-if="search.query.value"
-          type="button"
-          class="clear-btn"
-          aria-label="Clear search"
-          @click="clearSearch"
-        >
-          <McIcon :path="mdiClose" :size="18" />
-        </button>
-      </div>
-
-      <div class="filters">
-        <label class="filter">
-          <span>Character</span>
-          <select v-model="search.playerId.value" class="form-select form-select-sm">
-            <option :value="null">All characters</option>
-            <option v-for="c in characterOptions" :key="c.id" :value="c.id">{{ c.name }}</option>
-          </select>
-        </label>
-        <div class="form-check form-switch filter">
-          <input id="key-items" v-model="search.includeKeyItems.value" type="checkbox" class="form-check-input" role="switch" />
-          <label class="form-check-label" for="key-items">Include key items</label>
+    <div class="shell container-fluid mb-5">
+      <div class="card mb-3">
+        <div class="card-header">
+          <header class="page-head">
+            <h2 class="mb-0">
+              <McIcon :path="mdiMagnify" :size="24" />
+              Inventory Search
+            </h2>
+            <div class="d-flex align-items-center gap-2">
+              <span
+                v-if="search.status.value === 'done' && search.results.value.length"
+                class="summary-badge d-none d-sm-inline-flex"
+              >
+                <b>Matches:</b> {{ search.results.value.length }}
+                {{ search.results.value.length === 1 ? 'character' : 'characters' }}
+              </span>
+              <button
+                type="button"
+                class="btn btn-sm btn-secondary lock-btn"
+                @click="relock"
+              >
+                <McIcon :path="mdiLockOutline" :size="16" />
+                Lock
+              </button>
+            </div>
+          </header>
         </div>
-      </div>
 
-      <div v-if="search.availableBags.value.length > 1" class="chips" role="group" aria-label="Filter by bag">
-        <button
-          v-for="bag in search.availableBags.value"
-          :key="bag"
-          type="button"
-          class="chip"
-          :class="{ on: search.bagFilter.value.includes(bag) }"
-          :aria-pressed="search.bagFilter.value.includes(bag)"
-          @click="search.toggleBag(bag)"
-        >
-          {{ bagLabel(bag) }}
-        </button>
+        <div class="card-body">
+          <div class="search-bar">
+            <McIcon :path="mdiMagnify" :size="22" class="search-icon" />
+            <input
+              ref="searchInput"
+              v-model="search.query.value"
+              type="search"
+              class="search-input"
+              placeholder="Search items by name or id…"
+              aria-label="Search inventory"
+              autocomplete="off"
+              spellcheck="false"
+            />
+            <button
+              v-if="search.query.value"
+              type="button"
+              class="clear-btn"
+              aria-label="Clear search"
+              @click="clearSearch"
+            >
+              <McIcon :path="mdiClose" :size="18" />
+            </button>
+          </div>
+
+          <div class="filters">
+            <label class="filter">
+              <span class="filter-label"><b>Character:</b></span>
+              <select v-model="search.playerId.value" class="form-select form-select-sm">
+                <option :value="null">All characters</option>
+                <option v-for="c in characterOptions" :key="c.id" :value="c.id">{{ c.name }}</option>
+              </select>
+            </label>
+            <div class="form-check form-switch filter">
+              <input
+                id="key-items"
+                v-model="search.includeKeyItems.value"
+                type="checkbox"
+                class="form-check-input"
+                role="switch"
+              />
+              <label class="form-check-label" for="key-items">Include key items</label>
+            </div>
+          </div>
+
+          <div
+            v-if="search.availableBags.value.length > 1"
+            class="chips"
+            role="group"
+            aria-label="Filter by bag"
+          >
+            <button
+              v-for="bag in search.availableBags.value"
+              :key="bag"
+              type="button"
+              class="chip"
+              :class="{ on: search.bagFilter.value.includes(bag) }"
+              :aria-pressed="search.bagFilter.value.includes(bag)"
+              @click="search.toggleBag(bag)"
+            >
+              {{ bagLabel(bag) }}
+            </button>
+          </div>
+        </div>
       </div>
 
       <div class="status" aria-live="polite">
-        <p v-if="search.status.value === 'idle'" class="hint">
-          <McIcon :path="mdiMagnify" :size="56" class="hint-icon" />
-          <span v-if="search.needsMoreChars.value">Keep typing…</span>
-          <span v-else>Type an item name, or an item id, to see who is carrying it.</span>
-        </p>
-        <p v-else-if="search.status.value === 'loading'" class="hint">Searching…</p>
-        <div v-else-if="search.status.value === 'error'" class="hint">
-          <span>Search failed: {{ search.errorMessage.value }}</span>
-          <button type="button" class="btn btn-sm btn-outline-secondary ms-2" @click="search.run()">Retry</button>
+        <div v-if="search.status.value === 'idle'" class="card status-card">
+          <div class="card-body hint">
+            <McIcon :path="mdiMagnify" :size="48" class="hint-icon" />
+            <span v-if="search.needsMoreChars.value">Keep typing…</span>
+            <span v-else>Type an item name, or an item id, to see who is carrying it.</span>
+          </div>
         </div>
-        <p v-else-if="!search.results.value.length" class="hint">
-          Nobody is carrying “{{ search.query.value.trim() }}”.
-        </p>
+        <div v-else-if="search.status.value === 'loading'" class="card status-card">
+          <div class="card-body hint flex-row">
+            <div class="spinner-border spinner-border-sm text-secondary me-2" role="status">
+              <span class="visually-hidden">Searching...</span>
+            </div>
+            <span>Searching…</span>
+          </div>
+        </div>
+        <div v-else-if="search.status.value === 'error'" class="card status-card">
+          <div class="card-body hint flex-row">
+            <span>Search failed: {{ search.errorMessage.value }}</span>
+            <button
+              type="button"
+              class="btn btn-sm btn-outline-secondary ms-2"
+              @click="search.run()"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+        <div v-else-if="!search.results.value.length" class="card status-card">
+          <div class="card-body hint">
+            <span>Nobody is carrying “{{ search.query.value.trim() }}”.</span>
+          </div>
+        </div>
         <p v-if="search.truncated.value && search.status.value === 'done'" class="notice">
           {{ search.truncated.value.total }} items match; showing the best
           {{ search.truncated.value.shown }}. Refine your search to narrow it.
         </p>
       </div>
 
-      <div class="results">
-        <ResultCard
+      <div
+        v-if="search.results.value.length"
+        class="row justify-content-md-center g-3 results"
+      >
+        <div
           v-for="character in search.results.value"
           :key="character.playerId"
-          :character="character"
-          @browse="openBrowser"
-        />
+          class="col-lg-6 d-flex align-items-stretch"
+        >
+          <ResultCard
+            class="w-100"
+            :character="character"
+            @browse="openBrowser"
+          />
+        </div>
       </div>
     </div>
 
@@ -194,47 +251,51 @@ onMounted(() => {
   color: var(--bs-body-color);
 }
 
-.shell {
-  margin: 0 auto;
-  max-width: 880px;
-  padding-bottom: 3rem;
-}
-
 .page-head {
   align-items: center;
   display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
   justify-content: space-between;
-  margin: 0.5rem 0 1rem;
 
   h2 {
     align-items: center;
     display: flex;
     gap: 0.5rem;
-    margin: 0;
   }
+}
+
+.summary-badge {
+  align-items: center;
+  background-color: var(--bs-secondary-bg);
+  border: 1px solid var(--bs-border-color);
+  border-radius: 6px;
+  font-size: 0.85rem;
+  gap: 0.35rem;
+  padding: 0.2rem 0.65rem;
 }
 
 .lock-btn {
   align-items: center;
   display: inline-flex;
-  gap: 0.3rem;
+  gap: 0.35rem;
 }
 
 .search-bar {
   align-items: center;
-  background: var(--bs-body-bg);
+  background-color: var(--bs-body-bg);
   border: 1px solid var(--bs-border-color);
-  border-radius: 999px;
+  border-radius: 8px;
   display: flex;
-  gap: 0.5rem;
-  padding: 0.35rem 0.9rem;
+  gap: 0.6rem;
+  padding: 0.35rem 0.85rem;
   transition:
-    border-color 0.15s,
-    box-shadow 0.15s;
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
 
   &:focus-within {
-    border-color: #c9b27c;
-    box-shadow: 0 0 0 0.2rem rgb(201 178 124 / 25%);
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.2);
   }
 }
 
@@ -247,7 +308,7 @@ onMounted(() => {
   border: 0;
   color: var(--bs-body-color);
   flex: 1;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   min-width: 0;
   outline: none;
   padding: 0.35rem 0;
@@ -258,11 +319,24 @@ onMounted(() => {
 }
 
 .clear-btn {
-  background: none;
+  align-items: center;
+  background-color: var(--bs-secondary-bg);
   border: 0;
+  border-radius: 50%;
   color: var(--bs-secondary-color);
   display: inline-flex;
-  padding: 0.2rem;
+  height: 26px;
+  justify-content: center;
+  padding: 0;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+  width: 26px;
+
+  &:hover {
+    background-color: var(--bs-border-color);
+    color: var(--bs-body-color);
+  }
 }
 
 .filters {
@@ -270,7 +344,7 @@ onMounted(() => {
   display: flex;
   flex-wrap: wrap;
   gap: 0.75rem 1.5rem;
-  margin: 0.9rem 0 0.25rem;
+  margin-top: 0.85rem;
 }
 
 .filter {
@@ -280,41 +354,53 @@ onMounted(() => {
   margin: 0;
 
   select {
-    min-width: 12rem;
+    min-width: 12.5rem;
   }
+}
+
+.filter-label {
+  font-size: 0.9rem;
 }
 
 .chips {
+  border-top: 1px solid var(--bs-border-color);
   display: flex;
   flex-wrap: wrap;
-  gap: 0.4rem;
-  margin-top: 0.75rem;
+  gap: 0.45rem;
+  margin-top: 0.85rem;
+  padding-top: 0.85rem;
 }
 
 .chip {
-  background: none;
+  align-items: center;
+  background-color: var(--bs-secondary-bg);
   border: 1px solid var(--bs-border-color);
   border-radius: 999px;
   color: var(--bs-body-color);
-  font-size: 0.8rem;
-  padding: 0.15rem 0.75rem;
+  display: inline-flex;
+  font-size: 0.82rem;
+  font-weight: 500;
+  padding: 0.2rem 0.8rem;
   transition:
-    background-color 0.15s,
-    border-color 0.15s;
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    transform 0.15s ease;
 
   &:hover {
-    border-color: #c9b27c;
+    border-color: var(--bs-primary);
+    transform: translateY(-1px);
   }
 
   &.on {
-    background: #0c2d66;
-    border-color: #c9b27c;
-    color: #f3e3b3;
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+    color: #fff;
   }
 }
 
-.status {
-  min-height: 1rem;
+.status-card {
+  margin-bottom: 1rem;
 }
 
 .hint {
@@ -324,26 +410,21 @@ onMounted(() => {
   flex-direction: column;
   gap: 0.5rem;
   justify-content: center;
-  margin: 2.5rem 0;
+  padding: 2rem 1rem;
   text-align: center;
 }
 
 .hint-icon {
-  opacity: 0.3;
+  opacity: 0.35;
 }
 
 .notice {
   background: var(--bs-warning-bg-subtle);
+  border: 1px solid var(--bs-warning-border-subtle);
   border-radius: 8px;
   color: var(--bs-warning-text-emphasis);
   font-size: 0.85rem;
-  margin: 1rem 0 0;
-  padding: 0.5rem 0.9rem;
-}
-
-.results {
-  display: grid;
-  gap: 1rem;
-  margin-top: 1rem;
+  margin: 0 0 1rem;
+  padding: 0.55rem 0.9rem;
 }
 </style>

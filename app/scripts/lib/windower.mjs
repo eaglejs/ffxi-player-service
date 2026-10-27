@@ -17,11 +17,11 @@ export function resourcesDirFromArgs(argv = process.argv) {
   return i > -1 ? argv[i + 1] : undefined
 }
 
-const unescapeLua = (s) => s.replace(/\\(["\\])/g, '$1')
+const unescapeLua = (s) => s.replace(/\\n/g, '\n').replace(/\\(["\\])/g, '$1')
 const ROW = /^\s*\[(\d+)\]\s*=\s*\{(.*)\},?\s*$/
 
 function field(body, key) {
-  const m = new RegExp(`\\b${key}=("(?:[^"\\\\]|\\\\.)*"|-?\\d+)`).exec(body)
+  const m = new RegExp(`\\b${key}=("(?:[^"\\\\]|\\\\.)*"|-?\\d+(?:\\.\\d+)?)`).exec(body)
   if (!m) return undefined
   return m[1].startsWith('"') ? unescapeLua(m[1].slice(1, -1)) : Number(m[1])
 }
@@ -38,8 +38,31 @@ export function parseItemRows(lua) {
       category: field(m[2], 'category'),
       level: field(m[2], 'level'),
       itemLevel: field(m[2], 'item_level'),
-      skill: field(m[2], 'skill')
+      superiorLevel: field(m[2], 'superior_level'),
+      skill: field(m[2], 'skill'),
+      flags: field(m[2], 'flags'),
+      jobs: field(m[2], 'jobs'),
+      slots: field(m[2], 'slots'),
+      races: field(m[2], 'races'),
+      damage: field(m[2], 'damage'),
+      delay: field(m[2], 'delay'),
+      castTime: field(m[2], 'cast_time'),
+      castDelay: field(m[2], 'cast_delay'),
+      recastDelay: field(m[2], 'recast_delay'),
+      maxCharges: field(m[2], 'max_charges')
     })
   }
   return rows
+}
+
+/** Parses `item_descriptions.lua` into a map of `id -> English stat/description text`. */
+export function parseItemDescriptions(lua) {
+  const out = {}
+  for (const line of lua.split('\n')) {
+    const m = ROW.exec(line)
+    if (!m) continue
+    const en = field(m[2], 'en')
+    if (en) out[Number(m[1])] = en.trimEnd()
+  }
+  return out
 }
