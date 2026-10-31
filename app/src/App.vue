@@ -1,21 +1,21 @@
 <template>
   <nav class="navbar">
-    <div class="container-fluid ms-2 me-2">
-      <h1>
+    <div class="container-fluid ms-2 me-2 header-container">
+      <h1 class="mb-0">
         <RouterLink class="navbar-brand" to="/" @click="onLogoClick"
           ><img :src="`${imagesPath}sam.webp`" alt="Samurai" class="me-2 logo" />FFXI
           Stats</RouterLink
         >
       </h1>
-      <div class="d-flex">
-        <ul class="d-flex list-unstyled app-menu m-0">
+      <div class="d-flex align-items-center header-actions">
+        <ul class="d-flex align-items-center list-unstyled app-menu m-0">
           <li>
-            <RouterLink class="theme-btn btn btn-light me-1" to="/">
+            <RouterLink class="theme-btn btn btn-light me-1" to="/" aria-label="Home">
               <GenIcon :icon="mdiHome" size="xl" />
             </RouterLink>
           </li>
           <li>
-            <RouterLink class="theme-btn btn btn-light me-1" to="/charts">
+            <RouterLink class="theme-btn btn btn-light me-1" to="/charts" aria-label="Charts">
               <GenIcon :icon="mdiChartTimelineVariant" size="xl" />
             </RouterLink>
           </li>
@@ -30,12 +30,12 @@
             </RouterLink>
           </li>
         </ul>
-        <GenTooltip :tip="fullScreenTitleText" placement="bottom">
+        <GenTooltip v-if="isDesktop" :tip="fullScreenTitleText" placement="bottom">
           <template #main>
             <button
               ref="fullScreenElement"
               class="theme-btn btn btn-light me-1"
-              v-if="isDesktop"
+              :aria-label="fullScreenTitleText"
               @click="toggleFullscreen"
             >
               <GenIcon :icon="getFullScreenIcon" size="xl" />
@@ -47,12 +47,13 @@
             <button
               ref="themeElement"
               class="theme-btn btn btn-light"
+              :aria-label="themeTitleText"
               @click="toggleTheme"
               data-bs-toggle="tooltip"
               data-bs-placement="bottom"
               :title="themeTitleText"
             >
-            <GenIcon :icon="getThemeIcon" size="xl" />
+              <GenIcon :icon="getThemeIcon" size="xl" />
             </button>
           </template>
         </GenTooltip>
@@ -181,16 +182,84 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
+.header-container {
+  flex-wrap: nowrap;
+}
+
+.navbar-brand {
+  align-items: center;
+  display: inline-flex;
+}
+
 .logo {
   height: calc(82px / 1.3);
   width: calc(49px / 1.3);
 }
 
 .theme-btn {
+  align-items: center;
   background: none;
   border: none;
+  display: inline-flex;
   font-size: 1.5rem;
   height: 45px;
+  justify-content: center;
+}
+
+@media (max-width: 576px) {
+  .header-container {
+    margin-left: 0.25rem !important;
+    margin-right: 0.25rem !important;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  .navbar-brand {
+    font-size: 1.05rem;
+    margin-right: 0.25rem;
+  }
+
+  .logo {
+    height: 44px;
+    margin-right: 0.35rem !important;
+    width: auto;
+  }
+
+  .header-actions,
+  .app-menu {
+    gap: 0.15rem;
+  }
+
+  .theme-btn {
+    height: 36px;
+    margin-right: 0 !important;
+    padding: 0.25rem 0.35rem;
+
+    :deep(.iconify) {
+      height: 22px;
+      width: 22px;
+    }
+  }
+}
+
+@media (max-width: 380px) {
+  .navbar-brand {
+    font-size: 0.95rem;
+  }
+
+  .logo {
+    height: 38px;
+  }
+
+  .theme-btn {
+    height: 32px;
+    padding: 0.2rem 0.25rem;
+
+    :deep(.iconify) {
+      height: 20px;
+      width: 20px;
+    }
+  }
 }
 
 .fill {
