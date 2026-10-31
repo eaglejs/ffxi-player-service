@@ -13,6 +13,19 @@ import {
 } from '@/helpers/items'
 import { timeAgo } from '@/helpers/time'
 
+describe('findIds with commas', () => {
+  const gear = { 1: 'Tantra Gaiters', 2: 'Cleric\'s Duckbills', 3: 'Iga Kyahan', 4: 'Iga Kyahan +1' }
+
+  it('merges the matches of every term, ignoring spaces and empty terms', () => {
+    const { ids } = findIds(gear, "Tantra Gaiters,  Cleric's Duckbills , ,iga kyahan")
+    expect(ids.sort()).toEqual([1, 2, 3, 4].map(Number))
+  })
+
+  it('dedupes ids matched by more than one term and mixes in bare ids', () => {
+    expect(findIds(gear, 'iga, kyahan, 99').ids.sort((a, b) => a - b)).toEqual([3, 4, 99])
+  })
+})
+
 describe('findIds', () => {
   const names = { '1': 'Cure', '2': 'Cure Potion', '3': 'Super Cure Staff', '4': 'Fire Crystal', '5': 'cure' }
 

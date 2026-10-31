@@ -36,7 +36,7 @@
               v-model="search.query.value"
               type="search"
               class="search-input"
-              placeholder="Search items by name or id…"
+              placeholder="Search items by name or id; separate several with commas…"
               aria-label="Search inventory"
               autocomplete="off"
               spellcheck="false"

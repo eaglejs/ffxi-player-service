@@ -50,6 +50,8 @@ export interface ItemTooltipView {
 
 /** The backend takes the ids in the query string, so one request carries at most this many. */
 export const MAX_ITEM_IDS = 50
+/** Most ids a multi-term (comma-separated) search may resolve to. */
+export const MAX_MULTI_TERM_IDS = 100
 export const MIN_NAME_QUERY = 2
 
 let loading: Promise<ItemData> | null = null
@@ -300,12 +302,43 @@ export interface IdMatches {
 
 const EMPTY: IdMatches = { ids: [], total: 0, truncated: false }
 
+/** Splits a search box value on commas into trimmed, non-empty terms. */
+export function searchTerms(query: string): string[] {
+  return query
+    .split(',')
+    .map((t) => t.trim())
+    .filter(Boolean)
+}
+
 /**
- * Resolves a search box value to ids. A bare number is an id; otherwise names are matched
- * case-insensitively and ranked exact, then prefix, then substring.
+ * Resolves a search box value to ids. Commas separate terms, whose matches are merged. For each
+ * term a bare number is an id; otherwise names are matched case-insensitively and ranked exact,
+ * then prefix, then substring. Terms are interleaved so a cap never starves the later ones.
  */
 export function findIds(names: Record<string, string>, query: string): IdMatches {
-  const q = query.trim().toLowerCase()
+  const terms = searchTerms(query)
+  if (terms.length <= 1) return findTermIds(names, terms[0] ?? '', MAX_ITEM_IDS)
+
+  const perTerm = terms.map((t) => findTermIds(names, t, MAX_ITEM_IDS))
+  const seen = new Set<number>()
+  const ids: number[] = []
+  const depth = Math.max(...perTerm.map((m) => m.ids.length))
+  for (let i = 0; i < depth; i++) {
+    for (const m of perTerm) {
+      const id = m.ids[i]
+      if (id !== undefined && !seen.has(id)) {
+        seen.add(id)
+        ids.push(id)
+      }
+    }
+  }
+  const hidden = perTerm.reduce((n, m) => n + m.total - m.ids.length, 0)
+  const total = ids.length + hidden
+  return { ids: ids.slice(0, MAX_MULTI_TERM_IDS), total, truncated: total > MAX_MULTI_TERM_IDS }
+}
+
+function findTermIds(names: Record<string, string>, term: string, cap: number): IdMatches {
+  const q = term.trim().toLowerCase()
   if (!q) return EMPTY
   if (/^\d{1,5}$/.test(q)) return { ids: [Number(q)], total: 1, truncated: false }
   if (q.length < MIN_NAME_QUERY) return EMPTY
@@ -320,9 +353,9 @@ export function findIds(names: Record<string, string>, query: string): IdMatches
   ranked.sort((a, b) => a[0] - b[0] || a[2].localeCompare(b[2]) || a[1] - b[1])
 
   return {
-    ids: ranked.slice(0, MAX_ITEM_IDS).map((r) => r[1]),
+    ids: ranked.slice(0, cap).map((r) => r[1]),
     total: ranked.length,
-    truncated: ranked.length > MAX_ITEM_IDS
+    truncated: ranked.length > cap
   }
 }
 

@@ -5,6 +5,7 @@ import {
   findKeyItemIds,
   loadItemData,
   MIN_NAME_QUERY,
+  searchTerms,
   type IdMatches,
   type ItemData
 } from '@/helpers/items'
@@ -53,8 +54,7 @@ export function useInventorySearch(deps?: Partial<Deps>) {
   const results = computed(() => filterByBags(characters.value, bagFilter.value))
   const availableBags = computed(() => bagsInResults(characters.value))
   const needsMoreChars = computed(() => {
-    const q = query.value.trim()
-    return q.length > 0 && q.length < MIN_NAME_QUERY && !/^\d+$/.test(q)
+    return searchTerms(query.value).some((t) => t.length < MIN_NAME_QUERY && !/^\d+$/.test(t))
   })
 
   async function run() {
