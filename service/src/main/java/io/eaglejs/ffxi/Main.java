@@ -35,6 +35,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 public class Main extends Application<FFXIConfiguration> {
 
@@ -89,11 +90,17 @@ public class Main extends Application<FFXIConfiguration> {
 
         // Pass through API routes, WebSocket, and any path with a file extension
         if (path.startsWith("/api/") || path.startsWith("/ws/") || path.contains(".")) {
+          // index.html references hashed bundles that change every deploy; a cached copy
+          // would point at files that no longer exist and render a blank page
+          if (path.equals("/index.html")) {
+            ((HttpServletResponse) response).setHeader("Cache-Control", "no-cache");
+          }
           chain.doFilter(request, response);
           return;
         }
 
         // Forward SPA routes (e.g. /charts, /players/123) to index.html
+        ((HttpServletResponse) response).setHeader("Cache-Control", "no-cache");
         request.getRequestDispatcher("/index.html").forward(request, response);
       }
 
